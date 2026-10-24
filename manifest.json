@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.vous.system-monitor",
+  "name": "System Monitor",
+  "version": "1.0.0",
+  "author": "Vous",
+  "license": "MIT",
+  "description": "Compact CPU, RAM, GPU, load and disk monitor with configurable modules.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "System Monitor",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
