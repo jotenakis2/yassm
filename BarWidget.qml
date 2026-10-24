@@ -207,9 +207,11 @@ BarWidget {
             return "No module enabled";
         }
 
+        const gap = " ".repeat(root.moduleSpacing);
+
         return segments.map(function(segment) {
             return segment.text;
-        }).join("  ");
+        }).join(gap);
     }
 
     readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "net", "temp", "battery"]
@@ -926,7 +928,7 @@ BarWidget {
         }
     }
 
-    implicitWidth: button.implicitWidth
+    implicitWidth: Math.max(Math.ceil(labelRow.width), Math.ceil(emptyLabel.implicitWidth))
     implicitHeight: button.implicitHeight
 
     FileView {
@@ -1054,6 +1056,8 @@ BarWidget {
         }
 
         Text {
+            id: emptyLabel
+
             anchors.centerIn: parent
             visible: root.segmentCache.length === 0
             text: "No module enabled"
