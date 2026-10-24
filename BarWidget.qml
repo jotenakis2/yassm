@@ -1,10 +1,8 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Commons
 import qs.Ui
-import QtQuick.Controls
-import QtQuick.Layouts
+import "lib" as Yassm
 
 BarWidget {
     id: root
@@ -12,27 +10,9 @@ BarWidget {
     moduleName: "io.github.jotenakis2.yassm"
 
     readonly property string detectScriptPath: Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", "")
-    readonly property string diskScriptPath: Qt.resolvedUrl("disk.sh").toString().replace("file://", "")
 
-    readonly property int fastIntervalMs: 1000
     readonly property int gpuIntervalMs: 10000
-    readonly property int diskIntervalMs: 15000
 
-    property real cpu: 0
-    property real memory: 0
-    property real memoryTotalKb: 0
-    property real memoryUsedKb: 0
-    property var swap: null
-    property real swapTotalKb: 0
-    property real swapUsedKb: 0
-    property real load1: 0
-    property real load5: 0
-    property real load15: 0
-    property int nproc: 1
-    readonly property real load: Math.max(0, Math.min(100, 100 * load1 / nproc))
-    property real disk: 0
-    property real diskUsedKb: 0
-    property real diskTotalKb: 0
     property var gpu: null
 
     property string hoveredSegment: ""
@@ -40,8 +20,6 @@ BarWidget {
     property string gpuKind: "none"
     property string gpuPath: ""
     property string gpuCommand: ""
-
-    property var previousCpuTimes: null
 
     property bool showCpu: setting("showCpu", true)
     property bool showMemory: setting("showMemory", true)
@@ -57,20 +35,20 @@ BarWidget {
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
-
     // All module icons are astral-plane Nerd Font glyphs: one rendered glyph,
     // two UTF-16 code units. The rest of each segment is ASCII. This keeps
     // glyph counting allocation-free at each refresh.
     readonly property var segmentCache: {
+        const metrics = Yassm.SystemMetrics;
         const segments = [];
 
         if (showCpu) {
-            const text = iconCpu + " " + pad(Math.round(cpu)) + "%";
+            const text = iconCpu + " " + pad(Math.round(metrics.cpuPercent)) + "%";
             segments.push({ key: "cpu", text: text, glyphs: text.length - 1 });
         }
 
         if (showLoad) {
-            const text = iconLoad + " " + pad(Math.round(load)) + "%";
+            const text = iconLoad + " " + pad(Math.round(metrics.loadPercent)) + "%";
             segments.push({ key: "load", text: text, glyphs: text.length - 1 });
         }
 
@@ -80,17 +58,17 @@ BarWidget {
         }
 
         if (showMemory) {
-            const text = iconMemory + " " + pad(Math.round(memory)) + "%";
+            const text = iconMemory + " " + pad(Math.round(metrics.memoryPercent)) + "%";
             segments.push({ key: "memory", text: text, glyphs: text.length - 1 });
         }
 
-        if (showSwap && swap !== null) {
-            const text = iconSwap + " " + pad(Math.round(swap)) + "%";
+        if (showSwap && metrics.hasSwap) {
+            const text = iconSwap + " " + pad(Math.round(metrics.swapPercent)) + "%";
             segments.push({ key: "swap", text: text, glyphs: text.length - 1 });
         }
 
         if (showDisk) {
-            const text = iconDisk + " " + pad(Math.round(disk)) + "%";
+            const text = iconDisk + " " + pad(Math.round(metrics.diskPercent)) + "%";
             segments.push({ key: "disk", text: text, glyphs: text.length - 1 });
         }
 
@@ -122,33 +100,72 @@ BarWidget {
         return (Number.isFinite(number) ? number : 0).toFixed(2).padStart(6, " ");
     }
 
-    function formatGib(kilobytes) {
+    function formatKibAsGib(kilobytes) {
         const value = Number(kilobytes) / 1048576;
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
+    function formatBytesAsGib(bytes) {
+        const value = Number(bytes) / 1073741824;
+        return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
+    }
+
+    function mountsTooltip() {
+        const mounts = Yassm.SystemMetrics.mounts;
+
+        if (!mounts || mounts.length === 0) {
+            return "Disk\nUnavailable";
+        }
+
+        let targetWidth = 0;
+        let usedWidth = 0;
+        let totalWidth = 0;
+        const rows = [];
+
+        for (let i = 0; i < mounts.length; i++) {
+            const target = mounts[i].target;
+            const used = formatBytesAsGib(mounts[i].usedBytes);
+            const total = formatBytesAsGib(mounts[i].totalBytes);
+
+            targetWidth = Math.max(targetWidth, target.length);
+            usedWidth = Math.max(usedWidth, used.length);
+            totalWidth = Math.max(totalWidth, total.length);
+            rows.push({ target: target, used: used, total: total });
+        }
+
+        const lines = rows.map(function(row) {
+            return row.target.padEnd(targetWidth)
+                + "  " + row.used.padStart(usedWidth)
+                + " / " + row.total.padStart(totalWidth);
+        });
+
+        return "Disk\n" + lines.join("\n");
+    }
+
     function moduleTooltip(key) {
+        const metrics = Yassm.SystemMetrics;
+
         if (key === "load") {
             return "Load average (1/5/15 min)\n"
-                + " 1 min " + formatLoad(load1) + "\n"
-                + " 5 min " + formatLoad(load5) + "\n"
-                + "15 min " + formatLoad(load15);
+                + " 1 min " + formatLoad(metrics.load1) + "\n"
+                + " 5 min " + formatLoad(metrics.load5) + "\n"
+                + "15 min " + formatLoad(metrics.load15);
         }
 
         if (key === "memory") {
-            return "RAM\n" + formatGib(memoryUsedKb) + " / " + formatGib(memoryTotalKb);
+            return "RAM\n" + formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb);
         }
 
         if (key === "swap") {
-            return "Swap\n" + formatGib(swapUsedKb) + " / " + formatGib(swapTotalKb);
+            return "Swap\n" + formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb);
         }
 
         if (key === "disk") {
-            return "Disk /\n" + formatGib(diskUsedKb) + " / " + formatGib(diskTotalKb);
+            return mountsTooltip();
         }
 
         if (key === "cpu") {
-            return "CPU\n" + Math.round(cpu) + "%";
+            return "CPU\n" + Math.round(metrics.cpuPercent) + "%";
         }
 
         if (key === "gpu") {
@@ -267,90 +284,6 @@ BarWidget {
         }
     }
 
-    function readCpuTimes() {
-        procStat.reload();
-
-        const firstLine = procStat.text().split("\n")[0];
-        const fields = firstLine.trim().split(/\s+/).slice(1).map(Number);
-
-        const idle = fields[3] + fields[4];
-        const total = fields.reduce(function(sum, value) {
-            return sum + value;
-        }, 0);
-
-        return {
-            idle: idle,
-            total: total
-        };
-    }
-
-    function updateCpu() {
-        const current = root.readCpuTimes();
-
-        if (root.previousCpuTimes) {
-            const totalDelta = current.total - root.previousCpuTimes.total;
-            const idleDelta = current.idle - root.previousCpuTimes.idle;
-
-            if (totalDelta > 0) {
-                root.cpu = Math.max(0, Math.min(100, 100 * (totalDelta - idleDelta) / totalDelta));
-            }
-        }
-
-        root.previousCpuTimes = current;
-    }
-
-    function updateMemory() {
-        procMemInfo.reload();
-
-        const lines = procMemInfo.text().split("\n");
-        let total = 0;
-        let available = 0;
-        let swapTotal = 0;
-        let swapFree = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith("MemTotal:")) {
-                total = Number(lines[i].split(/\s+/)[1]);
-            }
-
-            if (lines[i].startsWith("MemAvailable:")) {
-                available = Number(lines[i].split(/\s+/)[1]);
-            }
-
-            if (lines[i].startsWith("SwapTotal:")) {
-                swapTotal = Number(lines[i].split(/\s+/)[1]);
-            }
-
-            if (lines[i].startsWith("SwapFree:")) {
-                swapFree = Number(lines[i].split(/\s+/)[1]);
-            }
-        }
-
-        root.memoryTotalKb = total;
-        root.memoryUsedKb = Math.max(0, total - available);
-        root.swapTotalKb = swapTotal;
-        root.swapUsedKb = Math.max(0, swapTotal - swapFree);
-
-        if (total > 0) {
-            root.memory = Math.max(0, Math.min(100, 100 * (total - available) / total));
-        }
-
-        if (swapTotal > 0) {
-            root.swap = Math.max(0, Math.min(100, 100 * (swapTotal - swapFree) / swapTotal));
-        } else {
-            root.swap = null;
-        }
-    }
-
-    function updateLoad() {
-        procLoadAvg.reload();
-
-        const fields = procLoadAvg.text().trim().split(/\s+/);
-        root.load1 = Number(fields[0]) || 0;
-        root.load5 = Number(fields[1]) || 0;
-        root.load15 = Number(fields[2]) || 0;
-    }
-
     function updateGpuFromSysfs() {
         gpuBusyFile.path = root.gpuPath;
         gpuBusyFile.reload();
@@ -364,43 +297,61 @@ BarWidget {
         gpuProcess.running = true;
     }
 
-    readonly property bool opened: settingsWindow.visible
+    readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
 
     function open() {
-        if (settingsWindow.visible) {
+        if (root.opened) {
             return;
         }
 
+        settingsLoader.active = true;
+
+        const panel = settingsLoader.item;
+
+        if (!panel) {
+            Qt.callLater(root.open);
+            return;
+        }
+
+        panel.hostWidget = root;
+
         const barWindow = root.QsWindow.window;
         if (barWindow && barWindow.screen) {
-            settingsWindow.screen = barWindow.screen;
+            panel.screen = barWindow.screen;
+        }
+
+        const window = root.Window.window;
+        if (!window) {
+            return;
         }
 
         const pos = root.mapToItem(null, 0, 0);
 
-        settingsWindow.panelX = Math.max(
+        panel.panelX = Math.max(
             8,
             Math.min(
-                pos.x + (root.width / 2) - (settingsPanel.width / 2),
-                root.Window.window.width - settingsPanel.width - 8
+                pos.x + (root.width / 2) - (panel.panelWidth / 2),
+                window.width - panel.panelWidth - 8
             )
         );
 
-        settingsWindow.panelY = root.Window.window.height - settingsWindow.barVisibleOffset;
+        panel.panelY = window.height - panel.barVisibleOffset;
 
         if (root.bar && typeof root.bar.requestPopout === "function") {
             root.bar.requestPopout(root);
         }
 
-        settingsWindow.visible = true;
+        panel.visible = true;
     }
 
     function close() {
-        if (!settingsWindow.visible) {
+        const panel = settingsLoader.item;
+
+        if (!panel || !panel.visible) {
             return;
         }
 
-        settingsWindow.visible = false;
+        panel.visible = false;
 
         if (root.bar && typeof root.bar.releasePopout === "function") {
             root.bar.releasePopout(root);
@@ -412,7 +363,7 @@ BarWidget {
     }
 
     function togglePanel() {
-        if (settingsWindow.visible) {
+        if (root.opened) {
             root.close();
         } else {
             root.open();
@@ -421,39 +372,6 @@ BarWidget {
 
     implicitWidth: button.implicitWidth
     implicitHeight: button.implicitHeight
-
-    FileView {
-        id: procStat
-        path: "/proc/stat"
-    }
-
-    FileView {
-        id: procMemInfo
-        path: "/proc/meminfo"
-    }
-
-    FileView {
-        id: procLoadAvg
-        path: "/proc/loadavg"
-    }
-
-    FileView {
-        id: procCpuInfo
-        path: "/proc/cpuinfo"
-
-        onLoaded: {
-            const lines = text().split("\n");
-            let count = 0;
-
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].startsWith("processor")) {
-                    count++;
-                }
-            }
-
-            root.nproc = Math.max(1, count);
-        }
-    }
 
     FileView {
         id: gpuBusyFile
@@ -490,39 +408,6 @@ BarWidget {
         }
     }
 
-    Process {
-        id: diskProcess
-
-        command: ["bash", root.diskScriptPath]
-
-        stdout: SplitParser {
-            onRead: data => {
-                const fields = data.trim().split(/\s+/);
-
-                if (fields.length < 3) {
-                    return;
-                }
-
-                root.diskUsedKb = Number(fields[0]) || 0;
-                root.diskTotalKb = Number(fields[1]) || 0;
-                root.disk = Number(fields[2]) || 0;
-            }
-        }
-    }
-
-    Timer {
-        interval: root.fastIntervalMs
-        running: true
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: {
-            root.updateCpu();
-            root.updateMemory();
-            root.updateLoad();
-        }
-    }
-
     Timer {
         interval: root.gpuIntervalMs
         running: root.gpuKind !== "none"
@@ -536,15 +421,6 @@ BarWidget {
                 root.updateGpuFromCommand();
             }
         }
-    }
-
-    Timer {
-        interval: root.diskIntervalMs
-        running: true
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: diskProcess.running = true
     }
 
     WidgetButton {
@@ -585,147 +461,11 @@ BarWidget {
         }
     }
 
+    LazyLoader {
+        id: settingsLoader
 
-    PanelWindow {
-        id: settingsWindow
-
-        property real panelX: 0
-        property real panelY: 0
-        readonly property int barVisibleOffset: 30
-        
-        visible: false
-        color: "transparent"
-
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-
-        readonly property font panelFont: Qt.application.font
-
-        MouseArea {
-            anchors.fill: parent
-
-            onPressed: {
-                root.close();
-            }
-        }
-
-        BorderSurface {
-            id: settingsPanel
-
-            width: 280
-            height: settingsColumn.implicitHeight + 32
-            radius: Style.cornerRadius >= 0 ? Style.cornerRadius : 12
-            color: ShellColor.popups.background
-            borderSpec: Border.surfaceSpec("menu", "border", ShellColor.popups.border, Style.normalBorderWidth)
-            palette.windowText: ShellColor.popups.text
-            antialiasing: true
-            smooth: true
-
-            x: settingsWindow.panelX
-            y: settingsWindow.panelY
-
-            MouseArea {
-                anchors.fill: parent
-
-                onPressed: {
-                    // Empêche la fermeture lorsqu'on clique dans le panneau
-                }
-            }
-
-            ColumnLayout {
-                id: settingsColumn
-
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 4
-
-                Label {
-                    Layout.fillWidth: true
-                    text: "YASSM"
-                    palette.windowText: ShellColor.popups.text
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize + 1
-
-                    bottomPadding: 8
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "CPU"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showCpu
-
-                    onClicked: {
-                        root.updateSetting("showCpu", checked);
-                    }
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "Load"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showLoad
-
-                    onClicked: {
-                        root.updateSetting("showLoad", checked);
-                    }
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "GPU"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showGpu
-
-                    onClicked: {
-                        root.updateSetting("showGpu", checked);
-                    }
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "Memory"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showMemory
-
-                    onClicked: {
-                        root.updateSetting("showMemory", checked);
-                    }
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "Swap"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showSwap
-
-                    onClicked: {
-                        root.updateSetting("showSwap", checked);
-                    }
-                }
-
-                CheckBox {
-                    Layout.fillWidth: true
-                    text: "Disk (root partition)"
-                    font.family: settingsWindow.panelFont.family
-                    font.pointSize: settingsWindow.panelFont.pointSize
-                    checked: root.showDisk
-
-                    onClicked: {
-                        root.updateSetting("showDisk", checked);
-                    }
-                }
-            }
-        }
+        active: false
+        source: Qt.resolvedUrl("SettingsPanel.qml").toString()
     }
 
     IpcHandler {

@@ -1,5 +1,7 @@
 # YASSM — Yet Another Simple System Monitor
 
+Version 1.1.0
+
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, GPU et usage
 de la partition racine.
 
@@ -14,15 +16,25 @@ Dépôt prévu : <https://github.com/jotenakis2/yassm>
 | Swap | `/proc/meminfo` | 1 s |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
-| Disque `/` | `df -P /` | 15 s |
+| Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
 `--%` lorsqu'aucune source fiable n'est disponible.
 
+## Architecture
+
+- `lib/SystemMetrics.qml` est un singleton partagé : un seul échantillonneur
+  `/proc` et un seul `findmnt` pour toutes les instances de barre, y compris
+  sur plusieurs écrans.
+- `SettingsPanel.qml` est chargé à la demande au premier clic, puis conservé
+  pour les ouvertures suivantes.
+- Le GPU reste géré par le widget, conformément à la limite actuelle du
+  support Asahi.
+
 ## Prérequis
 
 - Omarchy 4.x avec son shell Quickshell.
-- `bash`, `find`, `sort`, `df`, `awk`.
+- `bash`, `find`, `sort` et `findmnt` (util-linux).
 - Une police Nerd Font pour les icônes.
 - Optionnel : `nvidia-smi` pour les GPU NVIDIA.
 
@@ -81,12 +93,25 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées ;
 - **RAM** : mémoire utilisée / mémoire totale en GiB ;
 - **Swap** : swap utilisé / swap total en GiB ;
-- **Disk** : espace utilisé / espace total de `/` en GiB ;
+- **Disk** : une ligne par système de fichiers réel détecté, en GiB. Les
+  pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.) sont ignorés.
+  Les points de montage qui partagent le même device/source sont dédupliqués :
+  sur un root btrfs avec subvolumes, `/home` et `/var/log` n'apparaissent donc
+  pas séparément de `/` ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
 formatées à la demande, uniquement pendant le survol, et la mise à jour de
 segment se fait sans recréer d'objets visuels.
+
+## Vérifications
+
+```bash
+./check.sh
+```
+
+Le script valide le manifeste, vérifie la syntaxe du script GPU, lance
+`shellcheck` si disponible et `qmllint` (Qt 6) sur les fichiers QML.
 
 ## GPU
 

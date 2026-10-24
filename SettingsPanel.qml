@@ -1,0 +1,127 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Quickshell
+import qs.Commons
+import qs.Ui
+
+PanelWindow {
+    id: root
+
+    property var hostWidget: null
+    property real panelX: 0
+    property real panelY: 0
+
+    readonly property int panelWidth: 280
+    readonly property int panelPadding: 16
+    readonly property int barVisibleOffset: hostWidget && hostWidget.bar && hostWidget.bar.barSize > 0
+        ? hostWidget.bar.barSize + Style.space(4)
+        : 30
+
+    readonly property var moduleSettings: [
+        { key: "showCpu", label: "CPU" },
+        { key: "showLoad", label: "Load" },
+        { key: "showGpu", label: "GPU" },
+        { key: "showMemory", label: "Memory" },
+        { key: "showSwap", label: "Swap" },
+        { key: "showDisk", label: "Disk (root partition)" }
+    ]
+
+    visible: false
+    color: "transparent"
+
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
+
+    MouseArea {
+        anchors.fill: parent
+
+        onPressed: {
+            if (root.hostWidget) {
+                root.hostWidget.close();
+            }
+        }
+    }
+
+    BorderSurface {
+        id: settingsPanel
+
+        width: root.panelWidth
+        height: settingsColumn.implicitHeight + root.panelPadding * 2
+        radius: Style.cornerRadius
+        color: ShellColor.popups.background
+        borderSpec: Border.surfaceSpec("menu", "border", ShellColor.popups.border, Style.normalBorderWidth)
+        palette.windowText: ShellColor.popups.text
+        antialiasing: true
+        smooth: true
+
+        x: root.panelX
+        y: root.panelY
+
+        MouseArea {
+            anchors.fill: parent
+
+            onPressed: {
+                // Consume clicks inside the panel.
+            }
+        }
+
+        ColumnLayout {
+            id: settingsColumn
+
+            anchors.fill: parent
+            anchors.margins: root.panelPadding
+            spacing: 4
+
+            Label {
+                Layout.fillWidth: true
+                text: "YASSM"
+                palette.windowText: ShellColor.popups.text
+                font.family: Style.font.family
+                font.pixelSize: Style.font.subtitle
+
+                bottomPadding: 8
+            }
+
+            Repeater {
+                model: root.moduleSettings
+
+                CheckBox {
+                    id: control
+
+                    required property var modelData
+
+                    Layout.fillWidth: true
+                    text: control.modelData.label
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                    palette.windowText: ShellColor.popups.text
+
+                    checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, true) : false
+
+                    onClicked: {
+                        if (root.hostWidget) {
+                            root.hostWidget.updateSetting(control.modelData.key, checked);
+                        }
+                    }
+
+                    Connections {
+                        target: root.hostWidget
+
+                        function onSettingsChanged() {
+                            control.checked = root.hostWidget
+                                ? root.hostWidget.setting(control.modelData.key, true)
+                                : false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
