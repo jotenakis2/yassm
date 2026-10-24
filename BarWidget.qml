@@ -59,12 +59,6 @@ BarWidget {
             segments.push({ key: "gpu", text: text, glyphs: text.length - 1 });
         }
 
-        if (showTemp) {
-            const text = iconTemp + " "
-                + pad(metrics.hasTemperature ? Math.round(metrics.temperatureC) : null) + "°C";
-            segments.push({ key: "temp", text: text, glyphs: text.length - 1 });
-        }
-
         if (showMemory) {
             const text = iconMemory + " " + pad(Math.round(metrics.memoryPercent)) + "%";
             segments.push({ key: "memory", text: text, glyphs: text.length - 1 });
@@ -78,6 +72,12 @@ BarWidget {
         if (showDisk) {
             const text = iconDisk + " " + pad(Math.round(metrics.diskPercent)) + "%";
             segments.push({ key: "disk", text: text, glyphs: text.length - 1 });
+        }
+
+        if (showTemp) {
+            const text = iconTemp + " "
+                + pad(metrics.hasTemperature ? Math.round(metrics.temperatureC) : null) + "°C";
+            segments.push({ key: "temp", text: text, glyphs: text.length - 1 });
         }
 
         return segments;
@@ -182,7 +182,7 @@ BarWidget {
 
         if (key === "load") {
             return tooltipBlock(
-                "LOAD AVERAGE (1/5/15 MIN)",
+                "LOAD",
                 " 1 min " + formatLoad(metrics.load1) + "\n"
                     + " 5 min " + formatLoad(metrics.load5) + "\n"
                     + "15 min " + formatLoad(metrics.load15)
@@ -210,13 +210,18 @@ BarWidget {
         }
 
         if (key === "temp") {
-            return tooltipBlock(
-                "TEMPERATURE",
-                metrics.hasTemperature
-                    ? metrics.temperatureC.toFixed(1) + " °C ("
-                        + (metrics.temperatureSensor || "unknown sensor") + ")"
-                    : "Unavailable"
-            );
+            const temperatures = metrics.temperatures;
+
+            if (!temperatures || temperatures.length === 0) {
+                return tooltipBlock("TEMPERATURE", "Unavailable");
+            }
+
+            const lines = temperatures.map(function(entry) {
+                return entry.celsius.toFixed(1).padStart(4, " ")
+                    + " °C (" + entry.sensor + ")";
+            });
+
+            return tooltipBlock("TEMPERATURE", lines.join("\n"));
         }
 
         return "";

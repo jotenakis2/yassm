@@ -39,7 +39,7 @@ Singleton {
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
     property real temperatureC: 0
-    property string temperatureSensor: ""
+    property var temperatures: []
 
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
@@ -228,6 +228,40 @@ Singleton {
         }
     }
 
+    function applyTemperatures(content) {
+        const entries = [];
+        const lines = content.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (line === "") {
+                continue;
+            }
+
+            const tab = line.indexOf("\t");
+            const raw = Number((tab >= 0 ? line.slice(0, tab) : line).trim());
+
+            if (!Number.isFinite(raw) || !(raw > 0) || !(raw < 200000)) {
+                continue;
+            }
+
+            const sensor = tab >= 0 ? line.slice(tab + 1).trim() : "";
+            entries.push({
+                celsius: raw / 1000,
+                sensor: sensor || "unknown sensor"
+            });
+        }
+
+        entries.sort(function(left, right) {
+            return right.celsius - left.celsius;
+        });
+
+        metrics.temperatures = entries;
+        metrics.hasTemperature = entries.length > 0;
+        metrics.temperatureC = entries.length > 0 ? entries[0].celsius : 0;
+    }
+
     FileView {
         id: procStat
         path: "/proc/stat"
@@ -301,29 +335,10 @@ Singleton {
 
         command: ["bash", metrics.temperatureScriptPath]
 
-        stdout: SplitParser {
-            onRead: data => {
-                const tab = data.indexOf("\t");
-                const head = (tab >= 0 ? data.slice(0, tab) : data).trim().split(/\s+/);
-
-                if (head.length < 1) {
-                    return;
-                }
-
-                const raw = Number(head[0]);
-                const sensor = tab >= 0 ? data.slice(tab + 1).trim() : "";
-
-                if (!Number.isFinite(raw) || !(raw > 0)) {
-                    metrics.hasTemperature = false;
-                    metrics.temperatureC = 0;
-                    metrics.temperatureSensor = "";
-                    return;
-                }
-
-                metrics.hasTemperature = true;
-                metrics.temperatureC = raw / 1000;
-                metrics.temperatureSensor = sensor;
-            }
+        stdout: StdioCollector {
+            id: temperatureOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyTemperatures(temperatureOutput.text)
         }
 
         onExited: function(exitCode, exitStatus) {

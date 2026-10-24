@@ -8,18 +8,25 @@ sensor_label() {
 	local path=$1
 	local label_file
 	local label
+	local dir
+	local device
 
 	case "$path" in
 	/sys/class/hwmon/*/temp*_input)
 		label_file="${path%_input}_label"
 		if [[ -r $label_file ]]; then
 			IFS= read -r label <"$label_file" || true
-			if [[ -n $label ]]; then
+			if [[ -n $label && $label != "temp" ]]; then
 				printf '%s\n' "$label"
 				return
 			fi
 		fi
-		printf '%s/%s\n' "${path%/*}" "${path##*/}"
+		dir=${path%/*}
+		device=""
+		if [[ -r $dir/name ]]; then
+			IFS= read -r device <"$dir/name" || true
+		fi
+		printf '%s/%s/%s\n' "${device:-hwmon}" "${dir##*/}" "${path##*/}"
 		;;
 	/sys/class/thermal/thermal_zone*/temp)
 		label_file="${path%/temp}/type"
@@ -38,9 +45,6 @@ sensor_label() {
 	esac
 }
 
-max=0
-max_path=""
-
 for path in /sys/class/thermal/thermal_zone*/temp /sys/class/hwmon/hwmon*/temp*_input; do
 	[[ -r $path ]] || continue
 
@@ -49,17 +53,7 @@ for path in /sys/class/thermal/thermal_zone*/temp /sys/class/hwmon/hwmon*/temp*_
 	[[ $raw =~ ^-?[0-9]+$ ]] || continue
 
 	if (( raw > 0 && raw < 200000 )); then
-		if (( raw > max )); then
-			max=$raw
-			max_path=$path
-		fi
+		label=$(sensor_label "$path")
+		printf '%d\t%s\n' "$raw" "$label"
 	fi
 done
-
-if (( max > 0 )); then
-	label=$(sensor_label "$max_path")
-else
-	label=""
-fi
-
-printf '%d\t%s\n' "$max" "$label"
