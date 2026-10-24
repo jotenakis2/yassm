@@ -93,11 +93,11 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées ;
 - **RAM** : mémoire utilisée / mémoire totale en GiB ;
 - **Swap** : swap utilisé / swap total en GiB ;
-- **Disk** : une ligne par système de fichiers réel détecté, en GiB. Les
-  pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.) sont ignorés.
-  Les points de montage qui partagent le même device/source sont dédupliqués :
-  sur un root btrfs avec subvolumes, `/home` et `/var/log` n'apparaissent donc
-  pas séparément de `/` ;
+- **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
+  pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
+  etc.) sont ignorés. Les points de montage qui partagent le même
+  device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
+  et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont

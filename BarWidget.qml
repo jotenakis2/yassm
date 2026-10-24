@@ -120,23 +120,27 @@ BarWidget {
         let targetWidth = 0;
         let usedWidth = 0;
         let totalWidth = 0;
+        let percentWidth = 0;
         const rows = [];
 
         for (let i = 0; i < mounts.length; i++) {
             const target = mounts[i].target;
             const used = formatBytesAsGib(mounts[i].usedBytes);
             const total = formatBytesAsGib(mounts[i].totalBytes);
+            const percent = "(" + mounts[i].percent + "%)";
 
             targetWidth = Math.max(targetWidth, target.length);
             usedWidth = Math.max(usedWidth, used.length);
             totalWidth = Math.max(totalWidth, total.length);
-            rows.push({ target: target, used: used, total: total });
+            percentWidth = Math.max(percentWidth, percent.length);
+            rows.push({ target: target, used: used, total: total, percent: percent });
         }
 
         const lines = rows.map(function(row) {
             return row.target.padEnd(targetWidth)
                 + "  " + row.used.padStart(usedWidth)
-                + " / " + row.total.padStart(totalWidth);
+                + " / " + row.total.padStart(totalWidth)
+                + " " + row.percent.padStart(percentWidth);
         });
 
         return "Disk\n" + lines.join("\n");

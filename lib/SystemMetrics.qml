@@ -173,6 +173,9 @@ Singleton {
             const totalBytes = Number(fields[3]);
             const usedBytes = Number(fields[4]);
             const availBytes = Number(fields[5]);
+            const percent = usedBytes + availBytes > 0
+                ? Math.max(0, Math.min(100, Math.ceil(100 * usedBytes / (usedBytes + availBytes))))
+                : 0;
 
             if (!source || excluded[fstype] || !(totalBytes > 0)) {
                 continue;
@@ -184,7 +187,8 @@ Singleton {
                 fstype: fstype,
                 totalBytes: totalBytes,
                 usedBytes: usedBytes,
-                availBytes: availBytes
+                availBytes: availBytes,
+                percent: percent
             };
 
             // Btrfs subvolumes and bind mounts share a source. Keep the
@@ -213,10 +217,7 @@ Singleton {
                 continue;
             }
 
-            const denominator = list[i].usedBytes + list[i].availBytes;
-            metrics.diskPercent = denominator > 0
-                ? Math.max(0, Math.min(100, Math.ceil(100 * list[i].usedBytes / denominator)))
-                : 0;
+            metrics.diskPercent = list[i].percent;
             break;
         }
     }

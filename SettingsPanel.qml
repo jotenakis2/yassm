@@ -16,9 +16,17 @@ PanelWindow {
 
     readonly property int panelWidth: 280
     readonly property int panelPadding: 16
-    readonly property int barVisibleOffset: hostWidget && hostWidget.bar && hostWidget.bar.barSize > 0
-        ? hostWidget.bar.barSize + Style.space(4)
-        : 30
+    readonly property int barVisibleOffset: {
+        const bar = hostWidget ? hostWidget.bar : null;
+        const barSize = bar ? Number(bar.barSize) : 0;
+        const gap = Number(Style.space(4));
+
+        if (!(barSize > 0)) {
+            return 30;
+        }
+
+        return Math.round(barSize + (Number.isFinite(gap) ? gap : 4));
+    }
 
     readonly property var moduleSettings: [
         { key: "showCpu", label: "CPU" },
