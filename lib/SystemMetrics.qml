@@ -45,6 +45,15 @@ Singleton {
     property real temperatureC: 0
     property var temperatures: []
 
+    readonly property string batteryScriptPath: Qt.resolvedUrl("../battery.sh").toString().replace("file://", "")
+    readonly property int batteryIntervalMs: 10000
+    property bool hasBattery: false
+    property real batteryPercent: 0
+    property string batteryStatus: ""
+    property real batteryTimeToEmpty: 0
+    property real batteryTimeToFull: 0
+    property real batteryPowerW: 0
+
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
 
@@ -276,6 +285,40 @@ Singleton {
         metrics.temperatureC = entries.length > 0 ? entries[0].celsius : 0;
     }
 
+    function applyBattery(content) {
+        const line = content.trim();
+
+        if (line === "") {
+            metrics.hasBattery = false;
+            metrics.batteryPercent = 0;
+            metrics.batteryStatus = "";
+            metrics.batteryTimeToEmpty = 0;
+            metrics.batteryTimeToFull = 0;
+            metrics.batteryPowerW = 0;
+            return;
+        }
+
+        const fields = line.split("\t");
+
+        if (fields.length < 5) {
+            return;
+        }
+
+        const percent = Number(fields[0]);
+
+        if (!Number.isFinite(percent)) {
+            metrics.hasBattery = false;
+            return;
+        }
+
+        metrics.hasBattery = true;
+        metrics.batteryPercent = Math.max(0, Math.min(100, percent));
+        metrics.batteryStatus = fields[1] || "";
+        metrics.batteryTimeToEmpty = Number(fields[2]) || 0;
+        metrics.batteryTimeToFull = Number(fields[3]) || 0;
+        metrics.batteryPowerW = (Number(fields[4]) || 0) / 1000000;
+    }
+
     FileView {
         id: procStat
         path: "/proc/stat"
@@ -369,6 +412,33 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: temperatureProcess.running = true
+    }
+
+    Process {
+        id: batteryProcess
+
+        command: ["bash", metrics.batteryScriptPath]
+
+        stdout: StdioCollector {
+            id: batteryOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyBattery(batteryOutput.text)
+        }
+
+        onExited: function(exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                console.warn("yassm: battery scan exited with", exitCode);
+            }
+        }
+    }
+
+    Timer {
+        interval: metrics.batteryIntervalMs
+        running: true
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: batteryProcess.running = true
     }
 
     Timer {

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.1
+Version 1.4.0
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -17,6 +17,7 @@ Dépôt prévu : <https://github.com/jotenakis2/yassm>
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
+| Batterie | `/sys/class/power_supply` (partagé) | 10 s |
 | Température | toutes les températures normales, triées | 10 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
@@ -63,6 +64,7 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Memory
 - Swap
 - Disk (`/`)
+- Battery
 - Temperature
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
@@ -77,6 +79,7 @@ Exemple d'entrée :
   "showMemory": true,
   "showSwap": true,
   "showGpu": true,
+  "showBattery": true,
   "showTemp": true,
   "showLoad": true,
   "showDisk": true
@@ -107,6 +110,8 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée ;
+- **Battery** : pourcentage, état, temps restant ou temps de charge, et
+  puissance instantanée quand le noyau les fournit ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
@@ -124,7 +129,7 @@ Uniquement sur la barre, pas dans les tooltips :
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
 courant. Les icônes conservent toujours la couleur normale de la barre ; seules
-les valeurs sont colorées.
+les valeurs sont colorées. La batterie reste en couleur normale de la barre.
 
 ## Vérifications
 

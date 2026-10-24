@@ -27,6 +27,7 @@ BarWidget {
     property bool showMemory: setting("showMemory", true)
     property bool showSwap: setting("showSwap", true)
     property bool showGpu: setting("showGpu", true)
+    property bool showBattery: setting("showBattery", true)
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
     property bool showDisk: setting("showDisk", true)
@@ -35,6 +36,7 @@ BarWidget {
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
+    readonly property string iconBattery: String.fromCodePoint(0xF0079)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
@@ -79,6 +81,10 @@ BarWidget {
             segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "percent"));
         }
 
+        if (showBattery && metrics.hasBattery) {
+            segments.push(makeSegment("battery", iconBattery, Math.round(metrics.batteryPercent), "%", "battery"));
+        }
+
         if (showTemp) {
             segments.push(makeSegment(
                 "temp",
@@ -104,7 +110,7 @@ BarWidget {
         }).join("  ");
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "temp"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "battery", "temp"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -133,6 +139,10 @@ BarWidget {
         const segment = segmentMap[key];
 
         if (!segment || segment.value === null || !Number.isFinite(segment.value)) {
+            return button.foreground;
+        }
+
+        if (segment.kind === "battery") {
             return button.foreground;
         }
 
@@ -210,6 +220,33 @@ BarWidget {
     function formatBytesAsGib(bytes) {
         const value = Number(bytes) / 1073741824;
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
+    }
+
+    function batteryStateLabel(status) {
+        switch (status) {
+        case "Charging":
+            return "Charging";
+        case "Discharging":
+            return "Discharging";
+        case "Full":
+            return "Fully charged";
+        case "Not charging":
+            return "Not charging";
+        default:
+            return status || "Unknown";
+        }
+    }
+
+    function formatDuration(seconds) {
+        const totalMinutes = Math.max(0, Math.round(Number(seconds) / 60));
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        if (hours > 0) {
+            return hours + "h " + String(minutes).padStart(2, "0") + "m";
+        }
+
+        return minutes + "m";
     }
 
     function tooltipBlock(title, body) {
@@ -317,6 +354,29 @@ BarWidget {
             return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
+        if (key === "battery") {
+            if (!metrics.hasBattery) {
+                return tooltipBlock("BATTERY", "Unavailable");
+            }
+
+            const lines = [
+                Math.round(metrics.batteryPercent) + "% ("
+                    + batteryStateLabel(metrics.batteryStatus) + ")"
+            ];
+
+            if (metrics.batteryStatus === "Charging" && metrics.batteryTimeToFull > 0) {
+                lines.push(formatDuration(metrics.batteryTimeToFull) + " to full");
+            } else if (metrics.batteryTimeToEmpty > 0) {
+                lines.push(formatDuration(metrics.batteryTimeToEmpty) + " remaining");
+            }
+
+            if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
+                lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W");
+            }
+
+            return tooltipBlock("BATTERY", lines.join("\n"));
+        }
+
         if (key === "temp") {
             const temperatures = metrics.temperatures;
 
@@ -421,6 +481,7 @@ BarWidget {
         entry.showMemory = root.showMemory;
         entry.showSwap = root.showSwap;
         entry.showGpu = root.showGpu;
+        entry.showBattery = root.showBattery;
         entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
