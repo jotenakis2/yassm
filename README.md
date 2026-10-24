@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.6.5
+Version 1.7.0
 
 **English** | [Français](README-fr.md)
 
@@ -71,6 +71,10 @@ Clicking the widget opens a panel to enable or disable:
 - Temperature
 - Battery
 - Bar colors (colored thresholds and blue battery on mains)
+- Spacing (gap between modules, 0–4 spaces; default 2)
+
+The **Spacing** slider sets the gap between modules from 0 to 4 spaces
+(default 2). It also applies between the ↓ and ↑ rates of the network module.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -89,7 +93,8 @@ Example entry:
   "showLoad": true,
   "showDisk": true,
   "showNet": true,
-  "showColors": true
+  "showColors": true,
+  "spacing": 2
 }
 ```
 

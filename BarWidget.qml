@@ -34,6 +34,11 @@ BarWidget {
     property bool showDisk: setting("showDisk", true)
     property bool showColors: setting("showColors", true)
 
+    readonly property int moduleSpacing: {
+        const value = Math.round(Number(setting("spacing", 2)));
+        return Number.isFinite(value) ? Math.max(0, Math.min(4, value)) : 2;
+    }
+
     readonly property string iconCpu: String.fromCodePoint(0xF0EE0)
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
@@ -153,15 +158,16 @@ BarWidget {
             const up = metrics.networkTxKib;
             const downText = formatRate(down);
             const upText = formatRate(up);
+            const gap = " ".repeat(root.moduleSpacing);
 
             segments.push({
                 key: "net",
                 icon: iconNetDown,
                 valueText: downText,
-                text: iconNetDown + " " + downText + "  " + iconNetUp + " " + upText,
+                text: iconNetDown + " " + downText + gap + iconNetUp + " " + upText,
                 value: Math.round(down),
                 kind: "net",
-                secondaryIcon: "  " + iconNetUp,
+                secondaryIcon: gap + iconNetUp,
                 secondaryValueText: " " + upText,
                 secondaryValue: Math.round(up)
             });
@@ -822,6 +828,7 @@ BarWidget {
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
         entry.showColors = root.showColors;
+        entry.spacing = root.moduleSpacing;
         entry[name] = value;
 
         root.settings = entry;
@@ -990,7 +997,7 @@ BarWidget {
 
             font.family: button.fontFamily
             font.pixelSize: button.fontSize
-            text: "  "
+            text: " ".repeat(root.moduleSpacing)
         }
 
         Row {
