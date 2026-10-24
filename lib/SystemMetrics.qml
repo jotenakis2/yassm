@@ -43,8 +43,6 @@ Singleton {
     property string networkInterface: ""
     property real networkRxKib: 0
     property real networkTxKib: 0
-    property real networkRxTotalKb: 0
-    property real networkTxTotalKb: 0
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
 
@@ -217,8 +215,6 @@ Singleton {
         metrics.networkPrevious = null;
         metrics.networkRxKib = 0;
         metrics.networkTxKib = 0;
-        metrics.networkRxTotalKb = 0;
-        metrics.networkTxTotalKb = 0;
     }
 
     function applyNetDev(content) {
@@ -269,8 +265,6 @@ Singleton {
             metrics.networkTxKib = 0;
         }
 
-        metrics.networkRxTotalKb = rx / 1024;
-        metrics.networkTxTotalKb = tx / 1024;
         metrics.networkPrevious = {
             iface: iface,
             time: now,

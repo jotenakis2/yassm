@@ -444,24 +444,6 @@ BarWidget {
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
-    function formatKibAsSize(kilobytes) {
-        const value = Number(kilobytes);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0 B";
-        }
-
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(2) + " GiB";
-        }
-
-        if (value >= 1024) {
-            return (value / 1024).toFixed(2) + " MiB";
-        }
-
-        return Math.round(value * 1024) + " B";
-    }
-
     // Compact, fixed-width rate for the bar (KiB/s).
     function formatRate(kib) {
         const value = Number(kib);
@@ -673,10 +655,8 @@ BarWidget {
 
             const lines = [
                 metrics.networkInterface,
-                "↓ " + formatRateLong(metrics.networkRxKib)
-                    + "  (" + formatKibAsSize(metrics.networkRxTotalKb) + " total)",
+                "↓ " + formatRateLong(metrics.networkRxKib),
                 "↑ " + formatRateLong(metrics.networkTxKib)
-                    + "  (" + formatKibAsSize(metrics.networkTxTotalKb) + " total)"
             ];
 
             return tooltipBlock("NET", lines.join("\n"));
