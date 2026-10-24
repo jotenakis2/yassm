@@ -674,7 +674,7 @@ BarWidget {
                         name: device.name,
                         used: usedText,
                         total: totalText,
-                        percent: String(percent).padStart(3, " ")
+                        percent: String(percent)
                     });
                 }
 
