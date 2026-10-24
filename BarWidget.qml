@@ -28,6 +28,7 @@ BarWidget {
     property bool showSwap: setting("showSwap", true)
     property bool showGpu: setting("showGpu", true)
     property bool showBattery: setting("showBattery", true)
+    property bool showNet: setting("showNet", true)
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
     property bool showDisk: setting("showDisk", true)
@@ -40,6 +41,8 @@ BarWidget {
     readonly property string iconBatteryFull: String.fromCodePoint(0xF0079)
     readonly property string iconBatteryEmpty: String.fromCodePoint(0xF008E)
     readonly property string iconBatteryPlug: String.fromCodePoint(0xF06A5)
+    readonly property string iconNetDown: String.fromCodePoint(0xF01DA)
+    readonly property string iconNetUp: String.fromCodePoint(0xF0552)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
@@ -145,6 +148,25 @@ BarWidget {
             segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "percent"));
         }
 
+        if (showNet && metrics.hasNetwork) {
+            const down = metrics.networkRxKib;
+            const up = metrics.networkTxKib;
+            const downText = formatRate(down);
+            const upText = formatRate(up);
+
+            segments.push({
+                key: "net",
+                icon: iconNetDown,
+                valueText: downText,
+                text: iconNetDown + " " + downText + "  " + iconNetUp + " " + upText,
+                value: Math.round(down),
+                kind: "net",
+                secondaryIcon: "  " + iconNetUp,
+                secondaryValueText: " " + upText,
+                secondaryValue: Math.round(up)
+            });
+        }
+
         if (showBattery && metrics.hasBattery) {
             segments.push(makeSegment(
                 "battery",
@@ -184,7 +206,7 @@ BarWidget {
         }).join("  ");
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "battery", "temp"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "net", "battery", "temp"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -205,6 +227,30 @@ BarWidget {
         return segmentMap[key] ? segmentMap[key].valueText : "";
     }
 
+    function segmentSecondaryIcon(key) {
+        return segmentMap[key] && segmentMap[key].secondaryIcon
+            ? segmentMap[key].secondaryIcon : "";
+    }
+
+    function segmentSecondaryValue(key) {
+        return segmentMap[key] && segmentMap[key].secondaryValueText
+            ? segmentMap[key].secondaryValueText : "";
+    }
+
+    function segmentSecondaryColor(key) {
+        if (!root.showColors) {
+            return button.foreground;
+        }
+
+        const segment = segmentMap[key];
+
+        if (!segment || segment.secondaryValue === undefined) {
+            return button.foreground;
+        }
+
+        return networkColor(segment.secondaryValue);
+    }
+
     function segmentVisible(key) {
         return segmentMap[key] !== undefined;
     }
@@ -214,9 +260,11 @@ BarWidget {
             return button.foreground;
         }
 
-        // The battery bolt turns theme-blue while charging; every other icon
-        // keeps the normal bar foreground.
-        if (key === "battery" && Yassm.SystemMetrics.batteryStatus === "Charging") {
+        const metrics = Yassm.SystemMetrics;
+
+        // On mains power, charging or held at a charge threshold, the battery
+        // icon and value both use the theme blue.
+        if (metrics.batteryPlugged) {
             return Yassm.ThemePalette.blue;
         }
 
@@ -239,6 +287,10 @@ BarWidget {
 
         if (segment.kind === "load") {
             return loadColor(segment.value);
+        }
+
+        if (segment.kind === "net") {
+            return networkColor(segment.value);
         }
 
         if (segment.kind === "temp") {
@@ -286,7 +338,29 @@ BarWidget {
         return button.foreground;
     }
 
+    function networkColor(value) {
+        const kib = Number(value);
+
+        if (!Number.isFinite(kib) || kib < 1) {
+            return button.foreground;
+        }
+
+        if (kib < 500) {
+            return Yassm.ThemePalette.green;
+        }
+
+        if (kib <= 1000) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return Yassm.ThemePalette.red;
+    }
+
     function batteryColor(value) {
+        if (Yassm.SystemMetrics.batteryPlugged) {
+            return Yassm.ThemePalette.blue;
+        }
+
         if (!Number.isFinite(value)) {
             return button.foreground;
         }
@@ -364,6 +438,61 @@ BarWidget {
     function formatKibAsGib(kilobytes) {
         const value = Number(kilobytes) / 1048576;
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
+    }
+
+    function formatKibAsSize(kilobytes) {
+        const value = Number(kilobytes);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "0 B";
+        }
+
+        if (value >= 1048576) {
+            return (value / 1048576).toFixed(2) + " GiB";
+        }
+
+        if (value >= 1024) {
+            return (value / 1024).toFixed(2) + " MiB";
+        }
+
+        return Math.round(value * 1024) + " B";
+    }
+
+    // Compact, fixed-width rate for the bar (KiB/s).
+    function formatRate(kib) {
+        const value = Number(kib);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "   0K";
+        }
+
+        if (value >= 1048576) {
+            return (value / 1048576).toFixed(1).padStart(4, " ") + "G";
+        }
+
+        if (value >= 1024) {
+            return (value / 1024).toFixed(1).padStart(4, " ") + "M";
+        }
+
+        return String(Math.round(value)).padStart(4, " ") + "K";
+    }
+
+    function formatRateLong(kib) {
+        const value = Number(kib);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "0 KiB/s";
+        }
+
+        if (value >= 1048576) {
+            return (value / 1048576).toFixed(1) + " GiB/s";
+        }
+
+        if (value >= 1024) {
+            return (value / 1024).toFixed(1) + " MiB/s";
+        }
+
+        return Math.round(value) + " KiB/s";
     }
 
     function formatKib(kilobytes) {
@@ -531,6 +660,24 @@ BarWidget {
             return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
+        if (key === "net") {
+            const metrics = Yassm.SystemMetrics;
+
+            if (!metrics.hasNetwork) {
+                return tooltipBlock("NET", "Unavailable");
+            }
+
+            const lines = [
+                metrics.networkInterface,
+                "↓ " + formatRateLong(metrics.networkRxKib)
+                    + "  (" + formatKibAsSize(metrics.networkRxTotalKb) + " total)",
+                "↑ " + formatRateLong(metrics.networkTxKib)
+                    + "  (" + formatKibAsSize(metrics.networkTxTotalKb) + " total)"
+            ];
+
+            return tooltipBlock("NET", lines.join("\n"));
+        }
+
         if (key === "battery") {
             if (!metrics.hasBattery) {
                 return tooltipBlock("BATTERY", "Unavailable");
@@ -662,6 +809,7 @@ BarWidget {
         entry.showSwap = root.showSwap;
         entry.showGpu = root.showGpu;
         entry.showBattery = root.showBattery;
+        entry.showNet = root.showNet;
         entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
@@ -864,6 +1012,24 @@ BarWidget {
                     Text {
                         text: " " + root.segmentValue(metricKey)
                         color: root.segmentColor(metricKey)
+                        font.family: button.fontFamily
+                        font.pixelSize: button.fontSize
+                        renderType: Text.NativeRendering
+                    }
+
+                    Text {
+                        visible: root.segmentSecondaryIcon(metricKey) !== ""
+                        text: root.segmentSecondaryIcon(metricKey)
+                        color: button.foreground
+                        font.family: button.fontFamily
+                        font.pixelSize: button.fontSize
+                        renderType: Text.NativeRendering
+                    }
+
+                    Text {
+                        visible: root.segmentSecondaryValue(metricKey) !== ""
+                        text: root.segmentSecondaryValue(metricKey)
+                        color: root.segmentSecondaryColor(metricKey)
                         font.family: button.fontFamily
                         font.pixelSize: button.fontSize
                         renderType: Text.NativeRendering

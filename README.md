@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.4
+Version 1.6.0
 
 **English** | [Français](README-fr.md)
 
@@ -19,6 +19,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
 | GPU | `nvidia-smi` or sysfs `gpu_busy_percent` | 10 s |
 | Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 15 s |
+| Network | `/proc/net/dev` (default route interface) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
 | Temperature | all normal temperatures, sorted | 10 s |
 
@@ -66,9 +67,10 @@ Clicking the widget opens a panel to enable or disable:
 - Memory
 - Swap
 - Disk (`/`)
+- Network
 - Battery
 - Temperature
-- Bar colors (colored thresholds and blue charging icon)
+- Bar colors (colored thresholds and blue battery on mains)
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -86,6 +88,7 @@ Example entry:
   "showTemp": true,
   "showLoad": true,
   "showDisk": true,
+  "showNet": true,
   "showColors": true
 }
 ```
@@ -111,6 +114,8 @@ Hovering a module shows a contextual tooltip:
   `/run/user`. Mount points that share the same device/source are
   deduplicated: on a btrfs root with subvolumes, `/home` and `/var/log`
   therefore do not appear separately from `/`;
+- **Network**: active interface, download (↓) and upload (↑) rates, with the
+  total transferred since boot. Both rates are colored independently;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   The icon follows the level: snowflake below 40 °C, thermometer from 40 to
@@ -132,20 +137,23 @@ value:
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, Disk, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
+| Network | < 1 KiB/s | 1–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Battery | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
 | Temperatures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 Load is not capped: it can exceed 100 % when the run queue is longer than the
 CPU count. Battery uses inverted logic: the lower the value, the more alarming
-the color.
+the color. Network download and upload rates are colored independently.
 
 The green/orange/red colors come from the current Omarchy theme's
-`colors.toml`. Icons keep the normal bar color, with one exception: the
-battery icon turns theme blue while charging.
+`colors.toml`. Icons keep the normal bar color, except for the battery: as
+soon as the machine is on mains power (charging or held at a charge threshold),
+its value and icon turn theme blue. On battery, the value follows the
+thresholds above.
 
-The **Bar colors** toggle disables all these colors: values and the charging
-icon return to the normal bar color. It maps to `showColors` in `shell.json`
-(enabled by default).
+The **Bar colors** toggle disables all these colors: values and the blue
+battery tint return to the normal bar color. It maps to `showColors` in
+`shell.json` (enabled by default).
 
 ## Battery icon
 
@@ -153,9 +161,9 @@ The icon follows the level in 10 % steps (empty battery below 10 %) and the
 power state:
 
 - **on battery**: battery alone, filled according to the level;
-- **charging**: battery with a bolt, icon tinted theme blue;
+- **charging**: battery with a bolt, value and icon blue;
 - **plugged but not charging** (full or charge threshold reached): battery
-  followed by a plug.
+  followed by a plug, value and icon blue.
 
 The "plugged" state comes from `UPower.onBattery`, which distinguishes a
 machine that is merely plugged in from one that is charging. Percentage,
@@ -189,6 +197,10 @@ launch no process.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
 that wait does not consume CPU.
+
+The network module adds two file reads per second (`/proc/net/dev` and
+`/proc/net/route`, ~8 µs), inside the existing timer and without spawning a
+process.
 
 ## Checks
 

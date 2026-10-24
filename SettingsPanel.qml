@@ -35,6 +35,7 @@ PanelWindow {
         { key: "showMemory", label: "Memory" },
         { key: "showSwap", label: "Swap" },
         { key: "showDisk", label: "Disk" },
+        { key: "showNet", label: "Network" },
         { key: "showBattery", label: "Battery" },
         { key: "showTemp", label: "Temperature" },
         { key: "showColors", label: "Bar colors" }

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.4
+Version 1.6.0
 
 [English](README.md) | **Français**
 
@@ -19,6 +19,7 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
+| Réseau | `/proc/net/dev` (interface de la route par défaut) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
 | Température | toutes les températures normales, triées | 10 s |
 
@@ -66,9 +67,10 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Memory
 - Swap
 - Disk (`/`)
+- Network
 - Battery
 - Temperature
-- Bar colors (seuils colorés et icône de charge bleue)
+- Bar colors (seuils colorés et batterie bleue sur secteur)
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -86,6 +88,7 @@ Exemple d'entrée :
   "showTemp": true,
   "showLoad": true,
   "showDisk": true,
+  "showNet": true,
   "showColors": true
 }
 ```
@@ -112,6 +115,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   FUSE) et `/run/user`. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
+- **Réseau** : interface active, débit descendant (↓) et montant (↑), avec le
+  total échangé depuis le démarrage. Les deux débits sont colorés
+  indépendamment ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. L'icône suit le niveau : flocon sous 40 °C,
@@ -134,20 +140,24 @@ valeur arrondie affichée :
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, Disque, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
+| Réseau | < 1 KiB/s | 1–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Batterie | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
 | Températures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 Le LOAD n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente
 est plus longue que le nombre de CPU. La batterie suit une logique inversée,
-plus la valeur est basse, plus la couleur est alarmante.
+plus la valeur est basse, plus la couleur est alarmante. Les débits réseau
+descendant et montant sont colorés indépendamment.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
-courant. Les icônes conservent la couleur normale de la barre, à une exception
-près : l'icône de batterie passe au bleu du thème pendant la charge.
+courant. Les icônes conservent la couleur normale de la barre, sauf la
+batterie : dès que la machine est sur secteur (en charge ou seuil de charge
+atteint), sa valeur et son icône passent au bleu du thème. Sur batterie, la
+valeur suit les seuils ci-dessus.
 
 Le toggle **Bar colors** du panneau désactive toutes ces couleurs : les valeurs
-et l'icône de charge reviennent à la couleur normale de la barre. Il correspond
-à `showColors` dans `shell.json` (activé par défaut).
+et la teinte bleue de la batterie reviennent à la couleur normale de la barre.
+Il correspond à `showColors` dans `shell.json` (activé par défaut).
 
 ## Icône de batterie
 
@@ -155,9 +165,9 @@ L'icône suit le niveau par paliers de 10 % (batterie vide sous 10 %) et l'état
 d'alimentation :
 
 - **sur batterie** : batterie seule, remplie selon le niveau ;
-- **en charge** : batterie avec éclair, icône teintée du bleu du thème ;
+- **en charge** : batterie avec éclair, valeur et icône bleues ;
 - **branchée sans charge** (pleine ou seuil de charge atteint) : batterie
-  suivie d'une prise.
+  suivie d'une prise, valeur et icône bleues.
 
 L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
 simplement branchée d'une machine en train de charger. Le pourcentage, l'état
@@ -192,6 +202,9 @@ et les tooltips ne lancent aucun processus.
 
 `findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
 (`/media/NAS` ici) ; cette attente ne consomme pas de CPU.
+
+Le module réseau ajoute deux lectures de fichiers par seconde (`/proc/net/dev`
+et `/proc/net/route`, ~8 µs), dans le timer existant et sans processus.
 
 ## Vérifications
 

@@ -40,6 +40,14 @@ Singleton {
     property real diskPercent: 0
     property var mounts: []
 
+    property string networkInterface: ""
+    property real networkRxKib: 0
+    property real networkTxKib: 0
+    property real networkRxTotalKb: 0
+    property real networkTxTotalKb: 0
+    property var networkPrevious: null
+    readonly property bool hasNetwork: networkInterface !== ""
+
     readonly property string temperatureScriptPath: Qt.resolvedUrl("../temperature.sh").toString().replace("file://", "")
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
@@ -185,6 +193,90 @@ Singleton {
         metrics.load1 = Number(fields[0]) || 0;
         metrics.load5 = Number(fields[1]) || 0;
         metrics.load15 = Number(fields[2]) || 0;
+    }
+
+    // The default route's interface avoids counting VPN/virtual traffic twice.
+    function applyNetRoute(content) {
+        const lines = content.split("\n");
+        let iface = "";
+
+        for (let i = 1; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length >= 2 && fields[1] === "00000000") {
+                iface = fields[0];
+                break;
+            }
+        }
+
+        if (iface === metrics.networkInterface) {
+            return;
+        }
+
+        metrics.networkInterface = iface;
+        metrics.networkPrevious = null;
+        metrics.networkRxKib = 0;
+        metrics.networkTxKib = 0;
+        metrics.networkRxTotalKb = 0;
+        metrics.networkTxTotalKb = 0;
+    }
+
+    function applyNetDev(content) {
+        const iface = metrics.networkInterface;
+
+        if (!iface) {
+            return;
+        }
+
+        const lines = content.split("\n");
+        let rx = null;
+        let tx = null;
+
+        for (let i = 2; i < lines.length; i++) {
+            const line = lines[i];
+            const colon = line.indexOf(":");
+
+            if (colon < 0 || line.slice(0, colon).trim() !== iface) {
+                continue;
+            }
+
+            const fields = line.slice(colon + 1).trim().split(/\s+/);
+            rx = Number(fields[0]);
+            tx = Number(fields[8]);
+            break;
+        }
+
+        if (!Number.isFinite(rx) || !Number.isFinite(tx)) {
+            return;
+        }
+
+        const now = Date.now();
+        const previous = metrics.networkPrevious;
+
+        // Date.now() can jump after suspend or NTP adjustment, and link
+        // resets can rewind counters; both cases restart the baseline.
+        if (previous
+                && previous.iface === iface
+                && now > previous.time
+                && now - previous.time <= 30000
+                && rx >= previous.rx
+                && tx >= previous.tx) {
+            const seconds = (now - previous.time) / 1000;
+            metrics.networkRxKib = (rx - previous.rx) / 1024 / seconds;
+            metrics.networkTxKib = (tx - previous.tx) / 1024 / seconds;
+        } else {
+            metrics.networkRxKib = 0;
+            metrics.networkTxKib = 0;
+        }
+
+        metrics.networkRxTotalKb = rx / 1024;
+        metrics.networkTxTotalKb = tx / 1024;
+        metrics.networkPrevious = {
+            iface: iface,
+            time: now,
+            rx: rx,
+            tx: tx
+        };
     }
 
     function unescapeMount(value) {
@@ -352,6 +444,18 @@ Singleton {
     }
 
     FileView {
+        id: procNetRoute
+        path: "/proc/net/route"
+        onLoaded: metrics.applyNetRoute(text())
+    }
+
+    FileView {
+        id: procNetDev
+        path: "/proc/net/dev"
+        onLoaded: metrics.applyNetDev(text())
+    }
+
+    FileView {
         id: procCpuInfo
         path: "/proc/cpuinfo"
 
@@ -380,6 +484,8 @@ Singleton {
             procStat.reload();
             procMemInfo.reload();
             procLoadAvg.reload();
+            procNetRoute.reload();
+            procNetDev.reload();
         }
     }
 
