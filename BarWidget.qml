@@ -36,10 +36,70 @@ BarWidget {
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
-    readonly property string iconBattery: String.fromCodePoint(0xF0079)
+    readonly property string iconBatteryFull: String.fromCodePoint(0xF0079)
+    readonly property string iconBatteryEmpty: String.fromCodePoint(0xF008E)
+    readonly property string iconBatteryPlug: String.fromCodePoint(0xF06A5)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
+
+    // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
+    // they cannot be derived from a single base like the plain battery icons.
+    readonly property var batteryChargingIcons: [
+        0xF089C, // charging-10
+        0xF0086, // charging-20
+        0xF0087, // charging-30
+        0xF0088, // charging-40
+        0xF089D, // charging-50
+        0xF0089, // charging-60
+        0xF089E, // charging-70
+        0xF008A, // charging-80
+        0xF008B, // charging-90
+        0xF0085  // charging-100
+    ]
+
+    // Plain battery icons run from 0xF007A (battery-10) to 0xF0082
+    // (battery-90); 0xF0079 is the complete battery.
+    function batteryLevel(percent) {
+        const value = Number(percent);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return 0;
+        }
+
+        return Math.min(10, Math.max(1, Math.ceil(value / 10)));
+    }
+
+    function batteryLevelIcon(percent) {
+        const level = batteryLevel(percent);
+
+        if (level === 0) {
+            return iconBatteryEmpty;
+        }
+
+        if (level === 10) {
+            return iconBatteryFull;
+        }
+
+        return String.fromCodePoint(0xF0079 + level);
+    }
+
+    function batteryChargingIcon(percent) {
+        const level = Math.max(1, batteryLevel(percent));
+        return String.fromCodePoint(batteryChargingIcons[level - 1]);
+    }
+
+    function batteryIcon(percent, status, plugged) {
+        if (status === "Charging") {
+            return batteryChargingIcon(percent);
+        }
+
+        const icon = batteryLevelIcon(percent);
+
+        // A plug next to the battery distinguishes "plugged in but idle"
+        // (full or charge threshold reached) from running on battery.
+        return plugged ? icon + iconBatteryPlug : icon;
+    }
 
     function makeSegment(key, icon, value, suffix, kind) {
         const valueText = pad(value) + suffix;
@@ -82,7 +142,17 @@ BarWidget {
         }
 
         if (showBattery && metrics.hasBattery) {
-            segments.push(makeSegment("battery", iconBattery, Math.round(metrics.batteryPercent), "%", "battery"));
+            segments.push(makeSegment(
+                "battery",
+                root.batteryIcon(
+                    metrics.batteryPercent,
+                    metrics.batteryStatus,
+                    metrics.batteryPlugged
+                ),
+                Math.round(metrics.batteryPercent),
+                "%",
+                "battery"
+            ));
         }
 
         if (showTemp) {

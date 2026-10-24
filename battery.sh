@@ -4,6 +4,25 @@ set -euo pipefail
 
 shopt -s nullglob
 
+# AC adapter state: `online == 1` means the machine is plugged in, even when
+# the battery itself is full or not charging.
+online=0
+for dir in /sys/class/power_supply/*; do
+	[[ -r $dir/type ]] || continue
+
+	read -r type <"$dir/type" || continue
+	[[ $type == "Mains" ]] || continue
+
+	if [[ -r $dir/online ]]; then
+		value=0
+		read -r value <"$dir/online" 2>/dev/null || value=0
+
+		if [[ $value == "1" ]]; then
+			online=1
+		fi
+	fi
+done
+
 for dir in /sys/class/power_supply/*; do
 	[[ -r $dir/type ]] || continue
 
@@ -38,6 +57,7 @@ for dir in /sys/class/power_supply/*; do
 		read -r power <"$dir/power_now" 2>/dev/null || power=0
 	fi
 
-	printf '%s\t%s\t%s\t%s\t%s\n' "$capacity" "$status" "$time_empty" "$time_full" "$power"
+	printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+		"$capacity" "$status" "$time_empty" "$time_full" "$power" "$online"
 	exit 0
 done

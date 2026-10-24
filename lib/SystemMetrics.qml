@@ -53,6 +53,7 @@ Singleton {
     property real batteryTimeToEmpty: 0
     property real batteryTimeToFull: 0
     property real batteryPowerW: 0
+    property bool batteryPlugged: false
 
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
@@ -295,12 +296,13 @@ Singleton {
             metrics.batteryTimeToEmpty = 0;
             metrics.batteryTimeToFull = 0;
             metrics.batteryPowerW = 0;
+            metrics.batteryPlugged = false;
             return;
         }
 
         const fields = line.split("\t");
 
-        if (fields.length < 5) {
+        if (fields.length < 6) {
             return;
         }
 
@@ -317,6 +319,7 @@ Singleton {
         metrics.batteryTimeToEmpty = Number(fields[2]) || 0;
         metrics.batteryTimeToFull = Number(fields[3]) || 0;
         metrics.batteryPowerW = (Number(fields[4]) || 0) / 1000000;
+        metrics.batteryPlugged = fields[5] === "1";
     }
 
     FileView {
