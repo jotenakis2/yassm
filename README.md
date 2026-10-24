@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.6.4
+Version 1.6.5
 
 **English** | [Français](README-fr.md)
 
@@ -68,8 +68,8 @@ Clicking the widget opens a panel to enable or disable:
 - Swap
 - Disk (`/`)
 - Network
-- Battery
 - Temperature
+- Battery
 - Bar colors (colored thresholds and blue battery on mains)
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar

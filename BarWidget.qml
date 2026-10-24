@@ -206,7 +206,7 @@ BarWidget {
         }).join("  ");
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "net", "battery", "temp"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "net", "temp", "battery"]
 
     readonly property var segmentMap: {
         const map = {};
