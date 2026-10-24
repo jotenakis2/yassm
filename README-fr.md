@@ -1,13 +1,13 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.3
+Version 1.5.4
 
 [English](README.md) | **Français**
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
 
-Dépôt prévu : <https://github.com/jotenakis2/yassm>
+Dépôt : <https://github.com/jotenakis2/yassm>
 
 ## Modules
 
@@ -228,15 +228,15 @@ reposent sur `powermetrics`, également macOS uniquement. YASSM affiche donc
 
 ## Mise à jour
 
-Le dépôt local est initialisé avec Git. Le remote prévu est :
+Le dépôt distant est :
 
 ```text
 https://github.com/jotenakis2/yassm.git
 ```
 
-Une fois le dépôt GitHub créé et poussé, `omarchy plugin update` pourra
-fonctionner ; sinon, remplacez les fichiers manuellement puis relancez
-`omarchy plugin validate` et `omarchy-shell shell rescanPlugins`.
+`omarchy plugin update` peut donc être utilisé. Sinon, remplacez les fichiers
+manuellement puis relancez `omarchy plugin validate` et
+`omarchy-shell shell rescanPlugins`.
 
 Aucun fichier de configuration à migrer : les réglages sont dans `shell.json`.
 

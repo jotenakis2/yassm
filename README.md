@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.3
+Version 1.5.4
 
 **English** | [Français](README-fr.md)
 
@@ -225,15 +225,15 @@ configuration rather than an invented value.
 
 ## Updating
 
-The local repository is initialized with Git. The intended remote is:
+The remote is:
 
 ```text
 https://github.com/jotenakis2/yassm.git
 ```
 
-Once the GitHub repository is created and pushed, `omarchy plugin update` will
-work; otherwise, replace the files manually and run `omarchy plugin validate`
-and `omarchy-shell shell rescanPlugins` again.
+`omarchy plugin update` can therefore be used. Otherwise, replace the files
+manually and run `omarchy plugin validate` and
+`omarchy-shell shell rescanPlugins` again.
 
 No configuration file to migrate: settings live in `shell.json`.
 
