@@ -1,45 +1,47 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.2
+Version 1.5.3
 
-Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
-GPU et usage de la partition racine.
+**English** | [Français](README-fr.md)
 
-Dépôt prévu : <https://github.com/jotenakis2/yassm>
+Omarchy bar widget showing CPU, RAM, swap, system load, temperature, GPU and
+root partition usage.
+
+Repository: <https://github.com/jotenakis2/yassm>
 
 ## Modules
 
-| Module | Source | Rafraîchissement |
+| Module | Source | Refresh |
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
 | Swap | `/proc/meminfo` | 1 s |
-| Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
-| GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
-| Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
-| Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
-| Température | toutes les températures normales, triées | 10 s |
+| Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
+| GPU | `nvidia-smi` or sysfs `gpu_busy_percent` | 10 s |
+| Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 15 s |
+| Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
+| Temperature | all normal temperatures, sorted | 10 s |
 
-Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
-`--%` lorsqu'aucune source fiable n'est disponible.
+Swap is hidden when the machine has no active swap. The GPU shows `--%` when
+no reliable source is available.
 
 ## Architecture
 
-- `lib/SystemMetrics.qml` est un singleton partagé : un seul échantillonneur
-  `/proc` et un seul `findmnt` pour toutes les instances de barre, y compris
-  sur plusieurs écrans. La batterie vient directement d'UPower (événementiel).
-- `SettingsPanel.qml` est chargé à la demande au premier clic, puis conservé
-  pour les ouvertures suivantes. Ses contrôles sont des `Toggle`/`ToggleSwitch`
-  Omarchy, avec les polices, couleurs et espacements du thème courant.
-- Le GPU reste géré par le widget, conformément à la limite actuelle du
-  support Asahi.
+- `lib/SystemMetrics.qml` is a shared singleton: a single `/proc` sampler and a
+  single `findmnt` for every bar instance, including multi-monitor setups.
+  Battery data comes directly from UPower (event-driven).
+- `SettingsPanel.qml` is loaded on demand on first click, then kept for
+  subsequent openings. Its controls are Omarchy `Toggle`/`ToggleSwitch`,
+  using the current theme's fonts, colors and spacing.
+- GPU support remains handled by the widget, consistent with the current
+  limitation of Asahi support.
 
-## Prérequis
+## Requirements
 
-- Omarchy 4.x avec son shell Quickshell.
-- `bash`, `find`, `sort` et `findmnt` (util-linux).
-- Une police Nerd Font pour les icônes.
-- Optionnel : `nvidia-smi` pour les GPU NVIDIA.
+- Omarchy 4.x with its Quickshell shell.
+- `bash`, `find`, `sort` and `findmnt` (util-linux).
+- A Nerd Font for the icons.
+- Optional: `nvidia-smi` for NVIDIA GPUs.
 
 ## Installation
 
@@ -50,13 +52,13 @@ omarchy-shell shell rescanPlugins
 omarchy plugin enable io.github.jotenakis2.yassm --section left
 ```
 
-Le `chmod +x` n'est pas nécessaire : les scripts sont lancés via `bash`.
-La dernière commande place le widget dans la section `left` de la barre ;
-adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
+`chmod +x` is not required: the scripts run through `bash`. The last command
+places the widget in the bar's `left` section; adjust `--section` (`left`,
+`center`, `right`) as you prefer.
 
-## Panneau de configuration
+## Settings panel
 
-Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
+Clicking the widget opens a panel to enable or disable:
 
 - CPU
 - Load
@@ -66,12 +68,12 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Disk (`/`)
 - Battery
 - Temperature
-- Bar colors (seuils colorés et icône de charge bleue)
+- Bar colors (colored thresholds and blue charging icon)
 
-Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
-l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
+Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
+entry. There is no separate configuration file.
 
-Exemple d'entrée :
+Example entry:
 
 ```json
 {
@@ -88,167 +90,164 @@ Exemple d'entrée :
 }
 ```
 
-Toutes les clés sont optionnelles ; les valeurs absentes valent `true`.
+All keys are optional; missing values default to `true`.
 
-Le panneau expose aussi les fonctions IPC `open`, `close`, `toggle`, `show` et
-`hide` sur la cible `io.github.jotenakis2.yassm`, et respecte le contrat
-`open()`/`close()`/`opened` utilisé par la barre Omarchy.
+The panel also exposes the IPC functions `open`, `close`, `toggle`, `show` and
+`hide` on the `io.github.jotenakis2.yassm` target, and honors the
+`open()`/`close()`/`opened` contract used by the Omarchy bar.
 
 ## Tooltips
 
-Le survol d'un module affiche une infobulle contextuelle :
+Hovering a module shows a contextual tooltip:
 
-- **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
-  alignées ;
-- **RAM** : mémoire utilisée / mémoire totale en GiB ;
-- **Swap** : swap utilisé / swap total en GiB. Si ZSWAP est utilisé, un bloc
-  `ZSWAP` affiche la taille compressée, la taille originale et le ratio de
-  compression ;
-- **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
-  pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
-  etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
-  FUSE) et `/run/user`. Les points de montage qui partagent le même
-  device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
-  et `/var/log` n'apparaissent donc pas séparément de `/` ;
-- **Temperature** : toutes les températures normales trouvées, triées de la
-  plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
-  barre affiche la plus élevée. L'icône suit le niveau : flocon sous 40 °C,
-  thermomètre de 40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C ;
-- **Battery** : pourcentage, état, temps restant ou temps de charge, et
-  puissance instantanée quand UPower la fournit, avec la direction
-  (`draw` en décharge, `charge` en charge) ;
-- **CPU** et **GPU** : pourcentage courant.
+- **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
+- **RAM**: used memory / total memory in GiB;
+- **Swap**: used swap / total swap in GiB. When ZSWAP is in use, a `ZSWAP`
+  block shows the compressed size, the original size and the compression
+  ratio;
+- **Disk**: one line per detected real filesystem, in GiB, with the
+  percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
+  are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
+  `/run/user`. Mount points that share the same device/source are
+  deduplicated: on a btrfs root with subvolumes, `/home` and `/var/log`
+  therefore do not appear separately from `/`;
+- **Temperature**: all normal temperatures found, sorted from highest to
+  lowest, with the sensor name in parentheses; the bar shows the highest one.
+  The icon follows the level: snowflake below 40 °C, thermometer from 40 to
+  49 °C, heat from 50 to 59 °C, alert from 60 °C;
+- **Battery**: percentage, state, time remaining or time to full, and
+  instantaneous power when UPower provides it, with direction (`draw` while
+  discharging, `charge` while charging);
+- **CPU** and **GPU**: current percentage.
 
-Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
-formatées à la demande, uniquement pendant le survol, et la mise à jour de
-segment se fait sans recréer d'objets visuels.
+Tooltips do not launch any extra process: values are formatted on demand, only
+while hovering, and segment updates do not recreate visual objects.
 
-## Couleurs de la barre
+## Bar colors
 
-Uniquement sur la barre, pas dans les tooltips. Les seuils s'appliquent à la
-valeur arrondie affichée :
+On the bar only, not in tooltips. Thresholds apply to the rounded displayed
+value:
 
-| Module | Normale | Verte | Orange | Rouge |
+| Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
-| CPU, RAM, Swap, Disque, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| CPU, RAM, Swap, Disk, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
-| Batterie | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
-| Températures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
+| Battery | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
+| Temperatures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-Le LOAD n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente
-est plus longue que le nombre de CPU. La batterie suit une logique inversée,
-plus la valeur est basse, plus la couleur est alarmante.
+Load is not capped: it can exceed 100 % when the run queue is longer than the
+CPU count. Battery uses inverted logic: the lower the value, the more alarming
+the color.
 
-Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
-courant. Les icônes conservent la couleur normale de la barre, à une exception
-près : l'icône de batterie passe au bleu du thème pendant la charge.
+The green/orange/red colors come from the current Omarchy theme's
+`colors.toml`. Icons keep the normal bar color, with one exception: the
+battery icon turns theme blue while charging.
 
-Le toggle **Bar colors** du panneau désactive toutes ces couleurs : les valeurs
-et l'icône de charge reviennent à la couleur normale de la barre. Il correspond
-à `showColors` dans `shell.json` (activé par défaut).
+The **Bar colors** toggle disables all these colors: values and the charging
+icon return to the normal bar color. It maps to `showColors` in `shell.json`
+(enabled by default).
 
-## Icône de batterie
+## Battery icon
 
-L'icône suit le niveau par paliers de 10 % (batterie vide sous 10 %) et l'état
-d'alimentation :
+The icon follows the level in 10 % steps (empty battery below 10 %) and the
+power state:
 
-- **sur batterie** : batterie seule, remplie selon le niveau ;
-- **en charge** : batterie avec éclair, icône teintée du bleu du thème ;
-- **branchée sans charge** (pleine ou seuil de charge atteint) : batterie
-  suivie d'une prise.
+- **on battery**: battery alone, filled according to the level;
+- **charging**: battery with a bolt, icon tinted theme blue;
+- **plugged but not charging** (full or charge threshold reached): battery
+  followed by a plug.
 
-L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
-simplement branchée d'une machine en train de charger. Le pourcentage, l'état
-et la puissance sont fournis par les propriétés UPower : aucun script ni timer
-n'est nécessaire, la barre réagit aux signaux D-Bus. UPower interroge le
-matériel environ toutes les 30 s, donc le pourcentage peut évoluer à ce
-rythme.
+The "plugged" state comes from `UPower.onBattery`, which distinguishes a
+machine that is merely plugged in from one that is charging. Percentage,
+state and power are provided by UPower properties: no script or timer is
+needed, the bar reacts to D-Bus signals. UPower polls the hardware about every
+30 s, so the percentage may change at that rate.
 
-## Performances
+## Performance
 
-Mesure sur deux fenêtres de 5 minutes, machine au repos, écran de veille et
-verrouillage désactivés (Apple M2 Pro, Omarchy 4.0.3, Quickshell 0.3.2) :
+Measured over two 5-minute windows, machine idle, screensaver and locking
+disabled (Apple M2 Pro, Omarchy 4.0.3, Quickshell 0.3.2):
 
-| Scénario | CPU `quickshell` (1 cœur) | RSS moyen | Réveils / 5 min |
+| Scenario | `quickshell` CPU (1 core) | Average RSS | Wakeups / 5 min |
 | --- | --- | --- | --- |
-| Sans YASSM | 2,413 % | 736 Mio | 27 385 |
-| Avec YASSM | 2,447 % | 750 Mio | 29 575 |
-| **Surcoût** | **+0,034 point** | **+14 Mio** | **+2 190** |
+| Without YASSM | 2.413 % | 736 MiB | 27,385 |
+| With YASSM | 2.447 % | 750 MiB | 29,575 |
+| **Overhead** | **+0.034 points** | **+14 MiB** | **+2,190** |
 
-Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
+Plus the short-lived scripts (CPU measured over 50 runs):
 
-| Script | CPU / exécution | Fréquence | CPU / minute |
+| Script | CPU / run | Frequency | CPU / minute |
 | --- | --- | --- | --- |
-| `temperature.sh` | 11,0 ms | 6×/min | 66 ms |
-| `findmnt` | 2,0 ms | 4×/min | 8 ms |
-| Batterie (UPower) | 0 | événementiel | 0 |
+| `temperature.sh` | 11.0 ms | 6×/min | 66 ms |
+| `findmnt` | 2.0 ms | 4×/min | 8 ms |
+| Battery (UPower) | 0 | event-driven | 0 |
 
-**Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
-résident.** YASSM est donc très performant : pas de polling batterie (UPower
-est événementiel), une seule série de mesures partagée entre toutes les barres,
-et les tooltips ne lancent aucun processus.
+**Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
+YASSM is therefore very performant: no battery polling (UPower is
+event-driven), a single sampling series shared by every bar, and tooltips
+launch no process.
 
-`findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
-(`/media/NAS` ici) ; cette attente ne consomme pas de CPU.
+`findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
+that wait does not consume CPU.
 
-## Vérifications
+## Checks
 
 ```bash
 ./check.sh
 ```
 
-Le script valide le manifeste, vérifie la syntaxe des scripts shell, lance
-`shellcheck` si disponible et `qmllint` (Qt 6) sur les fichiers QML.
+The script validates the manifest, checks shell script syntax, runs
+`shellcheck` when available and `qmllint` (Qt 6) on the QML files.
 
 ## GPU
 
-Sources utilisées :
+Sources used:
 
-1. `nvidia-smi` ;
-2. `/sys/class/drm/*/device/gpu_busy_percent` ;
-3. sinon `GPU --%`.
+1. `nvidia-smi`;
+2. `/sys/class/drm/*/device/gpu_busy_percent`;
+3. otherwise `GPU --%`.
 
 ### Apple Silicon / Asahi
 
-Sur une machine Apple Silicon avec le pilote `asahi` (AGX), aucune mesure
-d'occupation GPU n'est actuellement exposée par le système :
+On an Apple Silicon machine with the `asahi` driver (AGX), no GPU utilization
+measurement is currently exposed by the system:
 
-- pas de `gpu_busy_percent` ;
-- pas de `devfreq` ni de fréquence GPU exposée ;
-- pas de statistiques `drm-engine-*` dans `/proc/<pid>/fdinfo` ;
-- pas de capteur de puissance GPU dédié ;
-- le pilote n'expose pas de compteur d'utilisation via debugfs/sysfs.
+- no `gpu_busy_percent`;
+- no `devfreq` or exposed GPU frequency;
+- no `drm-engine-*` statistics in `/proc/<pid>/fdinfo`;
+- no dedicated GPU power sensor;
+- the driver exposes no utilization counter through debugfs/sysfs.
 
-Les outils existants ne couvrent pas ce cas : `btop` est compilé sans support
-GPU, `nvtop` ne supporte Apple que sous macOS (Metal), et `asitop`/`macmon`
-reposent sur `powermetrics`, également macOS uniquement. YASSM affiche donc
-`GPU --%` sur cette configuration, plutôt qu'une valeur inventée.
+Existing tools do not cover this case: `btop` is built without GPU support,
+`nvtop` only supports Apple on macOS (Metal), and `asitop`/`macmon` rely on
+`powermetrics`, also macOS-only. YASSM therefore shows `GPU --%` on this
+configuration rather than an invented value.
 
-## Mise à jour
+## Updating
 
-Le dépôt local est initialisé avec Git. Le remote prévu est :
+The local repository is initialized with Git. The intended remote is:
 
 ```text
 https://github.com/jotenakis2/yassm.git
 ```
 
-Une fois le dépôt GitHub créé et poussé, `omarchy plugin update` pourra
-fonctionner ; sinon, remplacez les fichiers manuellement puis relancez
-`omarchy plugin validate` et `omarchy-shell shell rescanPlugins`.
+Once the GitHub repository is created and pushed, `omarchy plugin update` will
+work; otherwise, replace the files manually and run `omarchy plugin validate`
+and `omarchy-shell shell rescanPlugins` again.
 
-Aucun fichier de configuration à migrer : les réglages sont dans `shell.json`.
+No configuration file to migrate: settings live in `shell.json`.
 
-## Désinstallation
+## Uninstall
 
 ```bash
 omarchy plugin disable io.github.jotenakis2.yassm
 omarchy plugin remove io.github.jotenakis2.yassm
 ```
 
-`disable` retire le widget de la barre en conservant les fichiers. Comme le
-dossier est un dépôt Git, `remove` supprime le dossier : pensez à pousser le
-dépôt ou à conserver une archive avant.
+`disable` removes the widget from the bar while keeping the files. Because the
+folder is a Git repository, `remove` deletes the folder: make sure to push the
+repository or keep an archive first.
 
-## Licence
+## License
 
-MIT — voir `LICENSE`.
+MIT — see `LICENSE`.
