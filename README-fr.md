@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.0
+Version 1.9.1
 
 [English](README.md) | **Français**
 
@@ -131,7 +131,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
 - **CPU** : pourcentage courant. Au survol, un échantillon unique de `ps`
-  ajoute le top 5 des processus par CPU (moyenne depuis leur lancement),
+  ajoute le top 5 des processus par CPU (moyenne depuis leur lancement,
+  ramenée sur la capacité totale des CPU comme la valeur principale),
   regroupés par nom ;
 - **GPU** : pourcentage courant.
 

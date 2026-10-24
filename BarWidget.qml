@@ -574,7 +574,11 @@ BarWidget {
     }
 
     function applyProcessCpu(content) {
-        root.processCpu = aggregateProcesses(content);
+        const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
+
+        root.processCpu = aggregateProcesses(content).map(function(entry) {
+            return { name: entry.name, value: entry.value / cores };
+        });
     }
 
     function applyProcessMemory(content) {

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.0
+Version 1.9.1
 
 **English** | [Français](README-fr.md)
 
@@ -130,7 +130,8 @@ Hovering a module shows a contextual tooltip:
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
 - **CPU**: current percentage. On hover, a single `ps` sample adds the top 5
-  processes by CPU (average since process start), grouped by name;
+  processes by CPU (average since process start, scaled to total CPU capacity
+  like the main value), grouped by name;
 - **GPU**: current percentage.
 
 Network, swap, disk and temperature tooltips launch no process. CPU and RAM
