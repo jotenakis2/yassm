@@ -144,8 +144,7 @@ BarWidget {
         }
 
         if (key === "disk") {
-            return "Disk /\n" + formatGib(diskUsedKb) + " / " + formatGib(diskTotalKb)
-                + " (" + Math.round(disk) + "%)";
+            return "Disk /\n" + formatGib(diskUsedKb) + " / " + formatGib(diskTotalKb);
         }
 
         if (key === "cpu") {

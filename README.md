@@ -81,7 +81,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées ;
 - **RAM** : mémoire utilisée / mémoire totale en GiB ;
 - **Swap** : swap utilisé / swap total en GiB ;
-- **Disk** : espace utilisé / espace total de `/` en GiB, avec le pourcentage ;
+- **Disk** : espace utilisé / espace total de `/` en GiB ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
