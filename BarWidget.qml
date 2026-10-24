@@ -214,6 +214,7 @@ BarWidget {
                 "TEMPERATURE",
                 metrics.hasTemperature
                     ? metrics.temperatureC.toFixed(1) + " °C\n"
+                        + (metrics.temperatureSensor || "unknown sensor") + "\n"
                         + "highest of " + metrics.temperatureSensors + " sensors"
                     : "Unavailable"
             );

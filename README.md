@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.2.0
+Version 1.2.1
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -103,8 +103,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **Temperature** : température maximale parmi tous les capteurs
-  `thermal_zone*/temp` et `hwmon*/temp*_input`, avec le nombre de capteurs
-  lus ;
+  `thermal_zone*/temp` et `hwmon*/temp*_input`, avec le nom du capteur
+  responsable et le nombre de capteurs lus ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont

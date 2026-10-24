@@ -40,6 +40,7 @@ Singleton {
     property bool hasTemperature: false
     property real temperatureC: 0
     property int temperatureSensors: 0
+    property string temperatureSensor: ""
 
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
@@ -303,25 +304,29 @@ Singleton {
 
         stdout: SplitParser {
             onRead: data => {
-                const fields = data.trim().split(/\s+/);
+                const tab = data.indexOf("\t");
+                const head = (tab >= 0 ? data.slice(0, tab) : data).trim().split(/\s+/);
 
-                if (fields.length < 2) {
+                if (head.length < 2) {
                     return;
                 }
 
-                const raw = Number(fields[0]);
-                const count = Number(fields[1]);
+                const raw = Number(head[0]);
+                const count = Number(head[1]);
+                const sensor = tab >= 0 ? data.slice(tab + 1).trim() : "";
 
                 if (!Number.isFinite(raw) || !(raw > 0)) {
                     metrics.hasTemperature = false;
                     metrics.temperatureC = 0;
                     metrics.temperatureSensors = 0;
+                    metrics.temperatureSensor = "";
                     return;
                 }
 
                 metrics.hasTemperature = true;
                 metrics.temperatureC = raw / 1000;
                 metrics.temperatureSensors = Number.isFinite(count) ? count : 0;
+                metrics.temperatureSensor = sensor;
             }
         }
 
