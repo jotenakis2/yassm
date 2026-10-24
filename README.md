@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.3
+Version 1.7.4
 
 **English** | [Français](README-fr.md)
 
@@ -53,9 +53,8 @@ omarchy-shell shell rescanPlugins
 omarchy plugin enable io.github.jotenakis2.yassm --section left
 ```
 
-`chmod +x` is not required: the scripts run through `bash`. The last command
-places the widget in the bar's `left` section; adjust `--section` (`left`,
-`center`, `right`) as you prefer.
+The last command places the widget in the bar's `left` section; adjust
+`--section` (`left`, `center`, `right`) as you prefer.
 
 ## Settings panel
 

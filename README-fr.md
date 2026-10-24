@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.3
+Version 1.7.4
 
 [English](README.md) | **Français**
 
@@ -53,7 +53,6 @@ omarchy-shell shell rescanPlugins
 omarchy plugin enable io.github.jotenakis2.yassm --section left
 ```
 
-Le `chmod +x` n'est pas nécessaire : les scripts sont lancés via `bash`.
 La dernière commande place le widget dans la section `left` de la barre ;
 adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 
