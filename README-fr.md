@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.1
+Version 1.7.2
 
 [English](README.md) | **Français**
 
@@ -75,6 +75,7 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 
 Le curseur **Spacing** règle l'espacement entre les modules de 0 à 4 espaces
 (2 par défaut). Il s'applique aussi entre les débits ↓ et ↑ du module réseau.
+À 0, un écart minimal de 2 px est conservé pour éviter tout chevauchement.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.

@@ -39,6 +39,9 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(0, Math.min(4, value)) : 2;
     }
 
+    // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.
+    readonly property real moduleGap: Math.max(2, separatorMetrics.advanceWidth)
+
     readonly property string iconCpu: String.fromCodePoint(0xF0EE0)
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
@@ -167,7 +170,7 @@ BarWidget {
                 text: iconNetDown + " " + downText + gap + iconNetUp + " " + upText,
                 value: Math.round(down),
                 kind: "net",
-                secondaryIcon: gap + iconNetUp,
+                secondaryIcon: iconNetUp,
                 secondaryValueText: " " + upText,
                 secondaryValue: Math.round(up)
             });
@@ -1006,7 +1009,7 @@ BarWidget {
             id: labelRow
 
             anchors.centerIn: parent
-            spacing: separatorMetrics.advanceWidth
+            spacing: root.moduleGap
 
             Repeater {
                 model: root.segmentOrder
@@ -1032,6 +1035,12 @@ BarWidget {
                         font.family: button.fontFamily
                         font.pixelSize: button.fontSize
                         renderType: Text.NativeRendering
+                    }
+
+                    Item {
+                        visible: root.segmentSecondaryValue(metricKey) !== ""
+                        width: root.moduleGap
+                        height: 1
                     }
 
                     Text {
