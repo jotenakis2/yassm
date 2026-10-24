@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.6
+Version 1.4.7
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -106,7 +106,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   compression ;
 - **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
   pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
-  etc.) sont ignorés. Les points de montage qui partagent le même
+  etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
+  FUSE) et `/run/user`. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **Temperature** : toutes les températures normales trouvées, triées de la

@@ -203,6 +203,14 @@ Singleton {
             const totalBytes = Number(fields[3]);
             const usedBytes = Number(fields[4]);
             const availBytes = Number(fields[5]);
+
+            // AppImage/FUSE scratch mounts land in /tmp, and per-user runtime
+            // mounts in /run/user are session-scoped: neither is real storage.
+            if (target === "/tmp" || target.startsWith("/tmp/")
+                    || target.startsWith("/run/user/")) {
+                continue;
+            }
+
             const percent = usedBytes + availBytes > 0
                 ? Math.max(0, Math.min(100, Math.ceil(100 * usedBytes / (usedBytes + availBytes))))
                 : 0;
