@@ -1,1 +1,2 @@
 singleton SystemMetrics 1.0 SystemMetrics.qml
+singleton ThemePalette 1.0 ThemePalette.qml

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.2.7
+Version 1.3.0
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -112,6 +112,18 @@ Le survol d'un module affiche une infobulle contextuelle :
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
 formatées à la demande, uniquement pendant le survol, et la mise à jour de
 segment se fait sans recréer d'objets visuels.
+
+## Couleurs de la barre
+
+Uniquement sur la barre, pas dans les tooltips :
+
+- valeurs en pourcentage : normale sous 10 %, verte sous 33 %, orange sous
+  66 %, rouge au-delà ;
+- températures : normale sous 40 °C, verte sous 50 °C, orange sous 60 °C,
+  rouge au-delà.
+
+Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
+courant.
 
 ## Vérifications
 

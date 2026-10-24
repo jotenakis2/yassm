@@ -20,9 +20,9 @@ if [[ -x $QML_LINT ]]; then
 		-I . \
 		-I /usr/share/omarchy/shell \
 		-I /usr/lib/qt6/qml \
-		BarWidget.qml SettingsPanel.qml lib/SystemMetrics.qml
+		BarWidget.qml SettingsPanel.qml lib/SystemMetrics.qml lib/ThemePalette.qml
 elif command -v qmllint >/dev/null 2>&1; then
-	qmllint BarWidget.qml SettingsPanel.qml lib/SystemMetrics.qml
+	qmllint BarWidget.qml SettingsPanel.qml lib/SystemMetrics.qml lib/ThemePalette.qml
 else
 	echo "qmllint not found; skipping QML lint" >&2
 fi

@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -37,47 +39,50 @@ BarWidget {
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
-    // All module icons are astral-plane Nerd Font glyphs: one rendered glyph,
-    // two UTF-16 code units. The rest of each segment is ASCII. This keeps
-    // glyph counting allocation-free at each refresh.
     readonly property var segmentCache: {
         const metrics = Yassm.SystemMetrics;
         const segments = [];
 
         if (showCpu) {
-            const text = iconCpu + " " + pad(Math.round(metrics.cpuPercent)) + "%";
-            segments.push({ key: "cpu", text: text, glyphs: text.length - 1 });
+            const value = Math.round(metrics.cpuPercent);
+            const text = iconCpu + " " + pad(value) + "%";
+            segments.push({ key: "cpu", text: text, value: value, kind: "percent" });
         }
 
         if (showLoad) {
-            const text = iconLoad + " " + pad(Math.round(metrics.loadPercent)) + "%";
-            segments.push({ key: "load", text: text, glyphs: text.length - 1 });
+            const value = Math.round(metrics.loadPercent);
+            const text = iconLoad + " " + pad(value) + "%";
+            segments.push({ key: "load", text: text, value: value, kind: "percent" });
         }
 
         if (showGpu) {
-            const text = iconGpu + " " + pad(gpu === null ? null : Math.round(gpu)) + "%";
-            segments.push({ key: "gpu", text: text, glyphs: text.length - 1 });
+            const value = gpu === null ? null : Math.round(gpu);
+            const text = iconGpu + " " + pad(value) + "%";
+            segments.push({ key: "gpu", text: text, value: value, kind: "percent" });
         }
 
         if (showMemory) {
-            const text = iconMemory + " " + pad(Math.round(metrics.memoryPercent)) + "%";
-            segments.push({ key: "memory", text: text, glyphs: text.length - 1 });
+            const value = Math.round(metrics.memoryPercent);
+            const text = iconMemory + " " + pad(value) + "%";
+            segments.push({ key: "memory", text: text, value: value, kind: "percent" });
         }
 
         if (showSwap && metrics.hasSwap) {
-            const text = iconSwap + " " + pad(Math.round(metrics.swapPercent)) + "%";
-            segments.push({ key: "swap", text: text, glyphs: text.length - 1 });
+            const value = Math.round(metrics.swapPercent);
+            const text = iconSwap + " " + pad(value) + "%";
+            segments.push({ key: "swap", text: text, value: value, kind: "percent" });
         }
 
         if (showDisk) {
-            const text = iconDisk + " " + pad(Math.round(metrics.diskPercent)) + "%";
-            segments.push({ key: "disk", text: text, glyphs: text.length - 1 });
+            const value = Math.round(metrics.diskPercent);
+            const text = iconDisk + " " + pad(value) + "%";
+            segments.push({ key: "disk", text: text, value: value, kind: "percent" });
         }
 
         if (showTemp) {
-            const text = iconTemp + " "
-                + pad(metrics.hasTemperature ? Math.round(metrics.temperatureC) : null) + "°C";
-            segments.push({ key: "temp", text: text, glyphs: text.length - 1 });
+            const value = metrics.hasTemperature ? Math.round(metrics.temperatureC) : null;
+            const text = iconTemp + " " + pad(value) + "°C";
+            segments.push({ key: "temp", text: text, value: value, kind: "temp" });
         }
 
         return segments;
@@ -93,6 +98,73 @@ BarWidget {
         return segments.map(function(segment) {
             return segment.text;
         }).join("  ");
+    }
+
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "temp"]
+
+    readonly property var segmentMap: {
+        const map = {};
+        const segments = segmentCache;
+
+        for (let i = 0; i < segments.length; i++) {
+            map[segments[i].key] = segments[i];
+        }
+
+        return map;
+    }
+
+    function segmentText(key) {
+        return segmentMap[key] ? segmentMap[key].text : "";
+    }
+
+    function segmentVisible(key) {
+        return segmentMap[key] !== undefined;
+    }
+
+    function segmentColor(key) {
+        const segment = segmentMap[key];
+
+        if (!segment || segment.value === null || !Number.isFinite(segment.value)) {
+            return button.foreground;
+        }
+
+        if (segment.kind === "temp") {
+            return temperatureColor(segment.value);
+        }
+
+        return percentColor(segment.value);
+    }
+
+    function percentColor(value) {
+        if (!Number.isFinite(value) || value < 10) {
+            return button.foreground;
+        }
+
+        if (value < 33) {
+            return Yassm.ThemePalette.green;
+        }
+
+        if (value < 66) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return Yassm.ThemePalette.red;
+    }
+
+    function temperatureColor(value) {
+        if (!Number.isFinite(value) || value < 40) {
+            return button.foreground;
+        }
+
+        if (value < 50) {
+            return Yassm.ThemePalette.green;
+        }
+
+        if (value < 60) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return Yassm.ThemePalette.red;
     }
 
     function pad(value) {
@@ -256,43 +328,27 @@ BarWidget {
     }
 
     function segmentHitAt(x) {
-        const segments = segmentCache;
-        const labelWidth = button.labelWidth;
-
-        if (segments.length === 0 || labelWidth <= 0) {
+        if (!labelRow || labelRow.width <= 0) {
             return null;
         }
 
-        let textLength = 0;
-        for (let i = 0; i < segments.length; i++) {
-            textLength += segments[i].glyphs;
-        }
-        textLength += 2 * (segments.length - 1);
+        const origin = labelRow.mapToItem(button, 0, 0);
+        const localX = x - origin.x;
+        const children = labelRow.children;
 
-        // The bar font is monospace; mapping pixel x to a glyph index avoids
-        // maintaining one hover area per segment.
-        const charWidth = labelWidth / textLength;
-        const startX = (button.width - labelWidth) / 2;
-        const localX = x - startX;
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
 
-        if (localX < 0 || localX > labelWidth) {
-            return null;
-        }
-
-        const charIndex = Math.floor(localX / charWidth);
-        let offset = 0;
-
-        for (let i = 0; i < segments.length; i++) {
-            const glyphs = segments[i].glyphs;
-
-            if (charIndex >= offset && charIndex < offset + glyphs) {
-                return {
-                    key: segments[i].key,
-                    center: startX + (offset + glyphs / 2) * charWidth
-                };
+            if (!child.visible || child.width <= 0) {
+                continue;
             }
 
-            offset += glyphs + 2;
+            if (localX >= child.x && localX <= child.x + child.width) {
+                return {
+                    key: child.metricKey,
+                    center: origin.x + child.x + child.width / 2
+                };
+            }
         }
 
         return null;
@@ -516,10 +572,53 @@ BarWidget {
         anchors.fill: parent
         bar: root.bar
         text: root.displayText
+        labelVisible: false
         tooltipText: ""
 
         onPressed: function(buttonCode) {
             root.togglePanel();
+        }
+
+        TextMetrics {
+            id: separatorMetrics
+
+            font.family: button.fontFamily
+            font.pixelSize: button.fontSize
+            text: "  "
+        }
+
+        Row {
+            id: labelRow
+
+            anchors.centerIn: parent
+            spacing: separatorMetrics.advanceWidth
+
+            Repeater {
+                model: root.segmentOrder
+
+                Text {
+                    required property string modelData
+
+                    readonly property string metricKey: modelData
+
+                    visible: root.segmentVisible(metricKey)
+                    text: root.segmentText(metricKey)
+                    color: root.segmentColor(metricKey)
+                    font.family: button.fontFamily
+                    font.pixelSize: button.fontSize
+                    renderType: Text.NativeRendering
+                }
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            visible: root.segmentCache.length === 0
+            text: "No module enabled"
+            color: button.foreground
+            font.family: button.fontFamily
+            font.pixelSize: button.fontSize
+            renderType: Text.NativeRendering
         }
 
         // HoverHandler.point does not update on every cursor move on this
