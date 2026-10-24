@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.2
+Version 1.4.3
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -126,11 +126,13 @@ Uniquement sur la barre, pas dans les tooltips :
 - valeurs en pourcentage : normale sous 10 %, verte sous 33 %, orange sous
   66 %, rouge au-delà ;
 - températures : normale sous 40 °C, verte sous 50 °C, orange sous 60 °C,
-  rouge au-delà.
+  rouge au-delà ;
+- batterie : rouge à 10 % ou moins, orange de 11 à 20 %, normale au-dessus,
+  verte pendant la charge.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
 courant. Les icônes conservent toujours la couleur normale de la barre ; seules
-les valeurs sont colorées. La batterie reste en couleur normale de la barre.
+les valeurs sont colorées.
 
 ## Icône de batterie
 

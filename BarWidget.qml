@@ -213,7 +213,7 @@ BarWidget {
         }
 
         if (segment.kind === "battery") {
-            return button.foreground;
+            return batteryColor(segment.value);
         }
 
         if (segment.kind === "temp") {
@@ -237,6 +237,28 @@ BarWidget {
         }
 
         return Yassm.ThemePalette.red;
+    }
+
+    function batteryColor(value) {
+        // Charging always reads as green, even on a low battery: the pack is
+        // being replenished, not about to die.
+        if (Yassm.SystemMetrics.batteryStatus === "Charging") {
+            return Yassm.ThemePalette.green;
+        }
+
+        if (!Number.isFinite(value)) {
+            return button.foreground;
+        }
+
+        if (value <= 10) {
+            return Yassm.ThemePalette.red;
+        }
+
+        if (value <= 20) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return button.foreground;
     }
 
     function temperatureColor(value) {
