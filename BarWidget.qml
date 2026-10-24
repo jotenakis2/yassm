@@ -650,19 +650,11 @@ BarWidget {
         }
 
         if (key === "swap") {
-            const totalKb = metrics.swapTotalKb;
-            const usedKb = metrics.swapUsedKb;
-            const percent = totalKb > 0 ? Math.round(100 * usedKb / totalKb) : 0;
-            const lines = [
-                formatKibAsGib(usedKb) + " / " + formatKibAsGib(totalKb)
-                    + " (" + percent + "%)"
-            ];
-
             const devices = metrics.swapDevices || [];
+            const lines = [];
 
             if (devices.length > 0) {
                 let nameWidth = 0;
-                let typeWidth = 0;
                 let usedWidth = 0;
                 let totalWidth = 0;
                 const rows = [];
@@ -671,33 +663,40 @@ BarWidget {
                     const device = devices[i];
                     const usedText = formatKibAsGib(device.usedKb);
                     const totalText = formatKibAsGib(device.sizeKb);
+                    const percent = device.sizeKb > 0
+                        ? Math.round(100 * device.usedKb / device.sizeKb)
+                        : 0;
 
                     nameWidth = Math.max(nameWidth, device.name.length);
-                    typeWidth = Math.max(typeWidth, device.type.length);
                     usedWidth = Math.max(usedWidth, usedText.length);
                     totalWidth = Math.max(totalWidth, totalText.length);
                     rows.push({
                         name: device.name,
-                        type: device.type,
                         used: usedText,
                         total: totalText,
-                        priority: device.priority
+                        percent: String(percent).padStart(3, " ")
                     });
                 }
-
-                lines.push("");
 
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
 
                     lines.push(
                         row.name.padEnd(nameWidth)
-                            + "  " + row.type.padEnd(typeWidth)
                             + "  " + row.used.padStart(usedWidth)
                             + " / " + row.total.padStart(totalWidth)
-                            + "  prio " + row.priority
+                            + " (" + row.percent + "%)"
                     );
                 }
+            } else {
+                const percent = metrics.swapTotalKb > 0
+                    ? Math.round(100 * metrics.swapUsedKb / metrics.swapTotalKb)
+                    : 0;
+
+                lines.push(
+                    formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb)
+                        + " (" + percent + "%)"
+                );
             }
 
             const zramLines = [];
@@ -730,6 +729,7 @@ BarWidget {
             }
 
             if (zramLines.length > 0) {
+                lines.push("");
                 lines.push("ZRAM");
 
                 for (let i = 0; i < zramLines.length; i++) {
@@ -742,6 +742,7 @@ BarWidget {
                     ? metrics.zswapOriginalKb / metrics.zswapCompressedKb
                     : 0;
 
+                lines.push("");
                 lines.push("ZSWAP");
                 lines.push(
                     formatKib(metrics.zswapCompressedKb)

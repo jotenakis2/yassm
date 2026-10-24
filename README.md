@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.8.0
+Version 1.8.1
 
 **English** | [Français](README-fr.md)
 
@@ -106,11 +106,11 @@ Hovering a module shows a contextual tooltip:
 
 - **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
 - **RAM**: used memory / total memory in GiB;
-- **Swap**: used swap / total swap in GiB. Each swap device is listed (name,
-  type, used/total, priority), including zram. A `ZRAM` section shows, for each
-  zram device, the compressed size, original size, ratio and RAM used. When
-  ZSWAP is in use, a `ZSWAP` block shows the compressed size, the original size
-  and the compression ratio;
+- **Swap**: each swap device is listed with used / total and its percentage,
+  including zram. A `ZRAM` section shows, for each zram device, the compressed
+  size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
+  block shows the compressed size, the original size and the compression
+  ratio;
 - **Disk**: one line per detected real filesystem, in GiB, with the
   percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
   are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
