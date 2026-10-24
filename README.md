@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.1.0
+Version 1.1.1
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, GPU et usage
 de la partition racine.
@@ -27,7 +27,8 @@ Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
   `/proc` et un seul `findmnt` pour toutes les instances de barre, y compris
   sur plusieurs écrans.
 - `SettingsPanel.qml` est chargé à la demande au premier clic, puis conservé
-  pour les ouvertures suivantes.
+  pour les ouvertures suivantes. Ses contrôles sont des `Toggle`/`ToggleSwitch`
+  Omarchy, avec les polices, couleurs et espacements du thème courant.
 - Le GPU reste géré par le widget, conformément à la limite actuelle du
   support Asahi.
 

@@ -14,8 +14,8 @@ PanelWindow {
     property real panelX: 0
     property real panelY: 0
 
-    readonly property int panelWidth: 280
-    readonly property int panelPadding: 16
+    readonly property int panelWidth: Style.space(300)
+    readonly property int panelPadding: Style.space(16)
     readonly property int barVisibleOffset: {
         const bar = hostWidget ? hostWidget.bar : null;
         const barSize = bar ? Number(bar.barSize) : 0;
@@ -85,7 +85,7 @@ PanelWindow {
 
             anchors.fill: parent
             anchors.margins: root.panelPadding
-            spacing: 4
+            spacing: Style.space(4)
 
             Label {
                 Layout.fillWidth: true
@@ -94,38 +94,27 @@ PanelWindow {
                 font.family: Style.font.family
                 font.pixelSize: Style.font.subtitle
 
-                bottomPadding: 8
+                bottomPadding: Style.space(8)
             }
 
             Repeater {
                 model: root.moduleSettings
 
-                CheckBox {
+                Toggle {
                     id: control
 
                     required property var modelData
 
                     Layout.fillWidth: true
-                    text: control.modelData.label
-                    font.family: Style.font.family
-                    font.pixelSize: Style.font.body
-                    palette.windowText: ShellColor.popups.text
-
+                    label: control.modelData.label
+                    fontFamily: Style.font.family
+                    titleSize: Style.font.body
+                    foreground: ShellColor.popups.text
                     checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, true) : false
 
                     onClicked: {
                         if (root.hostWidget) {
-                            root.hostWidget.updateSetting(control.modelData.key, checked);
-                        }
-                    }
-
-                    Connections {
-                        target: root.hostWidget
-
-                        function onSettingsChanged() {
-                            control.checked = root.hostWidget
-                                ? root.hostWidget.setting(control.modelData.key, true)
-                                : false;
+                            root.hostWidget.updateSetting(control.modelData.key, !control.checked);
                         }
                     }
                 }
