@@ -299,6 +299,11 @@ BarWidget {
     }
 
     function updateTooltip() {
+        if (root.opened) {
+            root.hideSegmentTooltip();
+            return;
+        }
+
         if (!root.bar || !tooltipTracker.containsMouse) {
             root.hideSegmentTooltip();
             return;
@@ -385,6 +390,7 @@ BarWidget {
             return;
         }
 
+        root.hideSegmentTooltip();
         settingsLoader.active = true;
 
         const panel = settingsLoader.item;

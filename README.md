@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.2.4
+Version 1.2.5
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
