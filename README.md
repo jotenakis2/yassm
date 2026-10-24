@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.1
+Version 1.5.2
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -163,6 +163,33 @@ et la puissance sont fournis par les propriétés UPower : aucun script ni timer
 n'est nécessaire, la barre réagit aux signaux D-Bus. UPower interroge le
 matériel environ toutes les 30 s, donc le pourcentage peut évoluer à ce
 rythme.
+
+## Performances
+
+Mesure sur deux fenêtres de 5 minutes, machine au repos, écran de veille et
+verrouillage désactivés (Apple M2 Pro, Omarchy 4.0.3, Quickshell 0.3.2) :
+
+| Scénario | CPU `quickshell` (1 cœur) | RSS moyen | Réveils / 5 min |
+| --- | --- | --- | --- |
+| Sans YASSM | 2,413 % | 736 Mio | 27 385 |
+| Avec YASSM | 2,447 % | 750 Mio | 29 575 |
+| **Surcoût** | **+0,034 point** | **+14 Mio** | **+2 190** |
+
+Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
+
+| Script | CPU / exécution | Fréquence | CPU / minute |
+| --- | --- | --- | --- |
+| `temperature.sh` | 11,0 ms | 6×/min | 66 ms |
+| `findmnt` | 2,0 ms | 4×/min | 8 ms |
+| Batterie (UPower) | 0 | événementiel | 0 |
+
+**Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
+résident.** YASSM est donc très performant : pas de polling batterie (UPower
+est événementiel), une seule série de mesures partagée entre toutes les barres,
+et les tooltips ne lancent aucun processus.
+
+`findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
+(`/media/NAS` ici) ; cette attente ne consomme pas de CPU.
 
 ## Vérifications
 
