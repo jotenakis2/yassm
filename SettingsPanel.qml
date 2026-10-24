@@ -90,7 +90,8 @@ PanelWindow {
 
             Label {
                 Layout.fillWidth: true
-                text: "YASSM"
+                text: "Yet Another Simple System Monitoring - Settings"
+                wrapMode: Text.WordWrap
                 palette.windowText: ShellColor.popups.text
                 font.family: Style.font.family
                 font.pixelSize: Style.font.subtitle
