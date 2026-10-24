@@ -213,9 +213,8 @@ BarWidget {
             return tooltipBlock(
                 "TEMPERATURE",
                 metrics.hasTemperature
-                    ? metrics.temperatureC.toFixed(1) + " °C\n"
-                        + (metrics.temperatureSensor || "unknown sensor") + "\n"
-                        + "highest of " + metrics.temperatureSensors + " sensors"
+                    ? metrics.temperatureC.toFixed(1) + " °C ("
+                        + (metrics.temperatureSensor || "unknown sensor") + ")"
                     : "Unavailable"
             );
         }

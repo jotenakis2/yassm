@@ -39,7 +39,6 @@ sensor_label() {
 }
 
 max=0
-count=0
 max_path=""
 
 for path in /sys/class/thermal/thermal_zone*/temp /sys/class/hwmon/hwmon*/temp*_input; do
@@ -54,7 +53,6 @@ for path in /sys/class/thermal/thermal_zone*/temp /sys/class/hwmon/hwmon*/temp*_
 			max=$raw
 			max_path=$path
 		fi
-		count=$((count + 1))
 	fi
 done
 
@@ -64,4 +62,4 @@ else
 	label=""
 fi
 
-printf '%d %d\t%s\n' "$max" "$count" "$label"
+printf '%d\t%s\n' "$max" "$label"

@@ -39,7 +39,6 @@ Singleton {
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
     property real temperatureC: 0
-    property int temperatureSensors: 0
     property string temperatureSensor: ""
 
     function applyCpuTimes(content) {
@@ -307,25 +306,22 @@ Singleton {
                 const tab = data.indexOf("\t");
                 const head = (tab >= 0 ? data.slice(0, tab) : data).trim().split(/\s+/);
 
-                if (head.length < 2) {
+                if (head.length < 1) {
                     return;
                 }
 
                 const raw = Number(head[0]);
-                const count = Number(head[1]);
                 const sensor = tab >= 0 ? data.slice(tab + 1).trim() : "";
 
                 if (!Number.isFinite(raw) || !(raw > 0)) {
                     metrics.hasTemperature = false;
                     metrics.temperatureC = 0;
-                    metrics.temperatureSensors = 0;
                     metrics.temperatureSensor = "";
                     return;
                 }
 
                 metrics.hasTemperature = true;
                 metrics.temperatureC = raw / 1000;
-                metrics.temperatureSensors = Number.isFinite(count) ? count : 0;
                 metrics.temperatureSensor = sensor;
             }
         }
