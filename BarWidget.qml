@@ -110,11 +110,34 @@ BarWidget {
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
+    function tooltipBlock(title, body) {
+        const lines = body.split("\n");
+        let width = title.length;
+
+        for (let i = 0; i < lines.length; i++) {
+            width = Math.max(width, lines[i].length);
+        }
+
+        function padLine(line) {
+            // NBSP padding keeps every line the same width, so the bar's
+            // centered Text lines up their left edges in a monospace font.
+            return line.padEnd(width, "\u00A0");
+        }
+
+        const padded = [padLine(title.toUpperCase())];
+
+        for (let i = 0; i < lines.length; i++) {
+            padded.push(padLine(lines[i]));
+        }
+
+        return padded.join("\n");
+    }
+
     function mountsTooltip() {
         const mounts = Yassm.SystemMetrics.mounts;
 
         if (!mounts || mounts.length === 0) {
-            return "Disk\nUnavailable";
+            return tooltipBlock("DISK", "Unavailable");
         }
 
         let targetWidth = 0;
@@ -143,25 +166,27 @@ BarWidget {
                 + " " + row.percent.padStart(percentWidth);
         });
 
-        return "Disk\n" + lines.join("\n");
+        return tooltipBlock("DISK", lines.join("\n"));
     }
 
     function moduleTooltip(key) {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "load") {
-            return "Load average (1/5/15 min)\n"
-                + " 1 min " + formatLoad(metrics.load1) + "\n"
-                + " 5 min " + formatLoad(metrics.load5) + "\n"
-                + "15 min " + formatLoad(metrics.load15);
+            return tooltipBlock(
+                "LOAD AVERAGE (1/5/15 MIN)",
+                " 1 min " + formatLoad(metrics.load1) + "\n"
+                    + " 5 min " + formatLoad(metrics.load5) + "\n"
+                    + "15 min " + formatLoad(metrics.load15)
+            );
         }
 
         if (key === "memory") {
-            return "RAM\n" + formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb);
+            return tooltipBlock("RAM", formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb));
         }
 
         if (key === "swap") {
-            return "Swap\n" + formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb);
+            return tooltipBlock("SWAP", formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb));
         }
 
         if (key === "disk") {
@@ -169,11 +194,11 @@ BarWidget {
         }
 
         if (key === "cpu") {
-            return "CPU\n" + Math.round(metrics.cpuPercent) + "%";
+            return tooltipBlock("CPU", Math.round(metrics.cpuPercent) + "%");
         }
 
         if (key === "gpu") {
-            return "GPU\n" + (gpu === null ? "Unavailable" : Math.round(gpu) + "%");
+            return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
         return "";
