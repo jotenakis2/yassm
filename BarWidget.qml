@@ -260,6 +260,10 @@ BarWidget {
             return button.foreground;
         }
 
+        if (key !== "battery") {
+            return button.foreground;
+        }
+
         const metrics = Yassm.SystemMetrics;
 
         // On mains power, charging or held at a charge threshold, the battery
@@ -341,7 +345,7 @@ BarWidget {
     function networkColor(value) {
         const kib = Number(value);
 
-        if (!Number.isFinite(kib) || kib < 1) {
+        if (!Number.isFinite(kib) || kib < 10) {
             return button.foreground;
         }
 
