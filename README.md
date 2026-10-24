@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.8.2
+Version 1.9.0
 
 **English** | [Français](README-fr.md)
 
@@ -105,7 +105,8 @@ All keys are optional; missing values default to `true`.
 Hovering a module shows a contextual tooltip:
 
 - **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
-- **RAM**: used memory / total memory in GiB;
+- **RAM**: used memory / total memory in GiB. On hover, a single `ps` sample
+  adds the top 5 processes by RSS, grouped by name;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
@@ -128,10 +129,13 @@ Hovering a module shows a contextual tooltip:
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
-- **CPU** and **GPU**: current percentage.
+- **CPU**: current percentage. On hover, a single `ps` sample adds the top 5
+  processes by CPU (average since process start), grouped by name;
+- **GPU**: current percentage.
 
-Tooltips do not launch any extra process: values are formatted on demand, only
-while hovering, and segment updates do not recreate visual objects.
+Network, swap, disk and temperature tooltips launch no process. CPU and RAM
+tooltips launch a single `ps` when they open and do not refresh it while the
+hover lasts.
 
 ## Bar colors
 
@@ -209,6 +213,9 @@ process.
 
 The swap detail adds one `/proc/swaps` read per second and one `mm_stat` read
 per zram device every 10 s, also without spawning a process.
+
+The CPU and RAM tooltips launch a single `ps` (~15 ms) when they open, never in
+the background.
 
 ## Checks
 

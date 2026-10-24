@@ -19,6 +19,9 @@ BarWidget {
 
     property string hoveredSegment: ""
 
+    property var processCpu: []
+    property var processMemory: []
+
     property string gpuKind: "none"
     property string gpuPath: ""
     property string gpuCommand: ""
@@ -533,6 +536,90 @@ BarWidget {
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
+    function aggregateProcesses(content) {
+        const byName = {};
+        const lines = content.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const parts = lines[i].trim().split(/\s+/);
+
+            if (parts.length < 2) {
+                continue;
+            }
+
+            const value = Number(parts[parts.length - 1]);
+
+            if (!Number.isFinite(value) || value <= 0) {
+                continue;
+            }
+
+            const name = parts.slice(0, -1).join(" ") || "?";
+
+            if (name === "ps") {
+                continue;
+            }
+
+            byName[name] = (byName[name] || 0) + value;
+        }
+
+        const entries = Object.keys(byName).map(function(name) {
+            return { name: name, value: byName[name] };
+        });
+
+        entries.sort(function(left, right) {
+            return right.value - left.value;
+        });
+
+        return entries.slice(0, 5);
+    }
+
+    function applyProcessCpu(content) {
+        root.processCpu = aggregateProcesses(content);
+    }
+
+    function applyProcessMemory(content) {
+        root.processMemory = aggregateProcesses(content);
+    }
+
+    function appendProcessRows(lines, entries, memory) {
+        let nameWidth = 0;
+        let valueWidth = 0;
+        const rows = [];
+
+        for (let i = 0; i < entries.length; i++) {
+            const name = entries[i].name;
+            const value = memory
+                ? formatKib(entries[i].value)
+                : entries[i].value.toFixed(1) + "%";
+
+            nameWidth = Math.max(nameWidth, name.length);
+            valueWidth = Math.max(valueWidth, value.length);
+            rows.push({ name: name, value: value });
+        }
+
+        for (let i = 0; i < rows.length; i++) {
+            lines.push(rows[i].name.padEnd(nameWidth) + "  " + rows[i].value.padStart(valueWidth));
+        }
+    }
+
+    function refreshProcessTooltip(key) {
+        if (!root.bar || !tooltipTracker.containsMouse) {
+            return;
+        }
+
+        if (root.hoveredSegment !== key) {
+            return;
+        }
+
+        const hit = root.segmentHitAt(tooltipTracker.mouseX);
+
+        if (!hit || hit.key !== key) {
+            return;
+        }
+
+        root.bar.showTooltip(tooltipAnchor, root.moduleTooltip(key));
+    }
+
     function batteryStateLabel(status) {
         switch (status) {
         case "Charging":
@@ -646,7 +733,16 @@ BarWidget {
         }
 
         if (key === "memory") {
-            return tooltipBlock("RAM", formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb));
+            const lines = [
+                formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb)
+            ];
+
+            if (root.processMemory.length > 0) {
+                lines.push("");
+                appendProcessRows(lines, root.processMemory, true);
+            }
+
+            return tooltipBlock("RAM", lines.join("\n"));
         }
 
         if (key === "swap") {
@@ -760,7 +856,14 @@ BarWidget {
         }
 
         if (key === "cpu") {
-            return tooltipBlock("CPU", Math.round(metrics.cpuPercent) + "%");
+            const lines = [Math.round(metrics.cpuPercent) + "%"];
+
+            if (root.processCpu.length > 0) {
+                lines.push("");
+                appendProcessRows(lines, root.processCpu, false);
+            }
+
+            return tooltipBlock("CPU", lines.join("\n"));
         }
 
         if (key === "gpu") {
@@ -879,6 +982,21 @@ BarWidget {
         }
 
         root.hoveredSegment = hit.key;
+
+        if (hit.key === "cpu") {
+            root.processCpu = [];
+
+            if (!cpuTopProcess.running) {
+                cpuTopProcess.running = true;
+            }
+        } else if (hit.key === "memory") {
+            root.processMemory = [];
+
+            if (!memoryTopProcess.running) {
+                memoryTopProcess.running = true;
+            }
+        }
+
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
         tooltipAnchor.tooltipHovered = true;
         root.bar.showTooltip(tooltipAnchor, root.moduleTooltip(hit.key));
@@ -1053,6 +1171,38 @@ BarWidget {
             onRead: data => {
                 const value = Number(data.trim());
                 root.gpu = Number.isNaN(value) ? null : value;
+            }
+        }
+    }
+
+    Process {
+        id: cpuTopProcess
+
+        command: ["ps", "-eo", "comm=,%cpu=", "--sort=-%cpu"]
+
+        stdout: StdioCollector {
+            id: cpuTopOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                root.applyProcessCpu(cpuTopOutput.text);
+                root.refreshProcessTooltip("cpu");
+            }
+        }
+    }
+
+    Process {
+        id: memoryTopProcess
+
+        command: ["ps", "-eo", "comm=,rss=", "--sort=-rss"]
+
+        stdout: StdioCollector {
+            id: memoryTopOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                root.applyProcessMemory(memoryTopOutput.text);
+                root.refreshProcessTooltip("memory");
             }
         }
     }

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.8.2
+Version 1.9.0
 
 [English](README.md) | **Français**
 
@@ -106,7 +106,8 @@ Le survol d'un module affiche une infobulle contextuelle :
 
 - **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
   alignées ;
-- **RAM** : mémoire utilisée / mémoire totale en GiB ;
+- **RAM** : mémoire utilisée / mémoire totale en GiB. Au survol, un échantillon
+  unique de `ps` ajoute le top 5 des processus par RSS, regroupés par nom ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -129,11 +130,14 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
-- **CPU** et **GPU** : pourcentage courant.
+- **CPU** : pourcentage courant. Au survol, un échantillon unique de `ps`
+  ajoute le top 5 des processus par CPU (moyenne depuis leur lancement),
+  regroupés par nom ;
+- **GPU** : pourcentage courant.
 
-Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
-formatées à la demande, uniquement pendant le survol, et la mise à jour de
-segment se fait sans recréer d'objets visuels.
+Les infobulles réseau, swap, disque et température ne lancent aucun processus.
+Les tooltips CPU et RAM lancent un seul `ps` à l'ouverture, puis ne le
+rafraîchissent pas tant que le survol dure.
 
 ## Couleurs de la barre
 
@@ -212,6 +216,9 @@ et `/proc/net/route`, ~8 µs), dans le timer existant et sans processus.
 
 Le détail swap ajoute une lecture de `/proc/swaps` par seconde et une lecture
 de `mm_stat` par périphérique zram toutes les 10 s, également sans processus.
+
+Les tooltips CPU et RAM lancent un seul `ps` (~15 ms) à l'ouverture, jamais en
+arrière-plan.
 
 ## Vérifications
 
