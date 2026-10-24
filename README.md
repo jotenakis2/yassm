@@ -73,6 +73,21 @@ Le panneau expose aussi les fonctions IPC `open`, `close`, `toggle`, `show` et
 `hide` sur la cible `io.github.jotenakis2.yassm`, et respecte le contrat
 `open()`/`close()`/`opened` utilisé par la barre Omarchy.
 
+## Tooltips
+
+Le survol d'un module affiche une infobulle contextuelle :
+
+- **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
+  alignées ;
+- **RAM** : mémoire utilisée / mémoire totale en GiB ;
+- **Swap** : swap utilisé / swap total en GiB ;
+- **Disk** : espace utilisé / espace total de `/` en GiB, avec le pourcentage ;
+- **CPU** et **GPU** : pourcentage courant.
+
+Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
+formatées à la demande, uniquement pendant le survol, et la mise à jour de
+segment se fait sans recréer d'objets visuels.
+
 ## GPU
 
 Sources utilisées :

@@ -20,11 +20,22 @@ BarWidget {
 
     property real cpu: 0
     property real memory: 0
+    property real memoryTotalKb: 0
+    property real memoryUsedKb: 0
     property var swap: null
-    property real load: 0
+    property real swapTotalKb: 0
+    property real swapUsedKb: 0
+    property real load1: 0
+    property real load5: 0
+    property real load15: 0
     property int nproc: 1
+    readonly property real load: Math.max(0, Math.min(100, 100 * load1 / nproc))
     property real disk: 0
+    property real diskUsedKb: 0
+    property real diskTotalKb: 0
     property var gpu: null
+
+    property string hoveredSegment: ""
 
     property string gpuKind: "none"
     property string gpuPath: ""
@@ -47,38 +58,55 @@ BarWidget {
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
 
-    readonly property string displayText: {
-        const parts = [];
+    // All module icons are astral-plane Nerd Font glyphs: one rendered glyph,
+    // two UTF-16 code units. The rest of each segment is ASCII. This keeps
+    // glyph counting allocation-free at each refresh.
+    readonly property var segmentCache: {
+        const segments = [];
 
         if (showCpu) {
-            parts.push(iconCpu + " " + pad(Math.round(cpu)) + "%");
+            const text = iconCpu + " " + pad(Math.round(cpu)) + "%";
+            segments.push({ key: "cpu", text: text, glyphs: text.length - 1 });
         }
 
         if (showLoad) {
-            parts.push(iconLoad + " " + pad(Math.round(load)) + "%");
+            const text = iconLoad + " " + pad(Math.round(load)) + "%";
+            segments.push({ key: "load", text: text, glyphs: text.length - 1 });
         }
 
         if (showGpu) {
-            parts.push(iconGpu + " " + pad(gpu === null ? null : Math.round(gpu)) + "%");
+            const text = iconGpu + " " + pad(gpu === null ? null : Math.round(gpu)) + "%";
+            segments.push({ key: "gpu", text: text, glyphs: text.length - 1 });
         }
 
         if (showMemory) {
-            parts.push(iconMemory + " " + pad(Math.round(memory)) + "%");
+            const text = iconMemory + " " + pad(Math.round(memory)) + "%";
+            segments.push({ key: "memory", text: text, glyphs: text.length - 1 });
         }
 
         if (showSwap && swap !== null) {
-            parts.push(iconSwap + " " + pad(Math.round(swap)) + "%");
+            const text = iconSwap + " " + pad(Math.round(swap)) + "%";
+            segments.push({ key: "swap", text: text, glyphs: text.length - 1 });
         }
 
         if (showDisk) {
-            parts.push(iconDisk + " " + pad(Math.round(disk)) + "%");
+            const text = iconDisk + " " + pad(Math.round(disk)) + "%";
+            segments.push({ key: "disk", text: text, glyphs: text.length - 1 });
         }
 
-        if (parts.length === 0) {
+        return segments;
+    }
+
+    readonly property string displayText: {
+        const segments = segmentCache;
+
+        if (segments.length === 0) {
             return "No module enabled";
         }
 
-        return parts.join("  ");
+        return segments.map(function(segment) {
+            return segment.text;
+        }).join("  ");
     }
 
     function pad(value) {
@@ -87,6 +115,128 @@ BarWidget {
         }
 
         return String(value).padStart(3, " ");
+    }
+
+    function formatLoad(value) {
+        const number = Number(value);
+        return (Number.isFinite(number) ? number : 0).toFixed(2).padStart(6, " ");
+    }
+
+    function formatGib(kilobytes) {
+        const value = Number(kilobytes) / 1048576;
+        return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
+    }
+
+    function moduleTooltip(key) {
+        if (key === "load") {
+            return "Load average (1/5/15 min)\n"
+                + " 1 min " + formatLoad(load1) + "\n"
+                + " 5 min " + formatLoad(load5) + "\n"
+                + "15 min " + formatLoad(load15);
+        }
+
+        if (key === "memory") {
+            return "RAM\n" + formatGib(memoryUsedKb) + " / " + formatGib(memoryTotalKb);
+        }
+
+        if (key === "swap") {
+            return "Swap\n" + formatGib(swapUsedKb) + " / " + formatGib(swapTotalKb);
+        }
+
+        if (key === "disk") {
+            return "Disk /\n" + formatGib(diskUsedKb) + " / " + formatGib(diskTotalKb)
+                + " (" + Math.round(disk) + "%)";
+        }
+
+        if (key === "cpu") {
+            return "CPU\n" + Math.round(cpu) + "%";
+        }
+
+        if (key === "gpu") {
+            return "GPU\n" + (gpu === null ? "Unavailable" : Math.round(gpu) + "%");
+        }
+
+        return "";
+    }
+
+    function segmentHitAt(x) {
+        const segments = segmentCache;
+        const labelWidth = button.labelWidth;
+
+        if (segments.length === 0 || labelWidth <= 0) {
+            return null;
+        }
+
+        let textLength = 0;
+        for (let i = 0; i < segments.length; i++) {
+            textLength += segments[i].glyphs;
+        }
+        textLength += 2 * (segments.length - 1);
+
+        // The bar font is monospace; mapping pixel x to a glyph index avoids
+        // maintaining one hover area per segment.
+        const charWidth = labelWidth / textLength;
+        const startX = (button.width - labelWidth) / 2;
+        const localX = x - startX;
+
+        if (localX < 0 || localX > labelWidth) {
+            return null;
+        }
+
+        const charIndex = Math.floor(localX / charWidth);
+        let offset = 0;
+
+        for (let i = 0; i < segments.length; i++) {
+            const glyphs = segments[i].glyphs;
+
+            if (charIndex >= offset && charIndex < offset + glyphs) {
+                return {
+                    key: segments[i].key,
+                    center: startX + (offset + glyphs / 2) * charWidth
+                };
+            }
+
+            offset += glyphs + 2;
+        }
+
+        return null;
+    }
+
+    function updateTooltip() {
+        if (!root.bar || !tooltipTracker.containsMouse) {
+            root.hideSegmentTooltip();
+            return;
+        }
+
+        const hit = root.segmentHitAt(tooltipTracker.mouseX);
+
+        if (!hit) {
+            root.hideSegmentTooltip();
+            return;
+        }
+
+        if (root.hoveredSegment === hit.key) {
+            return;
+        }
+
+        root.hoveredSegment = hit.key;
+        tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
+        tooltipAnchor.tooltipHovered = true;
+        root.bar.showTooltip(tooltipAnchor, root.moduleTooltip(hit.key));
+    }
+
+    function refreshTooltip() {
+        root.hoveredSegment = "";
+        root.updateTooltip();
+    }
+
+    function hideSegmentTooltip() {
+        root.hoveredSegment = "";
+        tooltipAnchor.tooltipHovered = false;
+
+        if (root.bar) {
+            root.bar.hideTooltip(tooltipAnchor);
+        }
     }
 
     function updateSetting(name, value) {
@@ -177,6 +327,11 @@ BarWidget {
             }
         }
 
+        root.memoryTotalKb = total;
+        root.memoryUsedKb = Math.max(0, total - available);
+        root.swapTotalKb = swapTotal;
+        root.swapUsedKb = Math.max(0, swapTotal - swapFree);
+
         if (total > 0) {
             root.memory = Math.max(0, Math.min(100, 100 * (total - available) / total));
         }
@@ -191,8 +346,10 @@ BarWidget {
     function updateLoad() {
         procLoadAvg.reload();
 
-        const load1 = Number(procLoadAvg.text().split(" ")[0]);
-        root.load = Math.max(0, Math.min(100, 100 * load1 / root.nproc));
+        const fields = procLoadAvg.text().trim().split(/\s+/);
+        root.load1 = Number(fields[0]) || 0;
+        root.load5 = Number(fields[1]) || 0;
+        root.load15 = Number(fields[2]) || 0;
     }
 
     function updateGpuFromSysfs() {
@@ -341,8 +498,15 @@ BarWidget {
 
         stdout: SplitParser {
             onRead: data => {
-                const value = Number(data.trim());
-                root.disk = Number.isNaN(value) ? 0 : value;
+                const fields = data.trim().split(/\s+/);
+
+                if (fields.length < 3) {
+                    return;
+                }
+
+                root.diskUsedKb = Number(fields[0]) || 0;
+                root.diskTotalKb = Number(fields[1]) || 0;
+                root.disk = Number(fields[2]) || 0;
             }
         }
     }
@@ -390,9 +554,35 @@ BarWidget {
         anchors.fill: parent
         bar: root.bar
         text: root.displayText
+        tooltipText: ""
 
         onPressed: function(buttonCode) {
             root.togglePanel();
+        }
+
+        // HoverHandler.point does not update on every cursor move on this
+        // Quickshell version. A passive MouseArea does, and NoButton keeps
+        // clicks flowing to WidgetButton.
+        MouseArea {
+            id: tooltipTracker
+
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.NoButton
+            cursorShape: Qt.PointingHandCursor
+
+            onEntered: Qt.callLater(root.refreshTooltip)
+            onMouseXChanged: root.updateTooltip()
+            onExited: root.hideSegmentTooltip()
+        }
+
+        Item {
+            id: tooltipAnchor
+
+            width: 1
+            height: button.height
+            visible: true
+            property bool tooltipHovered: false
         }
     }
 
