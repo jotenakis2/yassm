@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.UPower
 
 // One sampler for the whole shell. Every bar widget instance reads this
 // singleton, so multi-monitor setups don't duplicate /proc reads or findmnt
@@ -45,15 +46,53 @@ Singleton {
     property real temperatureC: 0
     property var temperatures: []
 
-    readonly property string batteryScriptPath: Qt.resolvedUrl("../battery.sh").toString().replace("file://", "")
-    readonly property int batteryIntervalMs: 10000
-    property bool hasBattery: false
-    property real batteryPercent: 0
-    property string batteryStatus: ""
-    property real batteryTimeToEmpty: 0
-    property real batteryTimeToFull: 0
-    property real batteryPowerW: 0
-    property bool batteryPlugged: false
+    readonly property var batteryDevice: {
+        const display = UPower.displayDevice;
+
+        if (display && display.isPresent && display.isLaptopBattery) {
+            return display;
+        }
+
+        const devices = UPower.devices ? UPower.devices.values : [];
+
+        for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+
+            if (device && device.isPresent && device.isLaptopBattery) {
+                return device;
+            }
+        }
+
+        return null;
+    }
+    readonly property bool hasBattery: batteryDevice !== null
+    readonly property real batteryPercent: hasBattery
+        ? Math.max(0, Math.min(100, 100 * (Number(batteryDevice.percentage) || 0)))
+        : 0
+    readonly property string batteryStatus: hasBattery ? batteryStateName(batteryDevice.state) : ""
+    readonly property real batteryTimeToEmpty: hasBattery ? (Number(batteryDevice.timeToEmpty) || 0) : 0
+    readonly property real batteryTimeToFull: hasBattery ? (Number(batteryDevice.timeToFull) || 0) : 0
+    readonly property real batteryPowerW: hasBattery ? (Number(batteryDevice.changeRate) || 0) : 0
+    readonly property bool batteryPlugged: hasBattery && !UPower.onBattery
+
+    function batteryStateName(state) {
+        switch (state) {
+        case UPowerDeviceState.Charging:
+            return "Charging";
+        case UPowerDeviceState.Discharging:
+            return "Discharging";
+        case UPowerDeviceState.FullyCharged:
+            return "Full";
+        case UPowerDeviceState.Empty:
+            return "Empty";
+        case UPowerDeviceState.PendingCharge:
+            return "Pending charge";
+        case UPowerDeviceState.PendingDischarge:
+            return "Pending discharge";
+        default:
+            return "Unknown";
+        }
+    }
 
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
@@ -294,42 +333,6 @@ Singleton {
         metrics.temperatureC = entries.length > 0 ? entries[0].celsius : 0;
     }
 
-    function applyBattery(content) {
-        const line = content.trim();
-
-        if (line === "") {
-            metrics.hasBattery = false;
-            metrics.batteryPercent = 0;
-            metrics.batteryStatus = "";
-            metrics.batteryTimeToEmpty = 0;
-            metrics.batteryTimeToFull = 0;
-            metrics.batteryPowerW = 0;
-            metrics.batteryPlugged = false;
-            return;
-        }
-
-        const fields = line.split("\t");
-
-        if (fields.length < 6) {
-            return;
-        }
-
-        const percent = Number(fields[0]);
-
-        if (!Number.isFinite(percent)) {
-            metrics.hasBattery = false;
-            return;
-        }
-
-        metrics.hasBattery = true;
-        metrics.batteryPercent = Math.max(0, Math.min(100, percent));
-        metrics.batteryStatus = fields[1] || "";
-        metrics.batteryTimeToEmpty = Number(fields[2]) || 0;
-        metrics.batteryTimeToFull = Number(fields[3]) || 0;
-        metrics.batteryPowerW = (Number(fields[4]) || 0) / 1000000;
-        metrics.batteryPlugged = fields[5] === "1";
-    }
-
     FileView {
         id: procStat
         path: "/proc/stat"
@@ -423,33 +426,6 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: temperatureProcess.running = true
-    }
-
-    Process {
-        id: batteryProcess
-
-        command: ["bash", metrics.batteryScriptPath]
-
-        stdout: StdioCollector {
-            id: batteryOutput
-            waitForEnd: true
-            onStreamFinished: metrics.applyBattery(batteryOutput.text)
-        }
-
-        onExited: function(exitCode, exitStatus) {
-            if (exitCode !== 0) {
-                console.warn("yassm: battery scan exited with", exitCode);
-            }
-        }
-    }
-
-    Timer {
-        interval: metrics.batteryIntervalMs
-        running: true
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: batteryProcess.running = true
     }
 
     Timer {

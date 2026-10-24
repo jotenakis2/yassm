@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.8
+Version 1.5.0
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -17,7 +17,7 @@ Dépôt prévu : <https://github.com/jotenakis2/yassm>
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
-| Batterie | `/sys/class/power_supply` (partagé) | 10 s |
+| Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
 | Température | toutes les températures normales, triées | 10 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
@@ -27,7 +27,7 @@ Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
 
 - `lib/SystemMetrics.qml` est un singleton partagé : un seul échantillonneur
   `/proc` et un seul `findmnt` pour toutes les instances de barre, y compris
-  sur plusieurs écrans.
+  sur plusieurs écrans. La batterie vient directement d'UPower (événementiel).
 - `SettingsPanel.qml` est chargé à la demande au premier clic, puis conservé
   pour les ouvertures suivantes. Ses contrôles sont des `Toggle`/`ToggleSwitch`
   Omarchy, avec les polices, couleurs et espacements du thème courant.
@@ -114,7 +114,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
-  puissance instantanée quand le noyau la fournit, avec la direction
+  puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
 - **CPU** et **GPU** : pourcentage courant.
 
@@ -156,9 +156,12 @@ d'alimentation :
 - **branchée sans charge** (pleine ou seuil de charge atteint) : batterie
   suivie d'une prise.
 
-L'état « branché » vient du champ `online` de l'alimentation secteur dans
-`/sys/class/power_supply`, ce qui distingue une machine simplement branchée
-d'une machine en train de charger.
+L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
+simplement branchée d'une machine en train de charger. Le pourcentage, l'état
+et la puissance sont fournis par les propriétés UPower : aucun script ni timer
+n'est nécessaire, la barre réagit aux signaux D-Bus. UPower interroge le
+matériel environ toutes les 30 s, donc le pourcentage peut évoluer à ce
+rythme.
 
 ## Vérifications
 
@@ -166,7 +169,7 @@ d'une machine en train de charger.
 ./check.sh
 ```
 
-Le script valide le manifeste, vérifie la syntaxe du script GPU, lance
+Le script valide le manifeste, vérifie la syntaxe des scripts shell, lance
 `shellcheck` si disponible et `qmllint` (Qt 6) sur les fichiers QML.
 
 ## GPU

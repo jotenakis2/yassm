@@ -371,6 +371,20 @@ BarWidget {
         }
     }
 
+    function batteryPowerDirection() {
+        const status = Yassm.SystemMetrics.batteryStatus;
+
+        if (status === "Discharging") {
+            return "draw";
+        }
+
+        if (status === "Charging") {
+            return "charge";
+        }
+
+        return Yassm.SystemMetrics.batteryPlugged ? "charge" : "draw";
+    }
+
     function formatDuration(seconds) {
         const totalMinutes = Math.max(0, Math.round(Number(seconds) / 60));
         const hours = Math.floor(totalMinutes / 60);
@@ -506,8 +520,8 @@ BarWidget {
 
             if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
                 lines.push(
-                    Math.abs(metrics.batteryPowerW).toFixed(1) + " W"
-                        + (metrics.batteryPowerW < 0 ? " draw" : " charge")
+                    Math.abs(metrics.batteryPowerW).toFixed(1) + " W "
+                        + batteryPowerDirection()
                 );
             }
 
