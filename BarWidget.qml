@@ -441,7 +441,10 @@ BarWidget {
             }
 
             if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
-                lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W");
+                lines.push(
+                    Math.abs(metrics.batteryPowerW).toFixed(1) + " W"
+                        + (metrics.batteryPowerW < 0 ? " draw" : " charge")
+                );
             }
 
             return tooltipBlock("BATTERY", lines.join("\n"));

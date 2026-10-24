@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.1
+Version 1.4.2
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -111,7 +111,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
-  puissance instantanée quand le noyau les fournit ;
+  puissance instantanée quand le noyau la fournit, avec la direction
+  (`draw` en décharge, `charge` en charge) ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont
