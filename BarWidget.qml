@@ -113,6 +113,20 @@ BarWidget {
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
+    function formatKib(kilobytes) {
+        const value = Number(kilobytes);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "0 MiB";
+        }
+
+        if (value >= 1048576) {
+            return (value / 1048576).toFixed(2) + " GiB";
+        }
+
+        return (value / 1024).toFixed(1) + " MiB";
+    }
+
     function formatBytesAsGib(bytes) {
         const value = Number(bytes) / 1073741824;
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
@@ -194,7 +208,21 @@ BarWidget {
         }
 
         if (key === "swap") {
-            return tooltipBlock("SWAP", formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb));
+            const swapLine = formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb);
+
+            if (!metrics.hasZswap) {
+                return tooltipBlock("SWAP", swapLine);
+            }
+
+            const ratio = metrics.zswapCompressedKb > 0
+                ? metrics.zswapOriginalKb / metrics.zswapCompressedKb
+                : 0;
+            const zswapLine = formatKib(metrics.zswapCompressedKb)
+                + " compressed -> " + formatKib(metrics.zswapOriginalKb)
+                + " original"
+                + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
+
+            return tooltipBlock("SWAP", swapLine + "\nZSWAP\n" + zswapLine);
         }
 
         if (key === "disk") {

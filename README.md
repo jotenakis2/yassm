@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.2.3
+Version 1.2.4
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -96,7 +96,9 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
   alignées ;
 - **RAM** : mémoire utilisée / mémoire totale en GiB ;
-- **Swap** : swap utilisé / swap total en GiB ;
+- **Swap** : swap utilisé / swap total en GiB. Si ZSWAP est utilisé, un bloc
+  `ZSWAP` affiche la taille compressée, la taille originale et le ratio de
+  compression ;
 - **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
   pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
   etc.) sont ignorés. Les points de montage qui partagent le même

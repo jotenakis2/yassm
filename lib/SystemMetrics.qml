@@ -27,6 +27,10 @@ Singleton {
     property real swapTotalKb: 0
     property real swapUsedKb: 0
 
+    property bool hasZswap: false
+    property real zswapCompressedKb: 0
+    property real zswapOriginalKb: 0
+
     property real load1: 0
     property real load5: 0
     property real load15: 0
@@ -78,6 +82,8 @@ Singleton {
         let available = 0;
         let swapTotal = 0;
         let swapFree = 0;
+        let zswapCompressed = 0;
+        let zswapOriginal = 0;
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].startsWith("MemTotal:")) {
@@ -88,6 +94,10 @@ Singleton {
                 swapTotal = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("SwapFree:")) {
                 swapFree = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Zswap:")) {
+                zswapCompressed = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Zswapped:")) {
+                zswapOriginal = Number(lines[i].split(/\s+/)[1]);
             }
         }
 
@@ -110,6 +120,10 @@ Singleton {
             metrics.swapUsedKb = 0;
             metrics.swapPercent = 0;
         }
+
+        metrics.zswapCompressedKb = zswapCompressed;
+        metrics.zswapOriginalKb = zswapOriginal;
+        metrics.hasZswap = zswapCompressed > 0 || zswapOriginal > 0;
     }
 
     function applyLoad(content) {
