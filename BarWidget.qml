@@ -122,7 +122,7 @@ BarWidget {
         }
 
         if (showLoad) {
-            segments.push(makeSegment("load", iconLoad, Math.round(metrics.loadPercent), "%", "percent"));
+            segments.push(makeSegment("load", iconLoad, Math.round(metrics.loadPercent), "%", "load"));
         }
 
         if (showGpu) {
@@ -226,6 +226,10 @@ BarWidget {
             return batteryColor(segment.value);
         }
 
+        if (segment.kind === "load") {
+            return loadColor(segment.value);
+        }
+
         if (segment.kind === "temp") {
             return temperatureColor(segment.value);
         }
@@ -247,6 +251,28 @@ BarWidget {
         }
 
         return Yassm.ThemePalette.red;
+    }
+
+    function loadColor(value) {
+        // Load is not a utilization ratio: it is the run-queue length, so it
+        // may legitimately exceed 100 % on an oversubscribed machine.
+        if (!Number.isFinite(value)) {
+            return button.foreground;
+        }
+
+        if (value > 90) {
+            return Yassm.ThemePalette.red;
+        }
+
+        if (value > 50) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        if (value > 10) {
+            return Yassm.ThemePalette.green;
+        }
+
+        return button.foreground;
     }
 
     function batteryColor(value) {

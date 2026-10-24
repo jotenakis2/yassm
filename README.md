@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.4
+Version 1.4.5
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -14,7 +14,7 @@ Dépôt prévu : <https://github.com/jotenakis2/yassm>
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
 | Swap | `/proc/meminfo` | 1 s |
-| Load average | `/proc/loadavg`, normalisée par le nombre de CPU | 1 s |
+| Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
 | Batterie | `/sys/class/power_supply` (partagé) | 10 s |
@@ -125,6 +125,9 @@ Uniquement sur la barre, pas dans les tooltips :
 
 - valeurs en pourcentage : normale sous 10 %, verte sous 33 %, orange sous
   66 %, rouge au-delà ;
+- charge système (load) : normale jusqu'à 10 %, verte au-delà, orange au-delà
+  de 50 %, rouge au-delà de 90 % ; la valeur n'est pas plafonnée et peut donc
+  dépasser 100 % lorsque la file d'attente dépasse le nombre de CPU ;
 - températures : normale sous 40 °C, verte sous 50 °C, orange sous 60 °C,
   rouge au-delà ;
 - batterie : rouge sous 10 %, orange sous 20 %, verte sous 50 %, normale

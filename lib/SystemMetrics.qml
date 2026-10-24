@@ -34,7 +34,7 @@ Singleton {
     property real load1: 0
     property real load5: 0
     property real load15: 0
-    readonly property real loadPercent: Math.max(0, Math.min(100, 100 * load1 / nproc))
+    readonly property real loadPercent: Math.max(0, 100 * load1 / nproc)
 
     property real diskPercent: 0
     property var mounts: []
