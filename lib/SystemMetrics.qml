@@ -43,6 +43,8 @@ Singleton {
     property string networkInterface: ""
     property real networkRxKib: 0
     property real networkTxKib: 0
+    property real networkRxSessionKb: 0
+    property real networkTxSessionKb: 0
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
 
@@ -215,6 +217,8 @@ Singleton {
         metrics.networkPrevious = null;
         metrics.networkRxKib = 0;
         metrics.networkTxKib = 0;
+        metrics.networkRxSessionKb = 0;
+        metrics.networkTxSessionKb = 0;
     }
 
     function applyNetDev(content) {
@@ -258,8 +262,12 @@ Singleton {
                 && rx >= previous.rx
                 && tx >= previous.tx) {
             const seconds = (now - previous.time) / 1000;
-            metrics.networkRxKib = (rx - previous.rx) / 1024 / seconds;
-            metrics.networkTxKib = (tx - previous.tx) / 1024 / seconds;
+            const rxDelta = (rx - previous.rx) / 1024;
+            const txDelta = (tx - previous.tx) / 1024;
+            metrics.networkRxKib = rxDelta / seconds;
+            metrics.networkTxKib = txDelta / seconds;
+            metrics.networkRxSessionKb += rxDelta;
+            metrics.networkTxSessionKb += txDelta;
         } else {
             metrics.networkRxKib = 0;
             metrics.networkTxKib = 0;

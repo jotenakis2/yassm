@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.6.2
+Version 1.6.3
 
 [English](README.md) | **Français**
 
@@ -115,10 +115,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   FUSE) et `/run/user`. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
-- **Réseau** : interface active, débit descendant (↓) et montant (↑). Les deux
-  débits sont colorés indépendamment. Les totaux absolus ne sont pas affichés :
-  sur certains pilotes, le compteur d'interface peut être aberrant ; les
-  débits, calculés par différence, restent fiables ;
+- **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
+  total de la session (deltas depuis le démarrage du shell, remis à zéro à
+  chaque redémarrage). Les deux débits sont colorés indépendamment. Le
+  compteur absolu du pilote n'est pas utilisé, car il peut être aberrant ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. L'icône suit le niveau : flocon sous 40 °C,

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.6.2
+Version 1.6.3
 
 **English** | [Français](README-fr.md)
 
@@ -114,10 +114,10 @@ Hovering a module shows a contextual tooltip:
   `/run/user`. Mount points that share the same device/source are
   deduplicated: on a btrfs root with subvolumes, `/home` and `/var/log`
   therefore do not appear separately from `/`;
-- **Network**: active interface, download (↓) and upload (↑) rates. Both rates
-  are colored independently. Absolute totals are not shown: on some drivers
-  the interface counter can be bogus; rates, computed from deltas, remain
-  reliable;
+- **Network**: active interface, download (↓) and upload (↑) rates, plus the
+  session total (deltas since the shell started, reset on restart). Both rates
+  are colored independently. The driver's absolute counter is not used because
+  it can be bogus;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   The icon follows the level: snowflake below 40 °C, thermometer from 40 to
