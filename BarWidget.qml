@@ -9,7 +9,7 @@ import QtQuick.Layouts
 BarWidget {
     id: root
 
-    moduleName: "io.github.vous.system-monitor"
+    moduleName: "io.github.jotenakis2.yassm"
 
     readonly property string detectScriptPath: Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", "")
     readonly property string diskScriptPath: Qt.resolvedUrl("disk.sh").toString().replace("file://", "")
@@ -317,7 +317,7 @@ BarWidget {
                     root.gpuPath = detected.path;
                     root.gpuCommand = detected.command;
                 } catch (error) {
-                    console.warn("system-monitor: GPU detection failed:", data, error);
+                    console.warn("yassm: GPU detection failed:", data, error);
                 }
             }
         }
@@ -456,7 +456,7 @@ BarWidget {
 
                 Label {
                     Layout.fillWidth: true
-                    text: "My System monitor"
+                    text: "YASSM"
                     palette.windowText: ShellColor.popups.text
                     font.family: settingsWindow.panelFont.family
                     font.pointSize: settingsWindow.panelFont.pointSize + 1

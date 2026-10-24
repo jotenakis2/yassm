@@ -1,7 +1,9 @@
-# Omarchy System Monitor
+# YASSM — Yet Another Simple System Monitor
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, GPU et usage
 de la partition racine.
+
+Dépôt prévu : <https://github.com/jotenakis2/yassm>
 
 ## Modules
 
@@ -27,10 +29,10 @@ Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
 ## Installation
 
 ```bash
-unzip omarchy-system-monitor.zip -d "$HOME/.config/omarchy/plugins/"
-omarchy plugin validate "$HOME/.config/omarchy/plugins/io.github.vous.system-monitor"
+unzip yassm.zip -d "$HOME/.config/omarchy/plugins/"
+omarchy plugin validate "$HOME/.config/omarchy/plugins/io.github.jotenakis2.yassm"
 omarchy-shell shell rescanPlugins
-omarchy plugin enable io.github.vous.system-monitor --section left
+omarchy plugin enable io.github.jotenakis2.yassm --section left
 ```
 
 Le `chmod +x` n'est pas nécessaire : les scripts sont lancés via `bash`.
@@ -49,13 +51,13 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Disk (`/`)
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
-l'entrée de barre du widget. Il n'y a plus de fichier de configuration séparé.
+l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
 
 Exemple d'entrée :
 
 ```json
 {
-  "id": "io.github.vous.system-monitor",
+  "id": "io.github.jotenakis2.yassm",
   "showCpu": true,
   "showMemory": true,
   "showSwap": true,
@@ -68,40 +70,57 @@ Exemple d'entrée :
 Toutes les clés sont optionnelles ; les valeurs absentes valent `true`.
 
 Le panneau expose aussi les fonctions IPC `open`, `close`, `toggle`, `show` et
-`hide` sur la cible `io.github.vous.system-monitor`, et respecte le contrat
+`hide` sur la cible `io.github.jotenakis2.yassm`, et respecte le contrat
 `open()`/`close()`/`opened` utilisé par la barre Omarchy.
 
-## Sources GPU
+## GPU
 
-1. `nvidia-smi`
-2. `/sys/class/drm/*/device/gpu_busy_percent`
-3. Aucune source : affichage de `GPU --%`
+Sources utilisées :
 
-Il n'existe pas d'outil `asahi-gpu-top` : sur Apple Silicon/Asahi, le widget
-utilise `gpu_busy_percent` si le noyau l'expose, sinon il affiche `--%`.
+1. `nvidia-smi` ;
+2. `/sys/class/drm/*/device/gpu_busy_percent` ;
+3. sinon `GPU --%`.
+
+### Apple Silicon / Asahi
+
+Sur une machine Apple Silicon avec le pilote `asahi` (AGX), aucune mesure
+d'occupation GPU n'est actuellement exposée par le système :
+
+- pas de `gpu_busy_percent` ;
+- pas de `devfreq` ni de fréquence GPU exposée ;
+- pas de statistiques `drm-engine-*` dans `/proc/<pid>/fdinfo` ;
+- pas de capteur de puissance GPU dédié ;
+- le pilote n'expose pas de compteur d'utilisation via debugfs/sysfs.
+
+Les outils existants ne couvrent pas ce cas : `btop` est compilé sans support
+GPU, `nvtop` ne supporte Apple que sous macOS (Metal), et `asitop`/`macmon`
+reposent sur `powermetrics`, également macOS uniquement. YASSM affiche donc
+`GPU --%` sur cette configuration, plutôt qu'une valeur inventée.
 
 ## Mise à jour
 
-Le dépôt local est initialisé avec Git, mais aucun remote n'est configuré.
-`omarchy plugin update` ne fonctionne qu'avec un checkout Git possédant un
-remote : ajoutez-en un, puis utilisez `git pull`, `omarchy plugin validate` et
-`omarchy-shell shell rescanPlugins`. Sans remote, remplacez les fichiers
-manuellement puis relancez la validation et le scan.
+Le dépôt local est initialisé avec Git. Le remote prévu est :
 
-Aucun fichier de configuration à migrer : les réglages sont dans
-`shell.json`.
+```text
+https://github.com/jotenakis2/yassm.git
+```
+
+Une fois le dépôt GitHub créé et poussé, `omarchy plugin update` pourra
+fonctionner ; sinon, remplacez les fichiers manuellement puis relancez
+`omarchy plugin validate` et `omarchy-shell shell rescanPlugins`.
+
+Aucun fichier de configuration à migrer : les réglages sont dans `shell.json`.
 
 ## Désinstallation
 
 ```bash
-omarchy plugin disable io.github.vous.system-monitor
-omarchy plugin remove io.github.vous.system-monitor
+omarchy plugin disable io.github.jotenakis2.yassm
+omarchy plugin remove io.github.jotenakis2.yassm
 ```
 
 `disable` retire le widget de la barre en conservant les fichiers. Comme le
-dossier est désormais un dépôt Git, `remove` supprime le dossier (il ne le
-sauvegarde plus automatiquement) : pensez à pousser le dépôt ou à conserver
-l'archive ZIP avant.
+dossier est un dépôt Git, `remove` supprime le dossier : pensez à pousser le
+dépôt ou à conserver une archive avant.
 
 ## Licence
 
