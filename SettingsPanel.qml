@@ -155,7 +155,7 @@ PanelWindow {
                     Layout.alignment: Qt.AlignVCenter
                     bar: root.hostWidget ? root.hostWidget.bar : null
                     minimum: 0
-                    maximum: 4
+                    maximum: 5
                     step: 1
                     integer: true
                     value: root.hostWidget ? root.hostWidget.moduleSpacing : 2

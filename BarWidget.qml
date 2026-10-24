@@ -36,7 +36,7 @@ BarWidget {
 
     readonly property int moduleSpacing: {
         const value = Math.round(Number(setting("spacing", 2)));
-        return Number.isFinite(value) ? Math.max(0, Math.min(4, value)) : 2;
+        return Number.isFinite(value) ? Math.max(0, Math.min(5, value)) : 2;
     }
 
     // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.

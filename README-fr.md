@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.2
+Version 1.7.3
 
 [English](README.md) | **Français**
 
@@ -71,9 +71,9 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Temperature
 - Battery
 - Bar colors (seuils colorés et batterie bleue sur secteur)
-- Spacing (espacement entre modules, 0–4 espaces ; 2 par défaut)
+- Spacing (espacement entre modules, 0–5 espaces ; 2 par défaut)
 
-Le curseur **Spacing** règle l'espacement entre les modules de 0 à 4 espaces
+Le curseur **Spacing** règle l'espacement entre les modules de 0 à 5 espaces
 (2 par défaut). Il s'applique aussi entre les débits ↓ et ↑ du module réseau.
 À 0, un écart minimal de 2 px est conservé pour éviter tout chevauchement.
 
