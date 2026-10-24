@@ -462,23 +462,27 @@ BarWidget {
         return Math.round(value * 1024) + " B";
     }
 
-    // Compact, fixed-width rate for the bar (KiB/s).
+    // Compact 4-character rate for the bar (KiB/s): "  0K" … "999K", "1.0M",
+    // " 10M", "1.0G". Keeping the value field at 3 characters makes a network
+    // half as wide as a percentage module.
     function formatRate(kib) {
         const value = Number(kib);
 
         if (!Number.isFinite(value) || value <= 0) {
-            return "   0K";
+            return "  0K";
         }
 
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(1).padStart(4, " ") + "G";
+        if (value >= 1000 * 1024) {
+            const gib = value / 1048576;
+            return (gib >= 10 ? gib.toFixed(0) : gib.toFixed(1)).padStart(3, " ") + "G";
         }
 
-        if (value >= 1024) {
-            return (value / 1024).toFixed(1).padStart(4, " ") + "M";
+        if (value >= 1000) {
+            const mib = value / 1024;
+            return (mib >= 10 ? mib.toFixed(0) : mib.toFixed(1)).padStart(3, " ") + "M";
         }
 
-        return String(Math.round(value)).padStart(4, " ") + "K";
+        return String(Math.round(value)).padStart(3, " ") + "K";
     }
 
     function formatRateLong(kib) {
