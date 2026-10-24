@@ -14,6 +14,7 @@ Singleton {
     property color green: "#76946a"
     property color orange: "#c17158"
     property color red: "#a55555"
+    property color blue: "#7aa2f7"
 
     function apply(raw) {
         const values = {};
@@ -30,6 +31,7 @@ Singleton {
         root.green = values.green || values.bright_green || values.color2 || "#76946a";
         root.orange = values.orange || values.yellow || values.bright_yellow || values.color3 || "#c17158";
         root.red = values.red || values.bright_red || values.color1 || ShellColor.urgent;
+        root.blue = values.blue || values.bright_blue || values.color4 || "#7aa2f7";
     }
 
     FileView {

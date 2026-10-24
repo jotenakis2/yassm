@@ -205,6 +205,16 @@ BarWidget {
         return segmentMap[key] !== undefined;
     }
 
+    function segmentIconColor(key) {
+        // The battery bolt turns theme-blue while charging; every other icon
+        // keeps the normal bar foreground.
+        if (key === "battery" && Yassm.SystemMetrics.batteryStatus === "Charging") {
+            return Yassm.ThemePalette.blue;
+        }
+
+        return button.foreground;
+    }
+
     function segmentColor(key) {
         const segment = segmentMap[key];
 
@@ -240,22 +250,20 @@ BarWidget {
     }
 
     function batteryColor(value) {
-        // Charging always reads as green, even on a low battery: the pack is
-        // being replenished, not about to die.
-        if (Yassm.SystemMetrics.batteryStatus === "Charging") {
-            return Yassm.ThemePalette.green;
-        }
-
         if (!Number.isFinite(value)) {
             return button.foreground;
         }
 
-        if (value <= 10) {
+        if (value < 10) {
             return Yassm.ThemePalette.red;
         }
 
-        if (value <= 20) {
+        if (value < 20) {
             return Yassm.ThemePalette.orange;
+        }
+
+        if (value < 50) {
+            return Yassm.ThemePalette.green;
         }
 
         return button.foreground;
@@ -769,7 +777,7 @@ BarWidget {
 
                     Text {
                         text: root.segmentIcon(metricKey)
-                        color: button.foreground
+                        color: root.segmentIconColor(metricKey)
                         font.family: button.fontFamily
                         font.pixelSize: button.fontSize
                         renderType: Text.NativeRendering
