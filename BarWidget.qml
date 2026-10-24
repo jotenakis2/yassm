@@ -25,6 +25,7 @@ BarWidget {
     property bool showMemory: setting("showMemory", true)
     property bool showSwap: setting("showSwap", true)
     property bool showGpu: setting("showGpu", true)
+    property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
     property bool showDisk: setting("showDisk", true)
 
@@ -32,6 +33,7 @@ BarWidget {
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
+    readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
@@ -55,6 +57,12 @@ BarWidget {
         if (showGpu) {
             const text = iconGpu + " " + pad(gpu === null ? null : Math.round(gpu)) + "%";
             segments.push({ key: "gpu", text: text, glyphs: text.length - 1 });
+        }
+
+        if (showTemp) {
+            const text = iconTemp + " "
+                + pad(metrics.hasTemperature ? Math.round(metrics.temperatureC) : null) + "°C";
+            segments.push({ key: "temp", text: text, glyphs: text.length - 1 });
         }
 
         if (showMemory) {
@@ -201,6 +209,16 @@ BarWidget {
             return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
+        if (key === "temp") {
+            return tooltipBlock(
+                "TEMPERATURE",
+                metrics.hasTemperature
+                    ? metrics.temperatureC.toFixed(1) + " °C\n"
+                        + "highest of " + metrics.temperatureSensors + " sensors"
+                    : "Unavailable"
+            );
+        }
+
         return "";
     }
 
@@ -301,6 +319,7 @@ BarWidget {
         entry.showMemory = root.showMemory;
         entry.showSwap = root.showSwap;
         entry.showGpu = root.showGpu;
+        entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
         entry[name] = value;

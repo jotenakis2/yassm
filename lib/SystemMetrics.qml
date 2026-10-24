@@ -35,6 +35,12 @@ Singleton {
     property real diskPercent: 0
     property var mounts: []
 
+    readonly property string temperatureScriptPath: Qt.resolvedUrl("../temperature.sh").toString().replace("file://", "")
+    readonly property int temperatureIntervalMs: 10000
+    property bool hasTemperature: false
+    property real temperatureC: 0
+    property int temperatureSensors: 0
+
     function applyCpuTimes(content) {
         const firstLine = content.split("\n")[0];
 
@@ -288,6 +294,51 @@ Singleton {
                 console.warn("yassm: findmnt exited with", exitCode);
             }
         }
+    }
+
+    Process {
+        id: temperatureProcess
+
+        command: ["bash", metrics.temperatureScriptPath]
+
+        stdout: SplitParser {
+            onRead: data => {
+                const fields = data.trim().split(/\s+/);
+
+                if (fields.length < 2) {
+                    return;
+                }
+
+                const raw = Number(fields[0]);
+                const count = Number(fields[1]);
+
+                if (!Number.isFinite(raw) || !(raw > 0)) {
+                    metrics.hasTemperature = false;
+                    metrics.temperatureC = 0;
+                    metrics.temperatureSensors = 0;
+                    return;
+                }
+
+                metrics.hasTemperature = true;
+                metrics.temperatureC = raw / 1000;
+                metrics.temperatureSensors = Number.isFinite(count) ? count : 0;
+            }
+        }
+
+        onExited: function(exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                console.warn("yassm: temperature scan exited with", exitCode);
+            }
+        }
+    }
+
+    Timer {
+        interval: metrics.temperatureIntervalMs
+        running: true
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: temperatureProcess.running = true
     }
 
     Timer {

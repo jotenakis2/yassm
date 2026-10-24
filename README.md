@@ -1,9 +1,9 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.1.1
+Version 1.2.0
 
-Widget de barre Omarchy affichant CPU, RAM, swap, charge système, GPU et usage
-de la partition racine.
+Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
+GPU et usage de la partition racine.
 
 Dépôt prévu : <https://github.com/jotenakis2/yassm>
 
@@ -15,6 +15,7 @@ Dépôt prévu : <https://github.com/jotenakis2/yassm>
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
 | Swap | `/proc/meminfo` | 1 s |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU | 1 s |
+| Température | max de `thermal_zone*/temp` et `hwmon*/temp*_input` | 10 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
 
@@ -59,6 +60,7 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - CPU
 - Load
 - GPU
+- Temperature
 - Memory
 - Swap
 - Disk (`/`)
@@ -75,6 +77,7 @@ Exemple d'entrée :
   "showMemory": true,
   "showSwap": true,
   "showGpu": true,
+  "showTemp": true,
   "showLoad": true,
   "showDisk": true
 }
@@ -99,6 +102,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   etc.) sont ignorés. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
+- **Temperature** : température maximale parmi tous les capteurs
+  `thermal_zone*/temp` et `hwmon*/temp*_input`, avec le nombre de capteurs
+  lus ;
 - **CPU** et **GPU** : pourcentage courant.
 
 Les infobulles ne lancent aucun processus supplémentaire : les valeurs sont

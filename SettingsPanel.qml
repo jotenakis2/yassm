@@ -32,6 +32,7 @@ PanelWindow {
         { key: "showCpu", label: "CPU" },
         { key: "showLoad", label: "Load" },
         { key: "showGpu", label: "GPU" },
+        { key: "showTemp", label: "Temperature" },
         { key: "showMemory", label: "Memory" },
         { key: "showSwap", label: "Swap" },
         { key: "showDisk", label: "Disk (root partition)" }

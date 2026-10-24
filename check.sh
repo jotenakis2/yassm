@@ -7,10 +7,10 @@ cd -- "$(dirname -- "$0")"
 
 omarchy plugin validate .
 
-bash -n detect-gpu.sh
+bash -n detect-gpu.sh temperature.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
-	shellcheck --severity=warning detect-gpu.sh
+	shellcheck --severity=warning detect-gpu.sh temperature.sh
 fi
 
 QML_LINT=/usr/lib/qt6/bin/qmllint
