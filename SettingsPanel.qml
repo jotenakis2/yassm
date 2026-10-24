@@ -14,7 +14,7 @@ PanelWindow {
     property real panelX: 0
     property real panelY: 0
 
-    readonly property int panelWidth: Style.space(300)
+    readonly property int panelWidth: Style.space(440)
     readonly property int panelPadding: Style.space(16)
     readonly property int barVisibleOffset: {
         const bar = hostWidget ? hostWidget.bar : null;
@@ -91,7 +91,7 @@ PanelWindow {
             Label {
                 Layout.fillWidth: true
                 text: "Yet Another Simple System Monitoring - Settings"
-                wrapMode: Text.WordWrap
+                wrapMode: Text.NoWrap
                 palette.windowText: ShellColor.popups.text
                 font.family: Style.font.family
                 font.pixelSize: Style.font.subtitle
@@ -108,6 +108,7 @@ PanelWindow {
                     required property var modelData
 
                     Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(40)
                     label: control.modelData.label
                     fontFamily: Style.font.family
                     titleSize: Style.font.body
