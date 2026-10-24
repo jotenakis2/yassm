@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.4
+Version 1.7.5
 
 **English** | [Français](README-fr.md)
 
@@ -99,10 +99,6 @@ Example entry:
 ```
 
 All keys are optional; missing values default to `true`.
-
-The panel also exposes the IPC functions `open`, `close`, `toggle`, `show` and
-`hide` on the `io.github.jotenakis2.yassm` target, and honors the
-`open()`/`close()`/`opened` contract used by the Omarchy bar.
 
 ## Tooltips
 
