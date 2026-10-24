@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.5.0
+Version 1.5.1
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -112,7 +112,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
-  barre affiche la plus élevée ;
+  barre affiche la plus élevée. L'icône suit le niveau : flocon sous 40 °C,
+  thermomètre de 40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;

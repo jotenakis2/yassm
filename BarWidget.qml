@@ -41,6 +41,9 @@ BarWidget {
     readonly property string iconBatteryEmpty: String.fromCodePoint(0xF008E)
     readonly property string iconBatteryPlug: String.fromCodePoint(0xF06A5)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
+    readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
+    readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
+    readonly property string iconTempHot: String.fromCodePoint(0xF0E01)
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
@@ -159,7 +162,7 @@ BarWidget {
         if (showTemp) {
             segments.push(makeSegment(
                 "temp",
-                iconTemp,
+                root.temperatureIcon(metrics.hasTemperature ? metrics.temperatureC : null),
                 metrics.hasTemperature ? Math.round(metrics.temperatureC) : null,
                 "°C",
                 "temp"
@@ -301,6 +304,32 @@ BarWidget {
         }
 
         return button.foreground;
+    }
+
+    function temperatureIcon(celsius) {
+        if (celsius === null || celsius === undefined) {
+            return iconTemp;
+        }
+
+        const value = Number(celsius);
+
+        if (!Number.isFinite(value)) {
+            return iconTemp;
+        }
+
+        if (value < 40) {
+            return iconTempCool;
+        }
+
+        if (value < 50) {
+            return iconTemp;
+        }
+
+        if (value < 60) {
+            return iconTempWarm;
+        }
+
+        return iconTempHot;
     }
 
     function temperatureColor(value) {
