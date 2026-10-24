@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.0
+Version 1.3.1
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -123,7 +123,8 @@ Uniquement sur la barre, pas dans les tooltips :
   rouge au-delà.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
-courant.
+courant. Les icônes conservent toujours la couleur normale de la barre ; seules
+les valeurs sont colorées.
 
 ## Vérifications
 

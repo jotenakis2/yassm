@@ -39,50 +39,54 @@ BarWidget {
     readonly property string iconLoad: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
+    function makeSegment(key, icon, value, suffix, kind) {
+        const valueText = pad(value) + suffix;
+        return {
+            key: key,
+            icon: icon,
+            valueText: valueText,
+            text: icon + " " + valueText,
+            value: value,
+            kind: kind
+        };
+    }
+
     readonly property var segmentCache: {
         const metrics = Yassm.SystemMetrics;
         const segments = [];
 
         if (showCpu) {
-            const value = Math.round(metrics.cpuPercent);
-            const text = iconCpu + " " + pad(value) + "%";
-            segments.push({ key: "cpu", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("cpu", iconCpu, Math.round(metrics.cpuPercent), "%", "percent"));
         }
 
         if (showLoad) {
-            const value = Math.round(metrics.loadPercent);
-            const text = iconLoad + " " + pad(value) + "%";
-            segments.push({ key: "load", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("load", iconLoad, Math.round(metrics.loadPercent), "%", "percent"));
         }
 
         if (showGpu) {
-            const value = gpu === null ? null : Math.round(gpu);
-            const text = iconGpu + " " + pad(value) + "%";
-            segments.push({ key: "gpu", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("gpu", iconGpu, gpu === null ? null : Math.round(gpu), "%", "percent"));
         }
 
         if (showMemory) {
-            const value = Math.round(metrics.memoryPercent);
-            const text = iconMemory + " " + pad(value) + "%";
-            segments.push({ key: "memory", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("memory", iconMemory, Math.round(metrics.memoryPercent), "%", "percent"));
         }
 
         if (showSwap && metrics.hasSwap) {
-            const value = Math.round(metrics.swapPercent);
-            const text = iconSwap + " " + pad(value) + "%";
-            segments.push({ key: "swap", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("swap", iconSwap, Math.round(metrics.swapPercent), "%", "percent"));
         }
 
         if (showDisk) {
-            const value = Math.round(metrics.diskPercent);
-            const text = iconDisk + " " + pad(value) + "%";
-            segments.push({ key: "disk", text: text, value: value, kind: "percent" });
+            segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "percent"));
         }
 
         if (showTemp) {
-            const value = metrics.hasTemperature ? Math.round(metrics.temperatureC) : null;
-            const text = iconTemp + " " + pad(value) + "°C";
-            segments.push({ key: "temp", text: text, value: value, kind: "temp" });
+            segments.push(makeSegment(
+                "temp",
+                iconTemp,
+                metrics.hasTemperature ? Math.round(metrics.temperatureC) : null,
+                "°C",
+                "temp"
+            ));
         }
 
         return segments;
@@ -113,8 +117,12 @@ BarWidget {
         return map;
     }
 
-    function segmentText(key) {
-        return segmentMap[key] ? segmentMap[key].text : "";
+    function segmentIcon(key) {
+        return segmentMap[key] ? segmentMap[key].icon : "";
+    }
+
+    function segmentValue(key) {
+        return segmentMap[key] ? segmentMap[key].valueText : "";
     }
 
     function segmentVisible(key) {
@@ -596,17 +604,28 @@ BarWidget {
             Repeater {
                 model: root.segmentOrder
 
-                Text {
+                Row {
                     required property string modelData
 
                     readonly property string metricKey: modelData
 
                     visible: root.segmentVisible(metricKey)
-                    text: root.segmentText(metricKey)
-                    color: root.segmentColor(metricKey)
-                    font.family: button.fontFamily
-                    font.pixelSize: button.fontSize
-                    renderType: Text.NativeRendering
+
+                    Text {
+                        text: root.segmentIcon(metricKey)
+                        color: button.foreground
+                        font.family: button.fontFamily
+                        font.pixelSize: button.fontSize
+                        renderType: Text.NativeRendering
+                    }
+
+                    Text {
+                        text: " " + root.segmentValue(metricKey)
+                        color: root.segmentColor(metricKey)
+                        font.family: button.fontFamily
+                        font.pixelSize: button.fontSize
+                        renderType: Text.NativeRendering
+                    }
                 }
             }
         }
