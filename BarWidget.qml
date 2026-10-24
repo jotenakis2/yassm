@@ -31,6 +31,7 @@ BarWidget {
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
     property bool showDisk: setting("showDisk", true)
+    property bool showColors: setting("showColors", true)
 
     readonly property string iconCpu: String.fromCodePoint(0xF0EE0)
     readonly property string iconMemory: String.fromCodePoint(0xF035B)
@@ -206,6 +207,10 @@ BarWidget {
     }
 
     function segmentIconColor(key) {
+        if (!root.showColors) {
+            return button.foreground;
+        }
+
         // The battery bolt turns theme-blue while charging; every other icon
         // keeps the normal bar foreground.
         if (key === "battery" && Yassm.SystemMetrics.batteryStatus === "Charging") {
@@ -216,6 +221,9 @@ BarWidget {
     }
 
     function segmentColor(key) {
+        if (!root.showColors) {
+            return button.foreground;
+        }
         const segment = segmentMap[key];
 
         if (!segment || segment.value === null || !Number.isFinite(segment.value)) {
@@ -614,6 +622,7 @@ BarWidget {
         entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
+        entry.showColors = root.showColors;
         entry[name] = value;
 
         root.settings = entry;

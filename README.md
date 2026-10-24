@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.5
+Version 1.4.6
 
 Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
 GPU et usage de la partition racine.
@@ -66,6 +66,7 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Disk (`/`)
 - Battery
 - Temperature
+- Bar colors (seuils colorés et icône de charge bleue)
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -82,7 +83,8 @@ Exemple d'entrée :
   "showBattery": true,
   "showTemp": true,
   "showLoad": true,
-  "showDisk": true
+  "showDisk": true,
+  "showColors": true
 }
 ```
 
@@ -121,22 +123,27 @@ segment se fait sans recréer d'objets visuels.
 
 ## Couleurs de la barre
 
-Uniquement sur la barre, pas dans les tooltips :
+Uniquement sur la barre, pas dans les tooltips. Les seuils s'appliquent à la
+valeur arrondie affichée :
 
-- valeurs en pourcentage : normale sous 10 %, verte sous 33 %, orange sous
-  66 %, rouge au-delà ;
-- charge système (load) : normale jusqu'à 10 %, verte au-delà, orange au-delà
-  de 50 %, rouge au-delà de 90 % ; la valeur n'est pas plafonnée et peut donc
-  dépasser 100 % lorsque la file d'attente dépasse le nombre de CPU ;
-- températures : normale sous 40 °C, verte sous 50 °C, orange sous 60 °C,
-  rouge au-delà ;
-- batterie : rouge sous 10 %, orange sous 20 %, verte sous 50 %, normale
-  au-dessus.
+| Module | Normale | Verte | Orange | Rouge |
+| --- | --- | --- | --- | --- |
+| CPU, RAM, Swap, Disque, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
+| Batterie | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
+| Températures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
+
+Le LOAD n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente
+est plus longue que le nombre de CPU. La batterie suit une logique inversée,
+plus la valeur est basse, plus la couleur est alarmante.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
 courant. Les icônes conservent la couleur normale de la barre, à une exception
-près : l'icône de batterie passe au bleu du thème pendant la charge. Seules les
-valeurs sont colorées par les seuils.
+près : l'icône de batterie passe au bleu du thème pendant la charge.
+
+Le toggle **Bar colors** du panneau désactive toutes ces couleurs : les valeurs
+et l'icône de charge reviennent à la couleur normale de la barre. Il correspond
+à `showColors` dans `shell.json` (activé par défaut).
 
 ## Icône de batterie
 

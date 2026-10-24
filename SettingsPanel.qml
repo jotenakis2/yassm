@@ -36,7 +36,8 @@ PanelWindow {
         { key: "showSwap", label: "Swap" },
         { key: "showDisk", label: "Disk (root partition)" },
         { key: "showBattery", label: "Battery" },
-        { key: "showTemp", label: "Temperature" }
+        { key: "showTemp", label: "Temperature" },
+        { key: "showColors", label: "Bar colors" }
     ]
 
     visible: false
