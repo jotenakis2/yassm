@@ -1,4 +1,5 @@
 pragma Singleton
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
@@ -31,6 +32,10 @@ Singleton {
     property bool hasZswap: false
     property real zswapCompressedKb: 0
     property real zswapOriginalKb: 0
+
+    property var swapDevices: []
+    property var zramDevices: []
+    property var zramStats: ({})
 
     property real load1: 0
     property real load5: 0
@@ -181,6 +186,76 @@ Singleton {
         metrics.zswapCompressedKb = zswapCompressed;
         metrics.zswapOriginalKb = zswapOriginal;
         metrics.hasZswap = zswapCompressed > 0 || zswapOriginal > 0;
+    }
+
+    function applySwapDevices(content) {
+        const lines = content.split("\n");
+        const devices = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (line === "") {
+                continue;
+            }
+
+            const fields = line.split(/\s+/);
+
+            if (fields.length < 5) {
+                continue;
+            }
+
+            const name = fields[0].replace(/\\040/g, " ").replace(/\\011/g, "\t");
+            const sizeKb = Number(fields[2]);
+            const usedKb = Number(fields[3]);
+
+            if (!(sizeKb > 0)) {
+                continue;
+            }
+
+            const zram = name.startsWith("/dev/zram");
+
+            devices.push({
+                name: name,
+                zram: zram,
+                type: zram ? "zram" : fields[1],
+                sizeKb: sizeKb,
+                usedKb: Number.isFinite(usedKb) ? usedKb : 0,
+                priority: fields[4]
+            });
+        }
+
+        metrics.swapDevices = devices;
+
+        const zramNames = [];
+
+        for (let i = 0; i < devices.length; i++) {
+            if (devices[i].zram) {
+                zramNames.push(devices[i].name.split("/").pop());
+            }
+        }
+
+        if (zramNames.join(",") !== metrics.zramDevices.join(",")) {
+            metrics.zramDevices = zramNames;
+        }
+    }
+
+    function applyZramStat(name, content) {
+        const fields = content.trim().split(/\s+/);
+
+        if (fields.length < 3) {
+            return;
+        }
+
+        const stats = Object.assign({}, metrics.zramStats);
+
+        stats[name] = {
+            originalKb: (Number(fields[0]) || 0) / 1024,
+            compressedKb: (Number(fields[1]) || 0) / 1024,
+            memKb: (Number(fields[2]) || 0) / 1024
+        };
+
+        metrics.zramStats = stats;
     }
 
     function applyLoad(content) {
@@ -458,6 +533,12 @@ Singleton {
     }
 
     FileView {
+        id: procSwaps
+        path: "/proc/swaps"
+        onLoaded: metrics.applySwapDevices(text())
+    }
+
+    FileView {
         id: procCpuInfo
         path: "/proc/cpuinfo"
 
@@ -475,6 +556,33 @@ Singleton {
         }
     }
 
+    Instantiator {
+        model: metrics.zramDevices
+
+        delegate: Item {
+            id: zramDelegate
+
+            required property string modelData
+
+            FileView {
+                id: zramStat
+
+                path: "/sys/block/" + zramDelegate.modelData + "/mm_stat"
+                printErrors: false
+                onLoaded: metrics.applyZramStat(zramDelegate.modelData, text())
+            }
+
+            Timer {
+                interval: 10000
+                running: true
+                repeat: true
+                triggeredOnStart: true
+
+                onTriggered: zramStat.reload()
+            }
+        }
+    }
+
     Timer {
         interval: metrics.fastIntervalMs
         running: true
@@ -488,6 +596,7 @@ Singleton {
             procLoadAvg.reload();
             procNetRoute.reload();
             procNetDev.reload();
+            procSwaps.reload();
         }
     }
 

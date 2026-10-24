@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.5
+Version 1.8.0
 
 **English** | [Français](README-fr.md)
 
@@ -15,7 +15,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` | 1 s |
+| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | 1 s / 10 s |
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
 | GPU | `nvidia-smi` or sysfs `gpu_busy_percent` | 10 s |
 | Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 15 s |
@@ -106,9 +106,11 @@ Hovering a module shows a contextual tooltip:
 
 - **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
 - **RAM**: used memory / total memory in GiB;
-- **Swap**: used swap / total swap in GiB. When ZSWAP is in use, a `ZSWAP`
-  block shows the compressed size, the original size and the compression
-  ratio;
+- **Swap**: used swap / total swap in GiB. Each swap device is listed (name,
+  type, used/total, priority), including zram. A `ZRAM` section shows, for each
+  zram device, the compressed size, original size, ratio and RAM used. When
+  ZSWAP is in use, a `ZSWAP` block shows the compressed size, the original size
+  and the compression ratio;
 - **Disk**: one line per detected real filesystem, in GiB, with the
   percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
   are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
@@ -204,6 +206,9 @@ that wait does not consume CPU.
 The network module adds two file reads per second (`/proc/net/dev` and
 `/proc/net/route`, ~8 µs), inside the existing timer and without spawning a
 process.
+
+The swap detail adds one `/proc/swaps` read per second and one `mm_stat` read
+per zram device every 10 s, also without spawning a process.
 
 ## Checks
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.7.5
+Version 1.8.0
 
 [English](README.md) | **Français**
 
@@ -15,7 +15,7 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` | 1 s |
+| Swap | `/proc/meminfo` (barre), `/proc/swaps` + zram `mm_stat` (tooltip) | 1 s / 10 s |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
 | GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 15 s |
@@ -107,9 +107,11 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
   alignées ;
 - **RAM** : mémoire utilisée / mémoire totale en GiB ;
-- **Swap** : swap utilisé / swap total en GiB. Si ZSWAP est utilisé, un bloc
-  `ZSWAP` affiche la taille compressée, la taille originale et le ratio de
-  compression ;
+- **Swap** : swap utilisé / swap total en GiB. Chaque périphérique de swap est
+  listé (nom, type, utilisé/total, priorité), zram compris. Une section `ZRAM`
+  affiche, pour chaque zram, la taille compressée, la taille originale, le
+  ratio et la RAM utilisée. Si ZSWAP est utilisé, un bloc `ZSWAP` affiche la
+  taille compressée, la taille originale et le ratio de compression ;
 - **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
   pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
   etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
@@ -207,6 +209,9 @@ et les tooltips ne lancent aucun processus.
 
 Le module réseau ajoute deux lectures de fichiers par seconde (`/proc/net/dev`
 et `/proc/net/route`, ~8 µs), dans le timer existant et sans processus.
+
+Le détail swap ajoute une lecture de `/proc/swaps` par seconde et une lecture
+de `mm_stat` par périphérique zram toutes les 10 s, également sans processus.
 
 ## Vérifications
 

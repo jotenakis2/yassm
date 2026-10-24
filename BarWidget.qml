@@ -650,21 +650,108 @@ BarWidget {
         }
 
         if (key === "swap") {
-            const swapLine = formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb);
+            const totalKb = metrics.swapTotalKb;
+            const usedKb = metrics.swapUsedKb;
+            const percent = totalKb > 0 ? Math.round(100 * usedKb / totalKb) : 0;
+            const lines = [
+                formatKibAsGib(usedKb) + " / " + formatKibAsGib(totalKb)
+                    + " (" + percent + "%)"
+            ];
 
-            if (!metrics.hasZswap) {
-                return tooltipBlock("SWAP", swapLine);
+            const devices = metrics.swapDevices || [];
+
+            if (devices.length > 0) {
+                let nameWidth = 0;
+                let typeWidth = 0;
+                let usedWidth = 0;
+                let totalWidth = 0;
+                const rows = [];
+
+                for (let i = 0; i < devices.length; i++) {
+                    const device = devices[i];
+                    const usedText = formatKibAsGib(device.usedKb);
+                    const totalText = formatKibAsGib(device.sizeKb);
+
+                    nameWidth = Math.max(nameWidth, device.name.length);
+                    typeWidth = Math.max(typeWidth, device.type.length);
+                    usedWidth = Math.max(usedWidth, usedText.length);
+                    totalWidth = Math.max(totalWidth, totalText.length);
+                    rows.push({
+                        name: device.name,
+                        type: device.type,
+                        used: usedText,
+                        total: totalText,
+                        priority: device.priority
+                    });
+                }
+
+                lines.push("");
+
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+
+                    lines.push(
+                        row.name.padEnd(nameWidth)
+                            + "  " + row.type.padEnd(typeWidth)
+                            + "  " + row.used.padStart(usedWidth)
+                            + " / " + row.total.padStart(totalWidth)
+                            + "  prio " + row.priority
+                    );
+                }
             }
 
-            const ratio = metrics.zswapCompressedKb > 0
-                ? metrics.zswapOriginalKb / metrics.zswapCompressedKb
-                : 0;
-            const zswapLine = formatKib(metrics.zswapCompressedKb)
-                + " compressed -> " + formatKib(metrics.zswapOriginalKb)
-                + " original"
-                + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
+            const zramLines = [];
 
-            return tooltipBlock("SWAP", swapLine + "\nZSWAP\n" + zswapLine);
+            for (let i = 0; i < devices.length; i++) {
+                const device = devices[i];
+
+                if (!device.zram) {
+                    continue;
+                }
+
+                const base = device.name.split("/").pop();
+                const stats = metrics.zramStats ? metrics.zramStats[base] : null;
+
+                if (!stats) {
+                    continue;
+                }
+
+                const ratio = stats.compressedKb > 0
+                    ? stats.originalKb / stats.compressedKb
+                    : 0;
+
+                zramLines.push(
+                    base + ": " + formatKib(stats.compressedKb)
+                        + " compressed -> " + formatKib(stats.originalKb)
+                        + " original"
+                        + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "")
+                        + ", " + formatKib(stats.memKb) + " RAM"
+                );
+            }
+
+            if (zramLines.length > 0) {
+                lines.push("ZRAM");
+
+                for (let i = 0; i < zramLines.length; i++) {
+                    lines.push(zramLines[i]);
+                }
+            }
+
+            if (metrics.hasZswap) {
+                const ratio = metrics.zswapCompressedKb > 0
+                    ? metrics.zswapOriginalKb / metrics.zswapCompressedKb
+                    : 0;
+
+                lines.push("ZSWAP");
+                lines.push(
+                    formatKib(metrics.zswapCompressedKb)
+                        + " compressed -> " + formatKib(metrics.zswapOriginalKb)
+                        + " original"
+                        + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "")
+                );
+            }
+
+            return tooltipBlock("SWAP", lines.join("\n"));
         }
 
         if (key === "disk") {
