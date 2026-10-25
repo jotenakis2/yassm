@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.14
+Version 1.10.15
 
 **English** | [Français](README-fr.md)
 
@@ -70,7 +70,7 @@ Clicking the widget opens a panel to enable or disable:
 - Network
 - Temperature
 - Battery
-- Bar colors (colored thresholds and blue battery on mains)
+- Bar colors (colored thresholds and blue battery icon on mains)
 - Boxes (module frames)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
@@ -178,13 +178,13 @@ CPU count. Battery uses inverted logic: the lower the value, the more alarming
 the color. Network download and upload rates are colored independently.
 
 The green/orange/red colors come from the current Omarchy theme's
-`colors.toml`. Icons keep the normal bar color, except for the battery: as
-soon as the machine is on mains power (charging or held at a charge threshold),
-its value and icon turn theme blue. On battery, the value follows the
-thresholds above.
+`colors.toml`. Icons keep the normal bar color, except for the battery icon:
+as soon as the machine is on mains power (charging or held at a charge
+threshold), the icon turns theme blue while the value keeps the normal bar
+color. On battery, the value follows the thresholds above.
 
 The **Bar colors** toggle disables all these colors: values and the blue
-battery tint return to the normal bar color. It maps to `showColors` in
+battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).
 
 ## Battery icon
@@ -193,9 +193,9 @@ The icon follows the level in 10 % steps (empty battery below 10 %) and the
 power state:
 
 - **on battery**: battery alone, filled according to the level;
-- **charging**: battery with a bolt, value and icon blue;
+- **charging**: battery with a bolt, blue icon, value in the normal bar color;
 - **plugged but not charging** (full or charge threshold reached): battery
-  followed by a plug, value and icon blue.
+  followed by a plug, blue icon, value in the normal bar color.
 
 The "plugged" state comes from `UPower.onBattery`, which distinguishes a
 machine that is merely plugged in from one that is charging. Percentage,

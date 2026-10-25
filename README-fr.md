@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.14
+Version 1.10.15
 
 [English](README.md) | **Français**
 
@@ -70,7 +70,7 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Network
 - Temperature
 - Battery
-- Bar colors (seuils colorés et batterie bleue sur secteur)
+- Bar colors (seuils colorés et icône batterie bleue sur secteur)
 - Boxes (encadrement des modules)
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
@@ -179,13 +179,13 @@ plus la valeur est basse, plus la couleur est alarmante. Les débits réseau
 descendant et montant sont colorés indépendamment.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
-courant. Les icônes conservent la couleur normale de la barre, sauf la
+courant. Les icônes conservent la couleur normale de la barre, sauf l'icône de
 batterie : dès que la machine est sur secteur (en charge ou seuil de charge
-atteint), sa valeur et son icône passent au bleu du thème. Sur batterie, la
-valeur suit les seuils ci-dessus.
+atteint), l'icône passe au bleu du thème tandis que la valeur conserve la
+couleur normale de la barre. Sur batterie, la valeur suit les seuils ci-dessus.
 
 Le toggle **Bar colors** du panneau désactive toutes ces couleurs : les valeurs
-et la teinte bleue de la batterie reviennent à la couleur normale de la barre.
+et l'icône bleue de la batterie reviennent à la couleur normale de la barre.
 Il correspond à `showColors` dans `shell.json` (activé par défaut).
 
 ## Icône de batterie
@@ -194,9 +194,10 @@ L'icône suit le niveau par paliers de 10 % (batterie vide sous 10 %) et l'état
 d'alimentation :
 
 - **sur batterie** : batterie seule, remplie selon le niveau ;
-- **en charge** : batterie avec éclair, valeur et icône bleues ;
+- **en charge** : batterie avec éclair, icône bleue, valeur dans la couleur
+  normale de la barre ;
 - **branchée sans charge** (pleine ou seuil de charge atteint) : batterie
-  suivie d'une prise, valeur et icône bleues.
+  suivie d'une prise, icône bleue, valeur dans la couleur normale de la barre.
 
 L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
 simplement branchée d'une machine en train de charger. Le pourcentage, l'état

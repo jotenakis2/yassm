@@ -313,7 +313,7 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         // On mains power, charging or held at a charge threshold, the battery
-        // icon and value both use the theme blue.
+        // icon uses the theme blue. The value stays in the normal bar color.
         if (metrics.batteryPlugged) {
             return Yassm.ThemePalette.blue;
         }
@@ -422,7 +422,7 @@ BarWidget {
 
     function batteryColor(value) {
         if (Yassm.SystemMetrics.batteryPlugged) {
-            return Yassm.ThemePalette.blue;
+            return button.foreground;
         }
 
         if (!Number.isFinite(value)) {
