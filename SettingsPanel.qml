@@ -136,7 +136,7 @@ PanelWindow {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.topMargin: Style.space(6)
+                Layout.topMargin: Style.space(12)
                 Layout.preferredHeight: 1
                 color: Qt.rgba(
                     ShellColor.popups.text.r,
@@ -148,7 +148,7 @@ PanelWindow {
 
             PanelSectionHeader {
                 Layout.fillWidth: true
-                Layout.topMargin: Style.space(4)
+                Layout.topMargin: Style.space(10)
                 Layout.bottomMargin: Style.space(2)
                 text: "LAYOUT"
                 foreground: ShellColor.popups.text
