@@ -270,6 +270,111 @@ PanelWindow {
                     }
                 }
             }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: Style.space(12)
+                Layout.preferredHeight: 1
+                color: Qt.rgba(
+                    ShellColor.popups.text.r,
+                    ShellColor.popups.text.g,
+                    ShellColor.popups.text.b,
+                    0.12
+                )
+            }
+
+            PanelSectionHeader {
+                Layout.fillWidth: true
+                Layout.topMargin: Style.space(10)
+                Layout.bottomMargin: Style.space(2)
+                text: "TIMERS"
+                foreground: ShellColor.popups.text
+                fontFamily: Style.font.family
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Style.space(40)
+                spacing: Style.space(8)
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: "Refresh"
+                    palette.windowText: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                Text {
+                    Layout.preferredWidth: Style.space(28)
+                    Layout.alignment: Qt.AlignVCenter
+                    horizontalAlignment: Text.AlignRight
+                    text: (root.hostWidget ? String(root.hostWidget.refreshInterval) : "1") + " s"
+                    color: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                PanelSlider {
+                    Layout.preferredWidth: Style.space(160)
+                    Layout.alignment: Qt.AlignVCenter
+                    bar: root.hostWidget ? root.hostWidget.bar : null
+                    minimum: 1
+                    maximum: 5
+                    step: 1
+                    integer: true
+                    value: root.hostWidget ? root.hostWidget.refreshInterval : 1
+
+                    onReleased: function(value) {
+                        if (root.hostWidget) {
+                            root.hostWidget.updateSetting("refreshInterval", Math.round(value));
+                        }
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Style.space(40)
+                spacing: Style.space(8)
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: "Processes"
+                    palette.windowText: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                Text {
+                    Layout.preferredWidth: Style.space(28)
+                    Layout.alignment: Qt.AlignVCenter
+                    horizontalAlignment: Text.AlignRight
+                    text: (root.hostWidget ? String(root.hostWidget.processInterval) : "5") + " s"
+                    color: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                PanelSlider {
+                    Layout.preferredWidth: Style.space(160)
+                    Layout.alignment: Qt.AlignVCenter
+                    bar: root.hostWidget ? root.hostWidget.bar : null
+                    minimum: 2
+                    maximum: 10
+                    step: 1
+                    integer: true
+                    value: root.hostWidget ? root.hostWidget.processInterval : 5
+
+                    onReleased: function(value) {
+                        if (root.hostWidget) {
+                            root.hostWidget.updateSetting("processInterval", Math.round(value));
+                        }
+                    }
+                }
+            }
         }
     }
 }

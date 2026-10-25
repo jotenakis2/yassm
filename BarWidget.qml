@@ -85,6 +85,16 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(0, Math.min(3, value)) : 1;
     }
 
+    readonly property int refreshInterval: {
+        const value = Math.round(Number(setting("refreshInterval", 1)));
+        return Number.isFinite(value) ? Math.max(1, Math.min(5, value)) : 1;
+    }
+
+    readonly property int processInterval: {
+        const value = Math.round(Number(setting("processInterval", 5)));
+        return Number.isFinite(value) ? Math.max(2, Math.min(10, value)) : 5;
+    }
+
     // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.
     readonly property real moduleGap: Math.max(2, separatorMetrics.advanceWidth)
 
@@ -1195,6 +1205,8 @@ BarWidget {
         entry.showBoxes = root.showBoxes;
         entry.iconGap = root.iconGap;
         entry.spacing = root.moduleSpacing;
+        entry.refreshInterval = root.refreshInterval;
+        entry.processInterval = root.processInterval;
         entry[name] = value;
 
         root.settings = entry;
@@ -1362,11 +1374,18 @@ BarWidget {
 
     // Keep the process list live while the CPU or RAM tooltip is open.
     Timer {
-        interval: 5000
+        interval: root.processInterval * 1000
         repeat: true
         running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory"
 
         onTriggered: root.refreshProcesses()
+    }
+
+    // All bar instances share one sampler; the value is identical for each.
+    Binding {
+        target: Yassm.SystemMetrics
+        property: "fastIntervalMs"
+        value: root.refreshInterval * 1000
     }
 
     Timer {

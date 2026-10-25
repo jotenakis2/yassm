@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.19
+Version 1.10.20
 
 **English** | [Français](README-fr.md)
 
@@ -25,7 +25,8 @@ Repository: <https://github.com/jotenakis2/yassm>
 
 Swap is hidden when the machine has no active swap. The GPU shows `--%` when
 no reliable source is available. The network is displayed in two separate
-boxes, ↓ and ↑.
+boxes, ↓ and ↑. CPU, RAM, swap, load and network share one fast loop, 1 s by
+default and configurable from 1 to 5 s in Settings.
 
 ## Architecture
 
@@ -80,10 +81,20 @@ Clicking the widget opens a panel to enable or disable:
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 
+**Timers**
+
+- Refresh (metrics sampling interval, 1–5 s; default 1)
+- Processes (tooltip process refresh, 2–10 s; default 5)
+
 The **Between modules** slider sets the gap between modules from 0 to 5 spaces
 (default 2). The **Between icon and value** slider sets the gap between each
 module's icon and value from 0 to 3 spaces (default 1, i.e. 7.19 px). At 0, a
 minimum gap of 2 px is kept.
+
+The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
+Network rates use the real elapsed time, so changing the interval does not
+distort them. The **Processes** slider sets how often the CPU and RAM tooltips
+restart their `ps` while open; it goes down to 2 s.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -105,11 +116,13 @@ Example entry:
   "showColors": true,
   "showBoxes": true,
   "spacing": 2,
-  "iconGap": 1
+  "iconGap": 1,
+  "refreshInterval": 1,
+  "processInterval": 5
 }
 ```
 
-All keys are optional; missing values default to `true`.
+All keys are optional; missing values use the defaults above.
 
 ## Tooltips
 
@@ -123,7 +136,8 @@ Hovering a module shows a contextual tooltip:
   `SReclaimable`, like `free`). A centered `proc` heading introduces the
   `kernel` line (Slab + stacks + page tables + vmalloc + percpu; vmalloc and
   percpu may slightly overlap) and the top 10 **userland** processes by RSS,
-  grouped by name; the list refreshes every 5 s while the tooltip stays open;
+  grouped by name; the list refreshes every 5 s by default (2–10 s) while the
+  tooltip stays open;
   kernel threads are excluded;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
@@ -154,8 +168,8 @@ Hovering a module shows a contextual tooltip:
   heading then introduces kernel CPU (`system` + `irq` + `softirq`), on the
   same scale as the processes, followed by the top 10 **userland** processes by
   CPU (average since process start, scaled to total CPU capacity like the main
-  value), grouped by name; the list refreshes every 5 s while the tooltip stays
-  open; kernel threads are excluded;
+  value), grouped by name; the list refreshes every 5 s by default (2–10 s)
+  while the tooltip stays open; kernel threads are excluded;
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
@@ -163,7 +177,7 @@ Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
 the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
 tooltips is bold too, but keeps the body color. Network, swap, disk and
 temperature tooltips launch no process. CPU and RAM tooltips launch a `ps` when
-they open and then every 5 s while the hover lasts.
+they open and then every 5 s by default (2–10 s) while the hover lasts.
 
 ## Bar colors
 
@@ -243,7 +257,7 @@ The swap detail adds one `/proc/swaps` read per second and one `mm_stat` read
 per zram device every 10 s, also without spawning a process.
 
 The CPU and RAM tooltips launch a `ps` (~15 ms) when they open and then every
-5 s while the hover lasts, never in the background.
+5 s by default (2–10 s) while the hover lasts, never in the background.
 
 ## Checks
 

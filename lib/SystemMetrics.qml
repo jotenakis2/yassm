@@ -12,7 +12,7 @@ import Quickshell.Services.UPower
 Singleton {
     id: metrics
 
-    readonly property int fastIntervalMs: 1000
+    property int fastIntervalMs: 1000
     readonly property int diskIntervalMs: 15000
 
     property int nproc: 1

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.19
+Version 1.10.20
 
 [English](README.md) | **Français**
 
@@ -25,7 +25,8 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
 `--%` lorsqu'aucune source fiable n'est disponible. Le réseau est affiché dans
-deux boîtes distinctes, ↓ et ↑.
+deux boîtes distinctes, ↓ et ↑. CPU, RAM, swap, load et réseau partagent une
+seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 
 ## Architecture
 
@@ -80,10 +81,20 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 
+**Timers**
+
+- Refresh (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
+- Processes (rafraîchissement des processus du tooltip, 2–10 s ; 5 par défaut)
+
 Le curseur **Between modules** règle l'espacement entre les modules de 0 à 5
 espaces (2 par défaut). Le curseur **Between icon and value** règle l'espace
 entre l'icône et la valeur de chaque module de 0 à 3 espaces (1 par défaut,
 soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
+
+Le curseur **Refresh** pilote la boucle rapide (CPU, RAM, swap, load, réseau).
+Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle ne
+les fausse pas. Le curseur **Processes** règle la fréquence de relance du `ps`
+des tooltips CPU et RAM pendant le survol ; il descend jusqu'à 2 s.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -105,11 +116,14 @@ Exemple d'entrée :
   "showColors": true,
   "showBoxes": true,
   "spacing": 2,
-  "iconGap": 1
+  "iconGap": 1,
+  "refreshInterval": 1,
+  "processInterval": 5
 }
 ```
 
-Toutes les clés sont optionnelles ; les valeurs absentes valent `true`.
+Toutes les clés sont optionnelles ; les valeurs absentes utilisent les défauts
+ci-dessus.
 
 ## Tooltips
 
@@ -123,8 +137,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab +
   piles + tables de pages + vmalloc + percpu ; `vmalloc` et `percpu` peuvent se
   recouvrir légèrement) et le top 10 des processus **userland** par RSS,
-  regroupés par nom ; la liste est rafraîchie toutes les 5 s tant que le
-  tooltip reste ouvert ; les threads noyau sont exclus ;
+  regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
+  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -155,8 +169,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
   le top 10 des processus **userland** par CPU (moyenne depuis leur lancement,
   ramenée sur la capacité totale des CPU comme la valeur principale), regroupés
-  par nom ; la liste est rafraîchie toutes les 5 s tant que le tooltip reste
-  ouvert ; les threads noyau sont exclus ;
+  par nom ; la liste est rafraîchie toutes les 5 s par défaut (2–10 s) tant que
+  le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
@@ -245,7 +259,7 @@ Le détail swap ajoute une lecture de `/proc/swaps` par seconde et une lecture
 de `mm_stat` par périphérique zram toutes les 10 s, également sans processus.
 
 Les tooltips CPU et RAM lancent un `ps` (~15 ms) à l'ouverture puis toutes les
-5 s pendant le survol, jamais en arrière-plan.
+5 s par défaut (réglable de 2 à 10 s) pendant le survol, jamais en arrière-plan.
 
 ## Vérifications
 
