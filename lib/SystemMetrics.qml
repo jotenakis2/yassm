@@ -23,6 +23,7 @@ Singleton {
     property real memoryPercent: 0
     property real memoryTotalKb: 0
     property real memoryUsedKb: 0
+    property real memoryAvailableKb: 0
     property real memoryBuffCacheKb: 0
     property real kernelTotalKb: 0
     property real kernelReclaimableKb: 0
@@ -199,6 +200,7 @@ Singleton {
 
         metrics.memoryTotalKb = total;
         metrics.memoryUsedKb = Math.max(0, total - available);
+        metrics.memoryAvailableKb = available;
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
         metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
         metrics.kernelTotalKb = slab + kernelStack + pageTables + vmallocUsed + percpu;
