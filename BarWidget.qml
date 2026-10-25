@@ -774,26 +774,25 @@ BarWidget {
                 formatKibAsGib(metrics.memoryAvailableKb),
                 formatKibAsGib(metrics.memoryBuffCacheKb)
             ];
-            let labelWidth = 0;
-            let valueWidth = 0;
+            const hasKernel = metrics.kernelTotalKb > 0;
+            const table = processTable(root.processMemory, true);
+            const kernelValue = hasKernel ? formatKernelKb(metrics.kernelTotalKb) : "";
+            let nameWidth = 6;
+            let valueWidth = kernelValue.length;
 
             for (let i = 0; i < labels.length; i++) {
-                labelWidth = Math.max(labelWidth, labels[i].length);
+                nameWidth = Math.max(nameWidth, labels[i].length);
                 valueWidth = Math.max(valueWidth, values[i].length);
             }
+
+            nameWidth = Math.max(nameWidth, table.nameWidth);
+            valueWidth = Math.max(valueWidth, table.valueWidth);
 
             const lines = [];
 
             for (let i = 0; i < labels.length; i++) {
-                lines.push(labels[i].padEnd(labelWidth) + "  " + values[i].padStart(valueWidth));
+                lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth));
             }
-
-            const hasKernel = metrics.kernelTotalKb > 0;
-            const table = processTable(root.processMemory, true);
-            const kernelValue = hasKernel ? formatKernelKb(metrics.kernelTotalKb) : "";
-            const nameWidth = hasKernel ? Math.max(6, table.nameWidth) : table.nameWidth;
-
-            valueWidth = hasKernel ? Math.max(kernelValue.length, table.valueWidth) : table.valueWidth;
 
             if (hasKernel) {
                 lines.push("");
