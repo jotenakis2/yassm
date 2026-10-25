@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.5
+Version 1.10.6
 
 **English** | [Français](README-fr.md)
 
@@ -110,7 +110,9 @@ All keys are optional; missing values default to `true`.
 
 Hovering a module shows a contextual tooltip:
 
-- **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
+- **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns.
+  The icon tilts with the load: needle low up to 50 %, medium from 51 to 90 %,
+  high above that;
 - **RAM**: the tooltip shows `Total`, `Used`, `Available` and `Buffer/cache`
   (`Buffers` + `Cached` + `SReclaimable`, like `free`). A `kernel` line shows
   kernel memory (Slab + stacks + page tables + vmalloc + percpu); vmalloc and

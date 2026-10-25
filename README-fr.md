@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.5
+Version 1.10.6
 
 [English](README.md) | **Français**
 
@@ -111,7 +111,8 @@ Toutes les clés sont optionnelles ; les valeurs absentes valent `true`.
 Le survol d'un module affiche une infobulle contextuelle :
 
 - **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
-  alignées ;
+  alignées. L'icône change d'inclinaison selon la charge : aiguille basse
+  jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip affiche `Total`, `Used`, `Available` et `Buffer/cache`
   (`Buffers` + `Cached` + `SReclaimable`, comme `free`). Une ligne `kernel`
   indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu) ;

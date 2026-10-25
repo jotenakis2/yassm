@@ -96,7 +96,9 @@ BarWidget {
     readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
     readonly property string iconTempHot: String.fromCodePoint(0xF0E01)
-    readonly property string iconLoad: String.fromCodePoint(0xF04C5)
+    readonly property string iconLoadLow: String.fromCodePoint(0xF0F86)
+    readonly property string iconLoadMedium: String.fromCodePoint(0xF0F85)
+    readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
 
     // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
@@ -178,7 +180,13 @@ BarWidget {
         }
 
         if (showLoad) {
-            segments.push(makeSegment("load", iconLoad, Math.round(metrics.loadPercent), "%", "load"));
+            segments.push(makeSegment(
+                "load",
+                loadIcon(metrics.loadPercent),
+                Math.round(metrics.loadPercent),
+                "%",
+                "load"
+            ));
         }
 
         if (showGpu) {
@@ -351,6 +359,20 @@ BarWidget {
         }
 
         return Yassm.ThemePalette.red;
+    }
+
+    function loadIcon(percent) {
+        const value = Math.round(Number(percent));
+
+        if (!Number.isFinite(value) || value <= 50) {
+            return iconLoadLow;
+        }
+
+        if (value <= 90) {
+            return iconLoadMedium;
+        }
+
+        return iconLoadHigh;
     }
 
     function loadColor(value) {
