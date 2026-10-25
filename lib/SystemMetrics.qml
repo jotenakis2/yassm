@@ -20,6 +20,8 @@ Singleton {
     property real cpuPercent: 0
     property real kernelPercent: 0
     property var previousCpuTimes: null
+    property var corePercents: []
+    property var previousCoreTimes: null
 
     property real memoryPercent: 0
     property real memoryTotalKb: 0
@@ -112,29 +114,48 @@ Singleton {
     }
 
     function applyCpuTimes(content) {
-        const firstLine = content.split("\n")[0];
+        const lines = content.split("\n");
+        let aggregate = null;
+        const cores = [];
 
-        if (!firstLine || !firstLine.startsWith("cpu")) {
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (!line.startsWith("cpu")) {
+                break;
+            }
+
+            const fields = line.split(/\s+/);
+            const name = fields[0];
+            const values = fields.slice(1).map(Number);
+
+            if (values.length < 4 || values.some(function(value) { return !Number.isFinite(value); })) {
+                continue;
+            }
+
+            const idle = values[3] + (values[4] || 0);
+            const kernel = (values[2] || 0) + (values[5] || 0) + (values[6] || 0);
+            const total = values.reduce(function(sum, value) {
+                return sum + value;
+            }, 0);
+
+            if (name === "cpu") {
+                aggregate = { idle: idle, kernel: kernel, total: total };
+            } else {
+                cores.push({ idle: idle, total: total });
+            }
+        }
+
+        if (!aggregate) {
             return;
         }
 
-        const fields = firstLine.trim().split(/\s+/).slice(1).map(Number);
-
-        if (fields.length < 4 || fields.some(function(value) { return !Number.isFinite(value); })) {
-            return;
-        }
-
-        const idle = fields[3] + fields[4];
-        const kernel = (fields[2] || 0) + (fields[5] || 0) + (fields[6] || 0);
-        const total = fields.reduce(function(sum, value) {
-            return sum + value;
-        }, 0);
         const previous = metrics.previousCpuTimes;
 
         if (previous) {
-            const totalDelta = total - previous.total;
-            const idleDelta = idle - previous.idle;
-            const kernelDelta = kernel - previous.kernel;
+            const totalDelta = aggregate.total - previous.total;
+            const idleDelta = aggregate.idle - previous.idle;
+            const kernelDelta = aggregate.kernel - previous.kernel;
 
             if (totalDelta > 0) {
                 metrics.cpuPercent = Math.max(0, Math.min(100, 100 * (totalDelta - idleDelta) / totalDelta));
@@ -142,7 +163,30 @@ Singleton {
             }
         }
 
-        metrics.previousCpuTimes = { idle: idle, total: total, kernel: kernel };
+        metrics.previousCpuTimes = aggregate;
+
+        const previousCores = metrics.previousCoreTimes;
+        const percents = [];
+
+        if (previousCores && previousCores.length === cores.length) {
+            for (let i = 0; i < cores.length; i++) {
+                const totalDelta = cores[i].total - previousCores[i].total;
+                const idleDelta = cores[i].idle - previousCores[i].idle;
+
+                if (totalDelta > 0) {
+                    percents.push(Math.max(0, Math.min(100, 100 * (totalDelta - idleDelta) / totalDelta)));
+                } else {
+                    percents.push(0);
+                }
+            }
+        } else {
+            for (let i = 0; i < cores.length; i++) {
+                percents.push(0);
+            }
+        }
+
+        metrics.corePercents = percents;
+        metrics.previousCoreTimes = cores;
     }
 
     function applyMemoryInfo(content) {

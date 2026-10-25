@@ -689,6 +689,11 @@ BarWidget {
         appendTableRows(lines, processTable(entries, memory));
     }
 
+    function coreEntry(label, value) {
+        const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+        return String(label).padStart(3, " ") + " " + String(percent).padStart(3, " ") + "%";
+    }
+
     function batteryStateLabel(status) {
         switch (status) {
         case "Charging":
@@ -956,7 +961,23 @@ BarWidget {
         }
 
         if (key === "cpu") {
-            const lines = [Math.round(metrics.cpuPercent) + "%"];
+            const cores = metrics.corePercents || [];
+            const lines = [coreEntry("Avg", metrics.cpuPercent)];
+
+            if (cores.length > 0) {
+                const rows = Math.ceil(cores.length / 2);
+
+                for (let i = 0; i < rows; i++) {
+                    const left = coreEntry(String(i + 1), cores[i]);
+                    const rightIndex = i + rows;
+                    const right = rightIndex < cores.length
+                        ? coreEntry(String(rightIndex + 1), cores[rightIndex])
+                        : "";
+
+                    lines.push(left + (right !== "" ? "   " + right : ""));
+                }
+            }
+
             const table = processTable(root.processCpu, false);
             const kernelValue = metrics.kernelPercent.toFixed(1) + "%";
             const nameWidth = Math.max(6, table.nameWidth);
