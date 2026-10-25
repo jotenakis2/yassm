@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.9
+Version 1.9.10
 
 **English** | [Français](README-fr.md)
 
@@ -108,7 +108,7 @@ Hovering a module shows a contextual tooltip:
 - **RAM**: the tooltip shows `Total`, `Used`, `Available` and `Buffer/cache`
   (`Buffers` + `Cached` + `SReclaimable`, like `free`). A `kernel` line shows
   kernel memory (Slab + stacks + page tables + vmalloc + percpu); vmalloc and
-  percpu may slightly overlap. On hover, a single `ps` sample adds the top 5
+  percpu may slightly overlap. On hover, a single `ps` sample adds the top 10
   processes by RSS, grouped by name;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
@@ -132,7 +132,7 @@ Hovering a module shows a contextual tooltip:
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
-- **CPU**: current percentage. On hover, a single `ps` sample adds the top 5
+- **CPU**: current percentage. On hover, a single `ps` sample adds the top 10
   processes by CPU (average since process start, scaled to total CPU capacity
   like the main value), grouped by name;
 - **GPU**: current percentage.

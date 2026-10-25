@@ -588,7 +588,7 @@ BarWidget {
             return right.value - left.value;
         });
 
-        return entries.slice(0, 5);
+        return entries.slice(0, 10);
     }
 
     function applyProcessCpu(content) {

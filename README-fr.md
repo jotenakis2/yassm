@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.9
+Version 1.9.10
 
 [English](README.md) | **Français**
 
@@ -110,7 +110,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`Buffers` + `Cached` + `SReclaimable`, comme `free`). Une ligne `kernel`
   indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu) ;
   `vmalloc` et `percpu` peuvent se recouvrir légèrement. Au survol, un
-  échantillon unique de `ps` ajoute le top 5 des processus par RSS, regroupés
+  échantillon unique de `ps` ajoute le top 10 des processus par RSS, regroupés
   par nom ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
@@ -135,7 +135,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
 - **CPU** : pourcentage courant. Au survol, un échantillon unique de `ps`
-  ajoute le top 5 des processus par CPU (moyenne depuis leur lancement,
+  ajoute le top 10 des processus par CPU (moyenne depuis leur lancement,
   ramenée sur la capacité totale des CPU comme la valeur principale),
   regroupés par nom ;
 - **GPU** : pourcentage courant.
