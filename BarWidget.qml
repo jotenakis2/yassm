@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 import "lib" as Yassm
@@ -19,6 +20,24 @@ BarWidget {
     property var gpu: null
 
     property string hoveredSegment: ""
+
+    readonly property var tooltipContent: {
+        if (!root.hoveredSegment) {
+            return { title: "", body: "" };
+        }
+
+        const text = root.moduleTooltip(root.hoveredSegment);
+        const index = text.indexOf("\n");
+
+        if (index < 0) {
+            return { title: text.replace(/\u00A0+$/, ""), body: "" };
+        }
+
+        return {
+            title: text.slice(0, index).replace(/\u00A0+$/, ""),
+            body: text.slice(index + 1)
+        };
+    }
 
     property var processCpu: []
     property var processMemory: []
@@ -631,24 +650,6 @@ BarWidget {
         appendTableRows(lines, processTable(entries, memory));
     }
 
-    function refreshProcessTooltip(key) {
-        if (!root.bar || !tooltipTracker.containsMouse) {
-            return;
-        }
-
-        if (root.hoveredSegment !== key) {
-            return;
-        }
-
-        const hit = root.segmentHitAt(tooltipTracker.mouseX);
-
-        if (!hit || hit.key !== key) {
-            return;
-        }
-
-        root.bar.showTooltip(tooltipAnchor, root.moduleTooltip(key));
-    }
-
     function batteryStateLabel(status) {
         switch (status) {
         case "Charging":
@@ -1064,8 +1065,6 @@ BarWidget {
         }
 
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
-        tooltipAnchor.tooltipHovered = true;
-        root.bar.showTooltip(tooltipAnchor, root.moduleTooltip(hit.key));
     }
 
     function refreshTooltip() {
@@ -1075,11 +1074,6 @@ BarWidget {
 
     function hideSegmentTooltip() {
         root.hoveredSegment = "";
-        tooltipAnchor.tooltipHovered = false;
-
-        if (root.bar) {
-            root.bar.hideTooltip(tooltipAnchor);
-        }
     }
 
     function updateSetting(name, value) {
@@ -1253,7 +1247,6 @@ BarWidget {
 
             onStreamFinished: {
                 root.applyProcessCpu(cpuTopOutput.text);
-                root.refreshProcessTooltip("cpu");
             }
         }
     }
@@ -1269,7 +1262,6 @@ BarWidget {
 
             onStreamFinished: {
                 root.applyProcessMemory(memoryTopOutput.text);
-                root.refreshProcessTooltip("memory");
             }
         }
     }
@@ -1400,7 +1392,96 @@ BarWidget {
             width: 1
             height: button.height
             visible: true
-            property bool tooltipHovered: false
+        }
+    }
+
+    PopupWindow {
+        id: widgetTooltip
+
+        visible: root.hoveredSegment !== ""
+        color: "transparent"
+        implicitWidth: tooltipBubble.implicitWidth
+        implicitHeight: tooltipBubble.implicitHeight
+
+        anchor {
+            id: widgetTooltipAnchor
+
+            window: root.QsWindow.window
+            adjustment: PopupAdjustment.Slide
+            edges: Edges.Top | Edges.Left
+            gravity: Edges.Bottom | Edges.Right
+            rect.width: 1
+            rect.height: 1
+
+            onAnchoring: {
+                const target = tooltipAnchor;
+                const barWindow = root.QsWindow.window;
+
+                if (!barWindow) {
+                    return;
+                }
+
+                const position = root.bar ? root.bar.position : "top";
+                const popupWidth = widgetTooltip.implicitWidth;
+                const popupHeight = widgetTooltip.implicitHeight;
+                let localX = target.width / 2 - popupWidth / 2;
+                let localY = target.height + 6;
+
+                if (position === "bottom") {
+                    localY = -popupHeight - 6;
+                } else if (position === "left") {
+                    localX = target.width + 6;
+                    localY = target.height / 2 - popupHeight / 2;
+                } else if (position === "right") {
+                    localX = -popupWidth - 6;
+                    localY = target.height / 2 - popupHeight / 2;
+                }
+
+                const point = barWindow.contentItem.mapFromItem(target, localX, localY);
+                widgetTooltipAnchor.rect.x = Math.round(point.x);
+                widgetTooltipAnchor.rect.y = Math.round(point.y);
+            }
+        }
+
+        BorderSurface {
+            id: tooltipBubble
+
+            implicitWidth: Math.max(tooltipTitle.implicitWidth, tooltipBody.implicitWidth) + 20
+            implicitHeight: tooltipColumn.implicitHeight + 14
+            color: ShellColor.tooltip.background
+            borderSpec: Border.surfaceSpec("tooltip", "border", ShellColor.tooltip.border, 1)
+            radius: Style.cornerRadius
+
+            Column {
+                id: tooltipColumn
+
+                anchors.centerIn: parent
+                spacing: Style.space(2)
+
+                Text {
+                    id: tooltipTitle
+
+                    textFormat: Text.PlainText
+                    text: root.tooltipContent.title
+                    color: ShellColor.tooltip.text
+                    font.family: button.fontFamily
+                    font.pixelSize: Style.font.body
+                    font.weight: Font.Bold
+                    renderType: Text.NativeRendering
+                }
+
+                Text {
+                    id: tooltipBody
+
+                    visible: text !== ""
+                    textFormat: Text.PlainText
+                    text: root.tooltipContent.body
+                    color: ShellColor.tooltip.text
+                    font.family: button.fontFamily
+                    font.pixelSize: Style.font.body
+                    renderType: Text.NativeRendering
+                }
+            }
         }
     }
 
