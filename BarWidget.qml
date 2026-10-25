@@ -1491,7 +1491,7 @@ BarWidget {
 
                         textFormat: Text.PlainText
                         text: modelData.text
-                        color: ShellColor.tooltip.text
+                        color: modelData.heading ? ShellColor.tooltip.text : ShellColor.muted
                         font.family: button.fontFamily
                         font.pixelSize: Style.font.body
                         font.weight: modelData.heading ? Font.Bold : Font.Normal
