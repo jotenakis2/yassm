@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.26
+Version 1.10.27
 
 [English](README.md) | **Français**
 
@@ -255,7 +255,7 @@ Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
 **Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
 résident.** YASSM est donc très performant : pas de polling batterie (UPower
 est événementiel), une seule série de mesures partagée entre toutes les barres,
-et les tooltips ne lancent aucun processus.
+et la plupart des tooltips ne lancent aucun processus.
 
 `findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
 (`/media/NAS` ici) ; la commande est encadrée par `timeout 5`, donc un montage

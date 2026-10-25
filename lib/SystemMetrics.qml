@@ -285,7 +285,7 @@ Singleton {
         // or malformed (older kernels, truncated read).
         let availableKb = Number(available);
 
-        if (!Number.isFinite(availableKb) || availableKb <= 0 || availableKb > total) {
+        if (!Number.isFinite(availableKb) || availableKb < 0 || availableKb > total) {
             availableKb = memFree + buffers + cached + sReclaimable;
         }
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.26
+Version 1.10.27
 
 **English** | [Français](README-fr.md)
 
@@ -249,7 +249,7 @@ Plus the short-lived scripts (CPU measured over 50 runs):
 
 **Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
 YASSM is therefore very performant: no battery polling (UPower is
-event-driven), a single sampling series shared by every bar, and tooltips
+event-driven), a single sampling series shared by every bar, and most tooltips
 launch no process.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
