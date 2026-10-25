@@ -21,22 +21,34 @@ BarWidget {
 
     property string hoveredSegment: ""
 
+    readonly property string sectionMark: "\u0001"
+
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
-            return { title: "", body: "" };
+            return { title: "", lines: [] };
         }
 
         const text = root.moduleTooltip(root.hoveredSegment);
         const index = text.indexOf("\n");
+        const title = (index < 0 ? text : text.slice(0, index)).replace(/\u00A0+$/, "");
+        const body = index < 0 ? "" : text.slice(index + 1);
+        const lines = [];
 
-        if (index < 0) {
-            return { title: text.replace(/\u00A0+$/, ""), body: "" };
+        if (body !== "") {
+            const raw = body.split("\n");
+
+            for (let i = 0; i < raw.length; i++) {
+                const line = raw[i];
+                const heading = line.startsWith(root.sectionMark);
+
+                lines.push({
+                    text: heading ? line.slice(1).replace(/\u00A0+$/, "") : line,
+                    heading: heading
+                });
+            }
         }
 
-        return {
-            title: text.slice(0, index).replace(/\u00A0+$/, ""),
-            body: text.slice(index + 1)
-        };
+        return { title: title, lines: lines };
     }
 
     property var processCpu: []
@@ -887,7 +899,7 @@ BarWidget {
 
             if (zramLines.length > 0) {
                 lines.push("");
-                lines.push("ZRAM");
+                lines.push(root.sectionMark + "ZRAM");
 
                 for (let i = 0; i < zramLines.length; i++) {
                     lines.push(zramLines[i]);
@@ -900,7 +912,7 @@ BarWidget {
                     : 0;
 
                 lines.push("");
-                lines.push("ZSWAP");
+                lines.push(root.sectionMark + "ZSWAP");
                 lines.push(
                     formatKib(metrics.zswapCompressedKb)
                         + " compressed -> " + formatKib(metrics.zswapOriginalKb)
@@ -1446,7 +1458,7 @@ BarWidget {
         BorderSurface {
             id: tooltipBubble
 
-            implicitWidth: Math.max(tooltipTitle.implicitWidth, tooltipBody.implicitWidth) + 20
+            implicitWidth: tooltipColumn.implicitWidth + 20
             implicitHeight: tooltipColumn.implicitHeight + 14
             color: ShellColor.tooltip.background
             borderSpec: Border.surfaceSpec("tooltip", "border", ShellColor.tooltip.border, 1)
@@ -1456,7 +1468,7 @@ BarWidget {
                 id: tooltipColumn
 
                 anchors.centerIn: parent
-                spacing: Style.space(2)
+                spacing: 0
 
                 Text {
                     id: tooltipTitle
@@ -1468,18 +1480,23 @@ BarWidget {
                     font.pixelSize: Style.font.body
                     font.weight: Font.Bold
                     renderType: Text.NativeRendering
+                    bottomPadding: Style.space(2)
                 }
 
-                Text {
-                    id: tooltipBody
+                Repeater {
+                    model: root.tooltipContent.lines
 
-                    visible: text !== ""
-                    textFormat: Text.PlainText
-                    text: root.tooltipContent.body
-                    color: ShellColor.tooltip.text
-                    font.family: button.fontFamily
-                    font.pixelSize: Style.font.body
-                    renderType: Text.NativeRendering
+                    Text {
+                        required property var modelData
+
+                        textFormat: Text.PlainText
+                        text: modelData.text
+                        color: ShellColor.tooltip.text
+                        font.family: button.fontFamily
+                        font.pixelSize: Style.font.body
+                        font.weight: modelData.heading ? Font.Bold : Font.Normal
+                        renderType: Text.NativeRendering
+                    }
                 }
             }
         }

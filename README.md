@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.0
+Version 1.10.1
 
 **English** | [Français](README-fr.md)
 
@@ -142,10 +142,10 @@ Hovering a module shows a contextual tooltip:
   name; kernel threads are excluded;
 - **GPU**: current percentage.
 
-Tooltip titles (`CPU`, `RAM`, `NET`, etc.) are **bold**; the body stays in
-normal weight. Network, swap, disk and temperature tooltips launch no process.
-CPU and RAM tooltips launch a single `ps` when they open and do not refresh it
-while the hover lasts.
+Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`ZRAM`,
+`ZSWAP`) are **bold**; the body stays in normal weight. Network, swap, disk
+and temperature tooltips launch no process. CPU and RAM tooltips launch a
+single `ps` when they open and do not refresh it while the hover lasts.
 
 ## Bar colors
 

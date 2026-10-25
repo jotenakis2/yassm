@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.0
+Version 1.10.1
 
 [English](README.md) | **Français**
 
@@ -145,9 +145,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
-Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) sont en **gras** ; le corps
-reste en graisse normale. Les valeurs sont formatées à la demande, uniquement
-pendant le survol.
+Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
+(`ZRAM`, `ZSWAP`) sont en **gras** ; le corps reste en graisse normale. Les
+valeurs sont formatées à la demande, uniquement pendant le survol.
 
 ## Couleurs de la barre
 
