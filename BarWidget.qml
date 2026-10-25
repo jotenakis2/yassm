@@ -75,6 +75,11 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(0, Math.min(5, value)) : 2;
     }
 
+    readonly property int iconGap: {
+        const value = Math.round(Number(setting("iconGap", 1)));
+        return Number.isFinite(value) ? Math.max(0, Math.min(3, value)) : 1;
+    }
+
     // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.
     readonly property real moduleGap: Math.max(2, separatorMetrics.advanceWidth)
 
@@ -1112,6 +1117,7 @@ BarWidget {
         entry.showDisk = root.showDisk;
         entry.showColors = root.showColors;
         entry.showBoxes = root.showBoxes;
+        entry.iconGap = root.iconGap;
         entry.spacing = root.moduleSpacing;
         entry[name] = value;
 
@@ -1314,6 +1320,14 @@ BarWidget {
             text: " ".repeat(root.moduleSpacing)
         }
 
+        TextMetrics {
+            id: cellMetrics
+
+            font.family: button.fontFamily
+            font.pixelSize: button.fontSize
+            text: "0"
+        }
+
         Row {
             id: labelRow
 
@@ -1358,8 +1372,13 @@ BarWidget {
                             renderType: Text.NativeRendering
                         }
 
+                        Item {
+                            width: Math.max(2, root.iconGap * cellMetrics.advanceWidth)
+                            height: 1
+                        }
+
                         Text {
-                            text: " " + root.segmentValue(metricKey)
+                            text: root.segmentValue(metricKey)
                             color: root.segmentColor(metricKey)
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize

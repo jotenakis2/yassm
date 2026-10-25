@@ -168,6 +168,48 @@ PanelWindow {
                     }
                 }
             }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Style.space(40)
+                spacing: Style.space(8)
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: "Icon gap"
+                    palette.windowText: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                Text {
+                    Layout.preferredWidth: Style.space(14)
+                    Layout.alignment: Qt.AlignVCenter
+                    horizontalAlignment: Text.AlignRight
+                    text: root.hostWidget ? String(root.hostWidget.iconGap) : "1"
+                    color: ShellColor.popups.text
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.body
+                }
+
+                PanelSlider {
+                    Layout.preferredWidth: Style.space(160)
+                    Layout.alignment: Qt.AlignVCenter
+                    bar: root.hostWidget ? root.hostWidget.bar : null
+                    minimum: 0
+                    maximum: 3
+                    step: 1
+                    integer: true
+                    value: root.hostWidget ? root.hostWidget.iconGap : 1
+
+                    onReleased: function(value) {
+                        if (root.hostWidget) {
+                            root.hostWidget.updateSetting("iconGap", Math.round(value));
+                        }
+                    }
+                }
+            }
         }
     }
 }
