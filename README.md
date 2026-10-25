@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.14
+Version 1.9.15
 
 **English** | [Français](README-fr.md)
 
@@ -71,6 +71,7 @@ Clicking the widget opens a panel to enable or disable:
 - Temperature
 - Battery
 - Bar colors (colored thresholds and blue battery on mains)
+- Boxes (module frames)
 - Spacing (gap between modules, 0–5 spaces; default 2)
 
 The **Spacing** slider sets the gap between modules from 0 to 5 spaces
@@ -95,6 +96,7 @@ Example entry:
   "showDisk": true,
   "showNet": true,
   "showColors": true,
+  "showBoxes": true,
   "spacing": 2
 }
 ```

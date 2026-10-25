@@ -37,6 +37,7 @@ BarWidget {
     property bool showLoad: setting("showLoad", true)
     property bool showDisk: setting("showDisk", true)
     property bool showColors: setting("showColors", true)
+    property bool showBoxes: setting("showBoxes", true)
 
     readonly property int moduleSpacing: {
         const value = Math.round(Number(setting("spacing", 2)));
@@ -1104,6 +1105,7 @@ BarWidget {
         entry.showLoad = root.showLoad;
         entry.showDisk = root.showDisk;
         entry.showColors = root.showColors;
+        entry.showBoxes = root.showBoxes;
         entry.spacing = root.moduleSpacing;
         entry[name] = value;
 
@@ -1323,16 +1325,20 @@ BarWidget {
                     required property string modelData
 
                     readonly property string metricKey: modelData
-                    readonly property int paddingX: Style.space(4)
-                    readonly property int paddingY: Style.space(2)
+                    readonly property int paddingX: root.showBoxes ? Style.space(4) : 0
+                    readonly property int paddingY: root.showBoxes ? Style.space(2) : 0
 
                     visible: root.segmentVisible(metricKey)
                     implicitWidth: segmentContent.implicitWidth + paddingX * 2
                     implicitHeight: segmentContent.implicitHeight + paddingY * 2
-                    radius: Style.space(4)
-                    color: Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03)
-                    border.width: Math.max(1, Style.normalBorderWidth)
-                    border.color: Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20)
+                    radius: root.showBoxes ? Style.space(4) : 0
+                    color: root.showBoxes
+                        ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03)
+                        : "transparent"
+                    border.width: root.showBoxes ? Math.max(1, Style.normalBorderWidth) : 0
+                    border.color: root.showBoxes
+                        ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20)
+                        : "transparent"
 
                     Row {
                         id: segmentContent

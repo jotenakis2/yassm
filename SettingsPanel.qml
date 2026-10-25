@@ -38,7 +38,8 @@ PanelWindow {
         { key: "showNet", label: "Network" },
         { key: "showTemp", label: "Temperature" },
         { key: "showBattery", label: "Battery" },
-        { key: "showColors", label: "Bar colors" }
+        { key: "showColors", label: "Bar colors" },
+        { key: "showBoxes", label: "Boxes" }
     ]
 
     visible: false
