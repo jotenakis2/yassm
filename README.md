@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.2
+Version 1.9.3
 
 **English** | [Français](README-fr.md)
 
@@ -106,7 +106,8 @@ Hovering a module shows a contextual tooltip:
 
 - **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns;
 - **RAM**: used memory / total memory in GiB. A `kernel` line shows kernel
-  memory (Slab + stacks + page tables) and its maximum reclaimable part.
+  memory (Slab + stacks + page tables + vmalloc + percpu) and its maximum
+  reclaimable part (`KReclaimable`); vmalloc and percpu may slightly overlap.
   On hover, a single `ps` sample adds the top 5 processes by RSS, grouped by
   name;
 - **Swap**: each swap device is listed with used / total and its percentage,
