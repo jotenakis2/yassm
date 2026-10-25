@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.24
+Version 1.10.25
 
 **English** | [Français](README-fr.md)
 
@@ -94,8 +94,8 @@ minimum gap of 2 px is kept.
 The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
-restart their `ps` while open; it goes down to 2 s. Hovering either row shows a
-tooltip with the same explanation.
+restart their `ps` while open; it goes down to 2 s. Hovering any slider row
+shows a tooltip with the same explanation.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.

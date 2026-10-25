@@ -193,6 +193,15 @@ PanelWindow {
                 Layout.preferredHeight: Style.space(40)
                 spacing: Style.space(8)
 
+                HoverHandler {
+                    id: modulesGapHover
+                }
+
+                PanelToolTip {
+                    visible: modulesGapHover.hovered
+                    text: "Gap between module boxes, in character cells.\n0–5 cells, with a 2 px minimum at 0."
+                }
+
                 Label {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
@@ -234,6 +243,15 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.space(40)
                 spacing: Style.space(8)
+
+                HoverHandler {
+                    id: iconGapHover
+                }
+
+                PanelToolTip {
+                    visible: iconGapHover.hovered
+                    text: "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0."
+                }
 
                 Label {
                     Layout.fillWidth: true

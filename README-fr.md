@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.24
+Version 1.10.25
 
 [English](README.md) | **Français**
 
@@ -95,7 +95,7 @@ Le curseur **Refresh** pilote la boucle rapide (CPU, RAM, swap, load, réseau).
 Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle ne
 les fausse pas. Le curseur **Processes** règle la fréquence de relance du `ps`
 des tooltips CPU et RAM pendant le survol ; il descend jusqu'à 2 s. Survoler
-l'une des deux lignes du panneau affiche une infobulle avec ces explications.
+n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
