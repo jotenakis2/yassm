@@ -993,7 +993,7 @@ BarWidget {
                         }
                     }
 
-                    lines.push(cells.join("   "));
+                    lines.push(cells.join("     "));
                 }
             }
 
