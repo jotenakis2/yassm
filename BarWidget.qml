@@ -603,7 +603,7 @@ BarWidget {
         root.processMemory = aggregateProcesses(content);
     }
 
-    function appendProcessRows(lines, entries, memory) {
+    function processTable(entries, memory) {
         let nameWidth = 0;
         let valueWidth = 0;
         const rows = [];
@@ -619,9 +619,21 @@ BarWidget {
             rows.push({ name: name, value: value });
         }
 
-        for (let i = 0; i < rows.length; i++) {
-            lines.push(rows[i].name.padEnd(nameWidth) + "  " + rows[i].value.padStart(valueWidth));
+        return { rows: rows, nameWidth: nameWidth, valueWidth: valueWidth };
+    }
+
+    function appendTableRows(lines, table, nameWidth, valueWidth) {
+        const nw = nameWidth === undefined ? table.nameWidth : nameWidth;
+        const vw = valueWidth === undefined ? table.valueWidth : valueWidth;
+
+        for (let i = 0; i < table.rows.length; i++) {
+            const row = table.rows[i];
+            lines.push(row.name.padEnd(nw) + "  " + row.value.padStart(vw));
         }
+    }
+
+    function appendProcessRows(lines, entries, memory) {
+        appendTableRows(lines, processTable(entries, memory));
     }
 
     function refreshProcessTooltip(key) {
@@ -759,6 +771,10 @@ BarWidget {
                 formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb)
             ];
             const hasKernel = metrics.kernelTotalKb > 0;
+            const table = processTable(root.processMemory, true);
+            const kernelValue = hasKernel ? formatKernelKb(metrics.kernelTotalKb) : "";
+            const nameWidth = hasKernel ? Math.max(6, table.nameWidth) : table.nameWidth;
+            const valueWidth = hasKernel ? Math.max(kernelValue.length, table.valueWidth) : table.valueWidth;
 
             if (hasKernel) {
                 const reclaimable = metrics.kernelReclaimableKb > 0
@@ -766,7 +782,10 @@ BarWidget {
                     : "";
 
                 lines.push("");
-                lines.push("kernel  " + formatKernelKb(metrics.kernelTotalKb) + reclaimable);
+                lines.push(
+                    "kernel".padEnd(nameWidth) + "  "
+                        + kernelValue.padStart(valueWidth) + reclaimable
+                );
             }
 
             if (root.processMemory.length > 0) {
@@ -774,7 +793,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                appendProcessRows(lines, root.processMemory, true);
+                appendTableRows(lines, table, nameWidth, valueWidth);
             }
 
             return tooltipBlock("RAM", lines.join("\n"));
