@@ -23,6 +23,7 @@ Singleton {
     property real memoryPercent: 0
     property real memoryTotalKb: 0
     property real memoryUsedKb: 0
+    property real memoryBuffCacheKb: 0
     property real kernelTotalKb: 0
     property real kernelReclaimableKb: 0
 
@@ -148,6 +149,8 @@ Singleton {
         let swapFree = 0;
         let zswapCompressed = 0;
         let zswapOriginal = 0;
+        let buffers = 0;
+        let cached = 0;
         let slab = 0;
         let sReclaimable = 0;
         let kernelStack = 0;
@@ -169,6 +172,10 @@ Singleton {
                 zswapCompressed = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Zswapped:")) {
                 zswapOriginal = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Buffers:")) {
+                buffers = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Cached:")) {
+                cached = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Slab:")) {
                 slab = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("SReclaimable:")) {
@@ -193,6 +200,7 @@ Singleton {
         metrics.memoryTotalKb = total;
         metrics.memoryUsedKb = Math.max(0, total - available);
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
+        metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
         metrics.kernelTotalKb = slab + kernelStack + pageTables + vmallocUsed + percpu;
         metrics.kernelReclaimableKb = kReclaimable > 0 ? kReclaimable : sReclaimable;
 

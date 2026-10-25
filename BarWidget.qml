@@ -769,6 +769,7 @@ BarWidget {
         if (key === "memory") {
             const lines = [
                 formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb)
+                    + " (buffer/cache " + formatKib(metrics.memoryBuffCacheKb) + ")"
             ];
             const hasKernel = metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
