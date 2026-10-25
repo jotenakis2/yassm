@@ -965,16 +965,25 @@ BarWidget {
             const lines = [];
 
             if (cores.length > 0) {
-                const rows = Math.ceil(cores.length / 2);
+                lines.push(root.sectionMark + root.iconCpu + " cores");
 
-                for (let i = 0; i < rows; i++) {
-                    const left = coreEntry(String(i + 1), cores[i]);
-                    const rightIndex = i + rows;
-                    const right = rightIndex < cores.length
-                        ? coreEntry(String(rightIndex + 1), cores[rightIndex])
-                        : "";
+                // Two columns fit up to 20 cores; beyond that, add columns so
+                // the tooltip never grows past 10 rows.
+                const columns = Math.max(2, Math.ceil(cores.length / 10));
+                const rows = Math.ceil(cores.length / columns);
 
-                    lines.push(left + (right !== "" ? "   " + right : ""));
+                for (let row = 0; row < rows; row++) {
+                    const cells = [];
+
+                    for (let column = 0; column < columns; column++) {
+                        const index = column * rows + row;
+
+                        if (index < cores.length) {
+                            cells.push(coreEntry(String(index + 1), cores[index]));
+                        }
+                    }
+
+                    lines.push(cells.join("   "));
                 }
             }
 

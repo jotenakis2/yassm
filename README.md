@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.8
+Version 1.10.9
 
 **English** | [Français](README-fr.md)
 
@@ -141,19 +141,20 @@ Hovering a module shows a contextual tooltip:
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
-- **CPU**: current percentage. The tooltip shows the 12 cores in two columns
-  (1–6 and 7–12), as per-core percentages. A `kernel` line shows kernel
-  CPU (`system` + `irq` + `softirq`), on the same scale as the processes. On
-  hover, a single `ps` sample adds the top 10 **userland** processes by CPU
-  (average since process start, scaled to total CPU capacity like the main
-  value), grouped by name; kernel threads are excluded;
+- **CPU**: current percentage. The tooltip lists the cores under a `cores`
+  heading, as per-core percentages in two columns (1–6 and 7–12); past 20
+  cores, extra columns keep the block at most 10 rows tall. A `kernel` line
+  shows kernel CPU (`system` + `irq` + `softirq`), on the same scale as the
+  processes. On hover, a single `ps` sample adds the top 10 **userland**
+  processes by CPU (average since process start, scaled to total CPU capacity
+  like the main value), grouped by name; kernel threads are excluded;
 - **GPU**: current percentage.
 
-Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`ZRAM`,
-`ZSWAP`) are **bold** and use the tooltip text color; the body uses the theme
-`muted` color. Network, swap, disk and temperature tooltips launch no process.
-CPU and RAM tooltips launch a single `ps` when they open and do not refresh it
-while the hover lasts.
+Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
+`ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color; the body uses
+the theme `muted` color. Network, swap, disk and temperature tooltips launch
+no process. CPU and RAM tooltips launch a single `ps` when they open and do
+not refresh it while the hover lasts.
 
 ## Bar colors
 
