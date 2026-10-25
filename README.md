@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.20
+Version 1.10.21
 
 **English** | [Français](README-fr.md)
 
@@ -18,7 +18,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | 1 s / 10 s |
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
 | GPU | `nvidia-smi` or sysfs `gpu_busy_percent` | 10 s |
-| Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 15 s |
+| Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 10 s |
 | Network | `/proc/net/dev` (default route interface) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
 | Temperature | all normal temperatures, sorted | 10 s |
@@ -238,7 +238,7 @@ Plus the short-lived scripts (CPU measured over 50 runs):
 | Script | CPU / run | Frequency | CPU / minute |
 | --- | --- | --- | --- |
 | `temperature.sh` | 11.0 ms | 6×/min | 66 ms |
-| `findmnt` | 2.0 ms | 4×/min | 8 ms |
+| `findmnt` | 2.0 ms | 6×/min | 12 ms |
 | Battery (UPower) | 0 | event-driven | 0 |
 
 **Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**

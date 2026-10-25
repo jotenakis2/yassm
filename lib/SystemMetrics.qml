@@ -13,7 +13,7 @@ Singleton {
     id: metrics
 
     property int fastIntervalMs: 1000
-    readonly property int diskIntervalMs: 15000
+    readonly property int diskIntervalMs: 10000
 
     property int nproc: 1
 
