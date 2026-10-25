@@ -23,6 +23,7 @@ BarWidget {
 
     readonly property string sectionMark: "\u0001"
     readonly property string centeredMark: "\u0002"
+    readonly property string boldMark: "\u0003"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
@@ -42,10 +43,12 @@ BarWidget {
                 const line = raw[i];
                 const heading = line.startsWith(root.sectionMark)
                     || line.startsWith(root.centeredMark);
+                const bold = !heading && line.startsWith(root.boldMark);
 
                 lines.push({
-                    text: heading ? line.slice(1).replace(/\u00A0+$/, "") : line,
-                    heading: heading
+                    text: heading || bold ? line.slice(1).replace(/\u00A0+$/, "") : line,
+                    heading: heading,
+                    bold: bold
                 });
             }
         }
@@ -851,7 +854,7 @@ BarWidget {
             }
 
             if (hasKernel) {
-                lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
             }
 
             if (root.processMemory.length > 0) {
@@ -1008,7 +1011,7 @@ BarWidget {
             }
 
             lines.push(root.centeredMark + "proc");
-            lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+            lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
 
             if (root.processCpu.length > 0) {
                 appendTableRows(lines, table, nameWidth, valueWidth);
@@ -1595,7 +1598,7 @@ BarWidget {
                         color: modelData.heading ? ShellColor.tooltip.text : ShellColor.muted
                         font.family: button.fontFamily
                         font.pixelSize: Style.font.body
-                        font.weight: modelData.heading ? Font.Bold : Font.Normal
+                        font.weight: modelData.heading || modelData.bold ? Font.Bold : Font.Normal
                         renderType: Text.NativeRendering
                     }
                 }

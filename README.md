@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.13
+Version 1.10.14
 
 **English** | [Français](README-fr.md)
 
@@ -155,9 +155,10 @@ Hovering a module shows a contextual tooltip:
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
 `data`, `proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
-the body uses the theme `muted` color. Network, swap, disk and temperature
-tooltips launch no process. CPU and RAM tooltips launch a `ps` when they open
-and then every 5 s while the hover lasts.
+the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
+tooltips is bold too, but keeps the body color. Network, swap, disk and
+temperature tooltips launch no process. CPU and RAM tooltips launch a `ps` when
+they open and then every 5 s while the hover lasts.
 
 ## Bar colors
 
