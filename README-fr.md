@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.2
+Version 1.10.3
 
 [English](README.md) | **Français**
 
@@ -132,8 +132,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   compteur absolu du pilote n'est pas utilisé, car il peut être aberrant ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
-  barre affiche la plus élevée. L'icône suit le niveau : flocon sous 40 °C,
-  thermomètre de 40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C ;
+  barre affiche la plus élevée. L'icône suit le niveau (seuils sur la valeur
+  arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C, chaleur de
+  50 à 59 °C, alerte à partir de 60 °C ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;

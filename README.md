@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.2
+Version 1.10.3
 
 **English** | [Français](README-fr.md)
 
@@ -130,8 +130,9 @@ Hovering a module shows a contextual tooltip:
   it can be bogus;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
-  The icon follows the level: snowflake below 40 °C, thermometer from 40 to
-  49 °C, heat from 50 to 59 °C, alert from 60 °C;
+  The icon follows the level (thresholds on the rounded displayed value):
+  snowflake below 40 °C, thermometer from 40 to 49 °C, heat from 50 to 59 °C,
+  alert from 60 °C;
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);

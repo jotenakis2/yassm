@@ -417,7 +417,7 @@ BarWidget {
             return iconTemp;
         }
 
-        const value = Number(celsius);
+        const value = Math.round(Number(celsius));
 
         if (!Number.isFinite(value)) {
             return iconTemp;
