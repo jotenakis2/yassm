@@ -38,8 +38,7 @@ PanelWindow {
         { key: "showNet", label: "Network" },
         { key: "showTemp", label: "Temperature" },
         { key: "showBattery", label: "Battery" },
-        { key: "showColors", label: "Bar colors" },
-        { key: "showBoxes", label: "Boxes" }
+        { key: "showColors", label: "Bar colors" }
     ]
 
     visible: false
@@ -103,6 +102,15 @@ PanelWindow {
                 bottomPadding: Style.space(8)
             }
 
+            PanelSectionHeader {
+                Layout.fillWidth: true
+                Layout.topMargin: Style.space(2)
+                Layout.bottomMargin: Style.space(2)
+                text: "MODULES"
+                foreground: ShellColor.popups.text
+                fontFamily: Style.font.family
+            }
+
             Repeater {
                 model: root.moduleSettings
 
@@ -123,6 +131,43 @@ PanelWindow {
                         if (root.hostWidget) {
                             root.hostWidget.updateSetting(control.modelData.key, !control.checked);
                         }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: Style.space(6)
+                Layout.preferredHeight: 1
+                color: Qt.rgba(
+                    ShellColor.popups.text.r,
+                    ShellColor.popups.text.g,
+                    ShellColor.popups.text.b,
+                    0.12
+                )
+            }
+
+            PanelSectionHeader {
+                Layout.fillWidth: true
+                Layout.topMargin: Style.space(4)
+                Layout.bottomMargin: Style.space(2)
+                text: "LAYOUT"
+                foreground: ShellColor.popups.text
+                fontFamily: Style.font.family
+            }
+
+            Toggle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Style.space(40)
+                label: "Boxes"
+                fontFamily: Style.font.family
+                titleSize: Style.font.body
+                foreground: ShellColor.popups.text
+                checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
+
+                onClicked: {
+                    if (root.hostWidget) {
+                        root.hostWidget.updateSetting("showBoxes", !checked);
                     }
                 }
             }

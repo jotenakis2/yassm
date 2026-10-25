@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.15
+Version 1.10.16
 
 **English** | [Français](README-fr.md)
 
@@ -61,6 +61,8 @@ The last command places the widget in the bar's `left` section; adjust
 
 Clicking the widget opens a panel to enable or disable:
 
+**Modules**
+
 - CPU
 - Load
 - GPU
@@ -71,6 +73,9 @@ Clicking the widget opens a panel to enable or disable:
 - Temperature
 - Battery
 - Bar colors (colored thresholds and blue battery icon on mains)
+
+**Layout**
+
 - Boxes (module frames)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
