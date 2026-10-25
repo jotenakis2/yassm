@@ -16,6 +16,7 @@ PanelWindow {
 
     readonly property int panelWidth: Style.space(440)
     readonly property int panelPadding: Style.space(16)
+    readonly property int toggleRowHeight: Style.space(36)
     readonly property int barVisibleOffset: {
         const bar = hostWidget ? hostWidget.bar : null;
         const barSize = bar ? Number(bar.barSize) : 0;
@@ -119,7 +120,7 @@ PanelWindow {
                     required property var modelData
 
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: root.toggleRowHeight
                     label: control.modelData.label
                     fontFamily: Style.font.family
                     titleSize: Style.font.body
@@ -157,7 +158,7 @@ PanelWindow {
 
             Toggle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Style.space(40)
+                Layout.preferredHeight: root.toggleRowHeight
                 label: "Boxes"
                 fontFamily: Style.font.family
                 titleSize: Style.font.body
@@ -173,7 +174,7 @@ PanelWindow {
 
             Toggle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Style.space(40)
+                Layout.preferredHeight: root.toggleRowHeight
                 label: "Colors"
                 fontFamily: Style.font.family
                 titleSize: Style.font.body
