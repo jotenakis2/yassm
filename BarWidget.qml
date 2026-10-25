@@ -758,17 +758,22 @@ BarWidget {
             const lines = [
                 formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb)
             ];
+            const hasKernel = metrics.kernelTotalKb > 0;
 
-            if (metrics.kernelTotalKb > 0) {
+            if (hasKernel) {
                 const reclaimable = metrics.kernelReclaimableKb > 0
                     ? " (" + formatKernelKb(metrics.kernelReclaimableKb) + " reclaimable max)"
                     : "";
 
+                lines.push("");
                 lines.push("kernel  " + formatKernelKb(metrics.kernelTotalKb) + reclaimable);
             }
 
             if (root.processMemory.length > 0) {
-                lines.push("");
+                if (!hasKernel) {
+                    lines.push("");
+                }
+
                 appendProcessRows(lines, root.processMemory, true);
             }
 
