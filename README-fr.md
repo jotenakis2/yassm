@@ -1,11 +1,11 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.25
+Version 1.10.26
 
 [English](README.md) | **Français**
 
-Widget de barre Omarchy affichant CPU, RAM, swap, charge système, température,
-GPU et usage de la partition racine.
+Widget de barre Omarchy affichant CPU, RAM, swap, charge système, réseau,
+température, GPU et usage de la partition racine.
 
 Dépôt : <https://github.com/jotenakis2/yassm>
 
@@ -15,11 +15,11 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` (barre), `/proc/swaps` + zram `mm_stat` (tooltip) | 1 s / 10 s |
+| Swap | `/proc/meminfo` (barre), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
-| GPU | `nvidia-smi` ou `gpu_busy_percent` sysfs | 10 s |
+| GPU | `gpu_busy_percent` sysfs, ou `nvidia-smi` | 10 s |
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 10 s |
-| Réseau | `/proc/net/dev` (interface de la route par défaut) | 1 s |
+| Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
 | Température | toutes les températures normales, triées | 10 s |
 
@@ -42,9 +42,13 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 ## Prérequis
 
 - Omarchy 4.x avec son shell Quickshell.
-- `bash`, `find`, `sort` et `findmnt` (util-linux).
+- `bash`, `findmnt` (util-linux), `ps` (procps-ng) et `timeout` (coreutils).
 - Une police Nerd Font pour les icônes.
 - Optionnel : `nvidia-smi` pour les GPU NVIDIA.
+
+Le widget est conçu pour une barre horizontale (haut ou bas). Il est masqué
+sur une barre verticale, où un emplacement de `barSize` de large ne peut pas
+contenir la rangée de modules.
 
 ## Installation
 
@@ -96,6 +100,7 @@ Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle
 les fausse pas. Le curseur **Processes** règle la fréquence de relance du `ps`
 des tooltips CPU et RAM pendant le survol ; il descend jusqu'à 2 s. Survoler
 n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
+Le panneau défile automatiquement si l'écran est trop court.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -135,9 +140,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
   `Used`, `Available` et `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
-  comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab +
-  piles + tables de pages + vmalloc + percpu ; `vmalloc` et `percpu` peuvent se
-  recouvrir légèrement) et le top 10 des processus **userland** par RSS,
+  comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab −
+  SReclaimable + piles + tables de pages + vmalloc + percpu ; SReclaimable est
+  déjà dans Buffer/cache, et `vmalloc` et `percpu` peuvent se recouvrir
+  légèrement) et le top 10 des processus **userland** par RSS,
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
@@ -152,9 +158,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
-  total de la session (deltas depuis le démarrage du shell, remis à zéro à
-  chaque redémarrage). Les deux débits sont colorés indépendamment. Le
-  compteur absolu du pilote n'est pas utilisé, car il peut être aberrant ;
+  total de la session (deltas depuis le démarrage du shell, remis à zéro au
+  redémarrage et conservés lors d'un changement d'interface). Les deux débits
+  sont colorés indépendamment. Le compteur absolu du pilote n'est pas utilisé,
+  car il peut être aberrant ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. L'icône suit le niveau (seuils sur la valeur
@@ -164,9 +171,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
-  centré, puis le pourcentage par cœur sur deux colonnes (1–6 et 7–12) ;
-  au-delà de 20 cœurs, des colonnes supplémentaires maintiennent le bloc à
-  10 lignes maximum. Un titre `proc` centré introduit ensuite le CPU noyau
+  centré, puis le pourcentage par cœur sur deux colonnes (réparties par
+  moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un
+  titre `proc` centré introduit ensuite le CPU noyau
   (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
   le top 10 des processus **userland** par CPU (moyenne depuis leur lancement,
   ramenée sur la capacité totale des CPU comme la valeur principale), regroupés
@@ -210,8 +217,8 @@ Il correspond à `showColors` dans `shell.json` (activé par défaut).
 
 ## Icône de batterie
 
-L'icône suit le niveau par paliers de 10 % (batterie vide sous 10 %) et l'état
-d'alimentation :
+L'icône suit le niveau par paliers de 10 % (icône vide à 0 % ; de 1 à 9 %,
+icône 10 %) et l'état d'alimentation :
 
 - **sur batterie** : batterie seule, remplie selon le niveau ;
 - **en charge** : batterie avec éclair, icône bleue, valeur dans la couleur
@@ -251,16 +258,18 @@ est événementiel), une seule série de mesures partagée entre toutes les barr
 et les tooltips ne lancent aucun processus.
 
 `findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
-(`/media/NAS` ici) ; cette attente ne consomme pas de CPU.
+(`/media/NAS` ici) ; la commande est encadrée par `timeout 5`, donc un montage
+mort ne peut pas figer le module disque.
 
-Le module réseau ajoute deux lectures de fichiers par seconde (`/proc/net/dev`
-et `/proc/net/route`, ~8 µs), dans le timer existant et sans processus.
+Le module réseau lit `/proc/net/dev` à chaque tick rapide ; `/proc/net/route`
+et `/proc/net/ipv6_route` sont relus toutes les 5 s, sans processus.
 
-Le détail swap ajoute une lecture de `/proc/swaps` par seconde et une lecture
-de `mm_stat` par périphérique zram toutes les 10 s, également sans processus.
+Les périphériques de swap sont relus depuis `/proc/swaps` toutes les 5 s, et
+`mm_stat` toutes les 10 s par zram, également sans processus.
 
-Les tooltips CPU et RAM lancent un `ps` (~15 ms) à l'ouverture puis toutes les
-5 s par défaut (réglable de 2 à 10 s) pendant le survol, jamais en arrière-plan.
+Les tooltips CPU et RAM lancent un `ps` (~15 ms, encadré par `timeout 5`) à
+l'ouverture puis toutes les 5 s par défaut (réglable de 2 à 10 s) pendant le
+survol, jamais en arrière-plan.
 
 ## Vérifications
 
@@ -268,15 +277,17 @@ Les tooltips CPU et RAM lancent un `ps` (~15 ms) à l'ouverture puis toutes les
 ./check.sh
 ```
 
-Le script valide le manifeste, vérifie la syntaxe des scripts shell, lance
-`shellcheck` si disponible et `qmllint` (Qt 6) sur les fichiers QML.
+Le script valide le manifeste, vérifie la syntaxe des scripts shell et la
+cohérence des versions, contrôle les contrats JSON/température, lance
+`shellcheck` si disponible et `qmllint` (Qt 6) avec une arborescence d'import
+`qs.Commons`/`qs.Ui` correcte.
 
 ## GPU
 
-Sources utilisées :
+Sources utilisées, dans l'ordre :
 
-1. `nvidia-smi` ;
-2. `/sys/class/drm/*/device/gpu_busy_percent` ;
+1. `/sys/class/drm/*/device/gpu_busy_percent` ;
+2. `nvidia-smi` ;
 3. sinon `GPU --%`.
 
 ### Apple Silicon / Asahi

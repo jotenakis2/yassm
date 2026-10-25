@@ -52,6 +52,8 @@ Singleton {
     property var mounts: []
 
     property string networkInterface: ""
+    property string networkRouteV4: ""
+    property string networkRouteV6: ""
     property real networkRxKib: 0
     property real networkTxKib: 0
     property real networkRxSessionKb: 0
@@ -59,7 +61,7 @@ Singleton {
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
 
-    readonly property string temperatureScriptPath: Qt.resolvedUrl("../temperature.sh").toString().replace("file://", "")
+    readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
     property real temperatureC: 0
@@ -85,9 +87,7 @@ Singleton {
         return null;
     }
     readonly property bool hasBattery: batteryDevice !== null
-    readonly property real batteryPercent: hasBattery
-        ? Math.max(0, Math.min(100, 100 * (Number(batteryDevice.percentage) || 0)))
-        : 0
+    readonly property real batteryPercent: hasBattery ? Math.max(0, Math.min(100, 100 * (Number(batteryDevice.percentage) || 0))) : 0
     readonly property string batteryStatus: hasBattery ? batteryStateName(batteryDevice.state) : ""
     readonly property real batteryTimeToEmpty: hasBattery ? (Number(batteryDevice.timeToEmpty) || 0) : 0
     readonly property real batteryTimeToFull: hasBattery ? (Number(batteryDevice.timeToFull) || 0) : 0
@@ -129,25 +129,41 @@ Singleton {
             const name = fields[0];
             const values = fields.slice(1).map(Number);
 
-            if (values.length < 4 || values.some(function(value) { return !Number.isFinite(value); })) {
+            if (values.length < 4 || values.some(function (value) {
+                return !Number.isFinite(value);
+            })) {
                 continue;
             }
 
             const idle = values[3] + (values[4] || 0);
             const kernel = (values[2] || 0) + (values[5] || 0) + (values[6] || 0);
-            const total = values.reduce(function(sum, value) {
+
+            // guest/guest_nice (fields 8-9) are already included in user/nice:
+            // adding them again would inflate the total and understate CPU %.
+            const total = values.slice(0, 8).reduce(function (sum, value) {
                 return sum + value;
             }, 0);
 
             if (name === "cpu") {
-                aggregate = { idle: idle, kernel: kernel, total: total };
+                aggregate = {
+                    idle: idle,
+                    kernel: kernel,
+                    total: total
+                };
             } else {
-                cores.push({ idle: idle, total: total });
+                cores.push({
+                    idle: idle,
+                    total: total
+                });
             }
         }
 
         if (!aggregate) {
             return;
+        }
+
+        if (cores.length > 0) {
+            metrics.nproc = cores.length;
         }
 
         const previous = metrics.previousCpuTimes;
@@ -192,7 +208,8 @@ Singleton {
     function applyMemoryInfo(content) {
         const lines = content.split("\n");
         let total = 0;
-        let available = 0;
+        let available = NaN;
+        let memFree = 0;
         let swapTotal = 0;
         let swapFree = 0;
         let zswapCompressed = 0;
@@ -211,6 +228,8 @@ Singleton {
                 total = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("MemAvailable:")) {
                 available = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("MemFree:")) {
+                memFree = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("SwapTotal:")) {
                 swapTotal = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("SwapFree:")) {
@@ -242,12 +261,44 @@ Singleton {
             return;
         }
 
+        function safe(value) {
+            return Number.isFinite(value) ? value : 0;
+        }
+
+        total = safe(total);
+        memFree = safe(memFree);
+        swapTotal = safe(swapTotal);
+        swapFree = safe(swapFree);
+        zswapCompressed = safe(zswapCompressed);
+        zswapOriginal = safe(zswapOriginal);
+        buffers = safe(buffers);
+        cached = safe(cached);
+        slab = safe(slab);
+        sReclaimable = safe(sReclaimable);
+        kernelStack = safe(kernelStack);
+        pageTables = safe(pageTables);
+        vmallocUsed = safe(vmallocUsed);
+        percpu = safe(percpu);
+
+        // MemAvailable is authoritative; fall back to the classic
+        // MemFree + Buffers + Cached + SReclaimable estimate if it is missing
+        // or malformed (older kernels, truncated read).
+        let availableKb = Number(available);
+
+        if (!Number.isFinite(availableKb) || availableKb <= 0 || availableKb > total) {
+            availableKb = memFree + buffers + cached + sReclaimable;
+        }
+
+        availableKb = Math.max(0, Math.min(total, availableKb));
+
         metrics.memoryTotalKb = total;
-        metrics.memoryUsedKb = Math.max(0, total - available);
-        metrics.memoryAvailableKb = available;
+        metrics.memoryUsedKb = Math.max(0, total - availableKb);
+        metrics.memoryAvailableKb = availableKb;
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
         metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
-        metrics.kernelTotalKb = slab + kernelStack + pageTables + vmallocUsed + percpu;
+        // SReclaimable is already counted in Buffer/cache: exclude it from the
+        // kernel line so the two rows do not show the same memory twice.
+        metrics.kernelTotalKb = Math.max(0, slab - sReclaimable) + kernelStack + pageTables + vmallocUsed + percpu;
 
         if (swapTotal > 0) {
             metrics.hasSwap = true;
@@ -283,7 +334,7 @@ Singleton {
                 continue;
             }
 
-            const name = fields[0].replace(/\\040/g, " ").replace(/\\011/g, "\t");
+            const name = fields[0].replace(/\\040/g, " ").replace(/\\011/g, "\t").replace(/\\134/g, "\\").replace(/\\012/g, "\n");
             const sizeKb = Number(fields[2]);
             const usedKb = Number(fields[3]);
 
@@ -298,8 +349,7 @@ Singleton {
                 zram: zram,
                 type: zram ? "zram" : fields[1],
                 sizeKb: sizeKb,
-                usedKb: Number.isFinite(usedKb) ? usedKb : 0,
-                priority: fields[4]
+                usedKb: Number.isFinite(usedKb) ? usedKb : 0
             });
         }
 
@@ -352,15 +402,67 @@ Singleton {
     function applyNetRoute(content) {
         const lines = content.split("\n");
         let iface = "";
+        let bestMetric = Infinity;
 
         for (let i = 1; i < lines.length; i++) {
             const fields = lines[i].trim().split(/\s+/);
 
-            if (fields.length >= 2 && fields[1] === "00000000") {
+            if (fields.length < 8 || fields[1] !== "00000000") {
+                continue;
+            }
+
+            // Flags is hexadecimal; bit 0 is RTF_UP. Metric is decimal and
+            // decides between several default routes (Ethernet vs Wi-Fi).
+            const flags = parseInt(fields[3], 16);
+            const metric = Number(fields[6]);
+
+            if (!(flags & 1) || !Number.isFinite(metric)) {
+                continue;
+            }
+
+            if (metric < bestMetric) {
+                bestMetric = metric;
                 iface = fields[0];
-                break;
             }
         }
+
+        metrics.networkRouteV4 = iface;
+        applyNetworkRoute();
+    }
+
+    function applyNetIpv6Route(content) {
+        const lines = content.split("\n");
+        const zero = "00000000000000000000000000000000";
+        let iface = "";
+        let bestMetric = Infinity;
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length < 10 || fields[0] !== zero || fields[1] !== "00") {
+                continue;
+            }
+
+            const metric = parseInt(fields[5], 16);
+
+            if (!Number.isFinite(metric)) {
+                continue;
+            }
+
+            if (metric < bestMetric) {
+                bestMetric = metric;
+                iface = fields[9];
+            }
+        }
+
+        metrics.networkRouteV6 = iface;
+        applyNetworkRoute();
+    }
+
+    function applyNetworkRoute() {
+        // Prefer the IPv4 default route, then an IPv6 default route. This
+        // keeps the module visible on IPv6-only networks.
+        const iface = metrics.networkRouteV4 || metrics.networkRouteV6;
 
         if (iface === metrics.networkInterface) {
             return;
@@ -370,8 +472,8 @@ Singleton {
         metrics.networkPrevious = null;
         metrics.networkRxKib = 0;
         metrics.networkTxKib = 0;
-        metrics.networkRxSessionKb = 0;
-        metrics.networkTxSessionKb = 0;
+        // Session totals span the whole shell session: keep them across
+        // interface changes, as documented.
     }
 
     function applyNetDev(content) {
@@ -408,12 +510,7 @@ Singleton {
 
         // Date.now() can jump after suspend or NTP adjustment, and link
         // resets can rewind counters; both cases restart the baseline.
-        if (previous
-                && previous.iface === iface
-                && now > previous.time
-                && now - previous.time <= 30000
-                && rx >= previous.rx
-                && tx >= previous.tx) {
+        if (previous && previous.iface === iface && now > previous.time && now - previous.time <= 30000 && rx >= previous.rx && tx >= previous.tx) {
             const seconds = (now - previous.time) / 1000;
             const rxDelta = (rx - previous.rx) / 1024;
             const txDelta = (tx - previous.tx) / 1024;
@@ -492,16 +589,19 @@ Singleton {
 
             // AppImage/FUSE scratch mounts land in /tmp, and per-user runtime
             // mounts in /run/user are session-scoped: neither is real storage.
-            if (target === "/tmp" || target.startsWith("/tmp/")
-                    || target.startsWith("/run/user/")) {
+            if (target === "/tmp" || target.startsWith("/tmp/") || target.startsWith("/run/user/")) {
                 continue;
             }
 
-            const percent = usedBytes + availBytes > 0
-                ? Math.max(0, Math.min(100, Math.ceil(100 * usedBytes / (usedBytes + availBytes))))
-                : 0;
+            const percent = usedBytes + availBytes > 0 ? Math.max(0, Math.min(100, Math.ceil(100 * usedBytes / (usedBytes + availBytes)))) : 0;
 
             if (!source || excluded[fstype] || !(totalBytes > 0)) {
+                continue;
+            }
+
+            // Container image layers and Snap packages are not useful storage
+            // entries and can flood the tooltip with dozens of duplicates.
+            if (fstype === "squashfs" || (fstype === "overlay" && target !== "/")) {
                 continue;
             }
 
@@ -522,7 +622,7 @@ Singleton {
             }
         }
 
-        const list = Object.keys(bySource).map(function(key) {
+        const list = Object.keys(bySource).map(function (key) {
             return bySource[key];
         });
 
@@ -530,7 +630,7 @@ Singleton {
             return;
         }
 
-        list.sort(function(left, right) {
+        list.sort(function (left, right) {
             return left.target < right.target ? -1 : (left.target > right.target ? 1 : 0);
         });
 
@@ -560,7 +660,7 @@ Singleton {
             const tab = line.indexOf("\t");
             const raw = Number((tab >= 0 ? line.slice(0, tab) : line).trim());
 
-            if (!Number.isFinite(raw) || !(raw > 0) || !(raw < 200000)) {
+            if (!Number.isFinite(raw) || raw === 0 || raw <= -50000 || raw >= 200000) {
                 continue;
             }
 
@@ -571,7 +671,7 @@ Singleton {
             });
         }
 
-        entries.sort(function(left, right) {
+        entries.sort(function (left, right) {
             return right.celsius - left.celsius;
         });
 
@@ -602,6 +702,12 @@ Singleton {
         id: procNetRoute
         path: "/proc/net/route"
         onLoaded: metrics.applyNetRoute(text())
+    }
+
+    FileView {
+        id: procNetIpv6Route
+        path: "/proc/net/ipv6_route"
+        onLoaded: metrics.applyNetIpv6Route(text())
     }
 
     FileView {
@@ -661,6 +767,21 @@ Singleton {
         }
     }
 
+    // Interfaces and swap devices change slowly. Keeping these reads out of
+    // the fast loop avoids rebuilding swapDevices every second.
+    Timer {
+        interval: 5000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: {
+            procNetRoute.reload();
+            procNetIpv6Route.reload();
+            procSwaps.reload();
+        }
+    }
+
     Timer {
         interval: metrics.fastIntervalMs
         running: true
@@ -672,16 +793,14 @@ Singleton {
             procStat.reload();
             procMemInfo.reload();
             procLoadAvg.reload();
-            procNetRoute.reload();
             procNetDev.reload();
-            procSwaps.reload();
         }
     }
 
     Process {
         id: mountProcess
 
-        command: ["findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL"]
+        command: ["timeout", "5", "findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL"]
 
         stdout: StdioCollector {
             id: mountOutput
@@ -689,8 +808,8 @@ Singleton {
             onStreamFinished: metrics.applyMounts(mountOutput.text)
         }
 
-        onExited: function(exitCode, exitStatus) {
-            if (exitCode !== 0) {
+        onExited: function (exitCode, exitStatus) {
+            if (exitCode !== 0 && exitCode !== 124) {
                 console.warn("yassm: findmnt exited with", exitCode);
             }
         }
@@ -699,7 +818,7 @@ Singleton {
     Process {
         id: temperatureProcess
 
-        command: ["bash", metrics.temperatureScriptPath]
+        command: ["timeout", "5", "bash", metrics.temperatureScriptPath]
 
         stdout: StdioCollector {
             id: temperatureOutput
@@ -707,8 +826,8 @@ Singleton {
             onStreamFinished: metrics.applyTemperatures(temperatureOutput.text)
         }
 
-        onExited: function(exitCode, exitStatus) {
-            if (exitCode !== 0) {
+        onExited: function (exitCode, exitStatus) {
+            if (exitCode !== 0 && exitCode !== 124) {
                 console.warn("yassm: temperature scan exited with", exitCode);
             }
         }

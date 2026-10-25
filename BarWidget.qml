@@ -13,7 +13,7 @@ BarWidget {
 
     moduleName: "io.github.jotenakis2.yassm"
 
-    readonly property string detectScriptPath: Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", "")
+    readonly property string detectScriptPath: decodeURIComponent(Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", ""))
 
     readonly property int gpuIntervalMs: 10000
 
@@ -21,13 +21,21 @@ BarWidget {
 
     property string hoveredSegment: ""
 
+    // The widget is built as a horizontal row of modules. A vertical bar only
+    // offers a barSize-wide slot, so hide gracefully instead of overflowing.
+    readonly property bool barVertical: root.bar ? root.bar.vertical === true : false
+    visible: !root.barVertical
+
     readonly property string sectionMark: "\u0001"
     readonly property string centeredMark: "\u0002"
     readonly property string boldMark: "\u0003"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
-            return { title: "", lines: [] };
+            return {
+                title: "",
+                lines: []
+            };
         }
 
         const text = root.moduleTooltip(root.hoveredSegment);
@@ -41,8 +49,7 @@ BarWidget {
 
             for (let i = 0; i < raw.length; i++) {
                 const line = raw[i];
-                const heading = line.startsWith(root.sectionMark)
-                    || line.startsWith(root.centeredMark);
+                const heading = line.startsWith(root.sectionMark) || line.startsWith(root.centeredMark);
                 const bold = !heading && line.startsWith(root.boldMark);
 
                 lines.push({
@@ -53,7 +60,10 @@ BarWidget {
             }
         }
 
-        return { title: title, lines: lines };
+        return {
+            title: title,
+            lines: lines
+        };
     }
 
     property var processCpu: []
@@ -195,13 +205,7 @@ BarWidget {
         }
 
         if (showLoad) {
-            segments.push(makeSegment(
-                "load",
-                loadIcon(metrics.loadPercent),
-                Math.round(metrics.loadPercent),
-                "%",
-                "load"
-            ));
+            segments.push(makeSegment("load", loadIcon(metrics.loadPercent), Math.round(metrics.loadPercent), "%", "load"));
         }
 
         if (showGpu) {
@@ -246,27 +250,11 @@ BarWidget {
         }
 
         if (showBattery && metrics.hasBattery) {
-            segments.push(makeSegment(
-                "battery",
-                root.batteryIcon(
-                    metrics.batteryPercent,
-                    metrics.batteryStatus,
-                    metrics.batteryPlugged
-                ),
-                Math.round(metrics.batteryPercent),
-                "%",
-                "battery"
-            ));
+            segments.push(makeSegment("battery", root.batteryIcon(metrics.batteryPercent, metrics.batteryStatus, metrics.batteryPlugged), Math.round(metrics.batteryPercent), "%", "battery"));
         }
 
         if (showTemp) {
-            segments.push(makeSegment(
-                "temp",
-                root.temperatureIcon(metrics.hasTemperature ? metrics.temperatureC : null),
-                metrics.hasTemperature ? Math.round(metrics.temperatureC) : null,
-                "°C",
-                "temp"
-            ));
+            segments.push(makeSegment("temp", root.temperatureIcon(metrics.hasTemperature ? metrics.temperatureC : null), metrics.hasTemperature ? Math.round(metrics.temperatureC) : null, "°C", "temp"));
         }
 
         return segments;
@@ -281,7 +269,7 @@ BarWidget {
 
         const gap = " ".repeat(root.moduleSpacing);
 
-        return segments.map(function(segment) {
+        return segments.map(function (segment) {
             return segment.text;
         }).join(gap);
     }
@@ -560,12 +548,14 @@ BarWidget {
             return "  0K";
         }
 
-        if (value >= 1000 * 1024) {
+        // Thresholds use the rounded width so the value never spills over to
+        // "1000K" or "1000M" and widens the bar for a single tick.
+        if (value >= 999.5 * 1024) {
             const gib = value / 1048576;
             return (gib >= 10 ? gib.toFixed(0) : gib.toFixed(1)).padStart(3, " ") + "G";
         }
 
-        if (value >= 1000) {
+        if (value >= 999.5) {
             const mib = value / 1024;
             return (mib >= 10 ? mib.toFixed(0) : mib.toFixed(1)).padStart(3, " ") + "M";
         }
@@ -648,11 +638,14 @@ BarWidget {
             byName[name] = (byName[name] || 0) + value;
         }
 
-        const entries = Object.keys(byName).map(function(name) {
-            return { name: name, value: byName[name] };
+        const entries = Object.keys(byName).map(function (name) {
+            return {
+                name: name,
+                value: byName[name]
+            };
         });
 
-        entries.sort(function(left, right) {
+        entries.sort(function (left, right) {
             return right.value - left.value;
         });
 
@@ -662,8 +655,11 @@ BarWidget {
     function applyProcessCpu(content) {
         const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
 
-        root.processCpu = aggregateProcesses(content).map(function(entry) {
-            return { name: entry.name, value: entry.value / cores };
+        root.processCpu = aggregateProcesses(content).map(function (entry) {
+            return {
+                name: entry.name,
+                value: entry.value / cores
+            };
         });
     }
 
@@ -678,16 +674,21 @@ BarWidget {
 
         for (let i = 0; i < entries.length; i++) {
             const name = entries[i].name;
-            const value = memory
-                ? formatKib(entries[i].value)
-                : entries[i].value.toFixed(1) + "%";
+            const value = memory ? formatKib(entries[i].value) : entries[i].value.toFixed(1) + "%";
 
             nameWidth = Math.max(nameWidth, name.length);
             valueWidth = Math.max(valueWidth, value.length);
-            rows.push({ name: name, value: value });
+            rows.push({
+                name: name,
+                value: value
+            });
         }
 
-        return { rows: rows, nameWidth: nameWidth, valueWidth: valueWidth };
+        return {
+            rows: rows,
+            nameWidth: nameWidth,
+            valueWidth: valueWidth
+        };
     }
 
     function appendTableRows(lines, table, nameWidth, valueWidth) {
@@ -704,9 +705,9 @@ BarWidget {
         appendTableRows(lines, processTable(entries, memory));
     }
 
-    function coreEntry(label, value) {
+    function coreEntry(label, value, labelWidth) {
         const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
-        return String(label).padStart(2, " ") + " " + String(percent).padStart(3, " ") + "%";
+        return String(label).padStart(labelWidth || 2, " ") + " " + String(percent).padStart(3, " ") + "%";
     }
 
     function batteryStateLabel(status) {
@@ -735,7 +736,7 @@ BarWidget {
             return "charge";
         }
 
-        return Yassm.SystemMetrics.batteryPlugged ? "charge" : "draw";
+        return "";
     }
 
     function formatDuration(seconds) {
@@ -804,14 +805,16 @@ BarWidget {
             usedWidth = Math.max(usedWidth, used.length);
             totalWidth = Math.max(totalWidth, total.length);
             percentWidth = Math.max(percentWidth, percent.length);
-            rows.push({ target: target, used: used, total: total, percent: percent });
+            rows.push({
+                target: target,
+                used: used,
+                total: total,
+                percent: percent
+            });
         }
 
-        const lines = rows.map(function(row) {
-            return row.target.padEnd(targetWidth)
-                + "  " + row.used.padStart(usedWidth)
-                + " / " + row.total.padStart(totalWidth)
-                + " " + row.percent.padStart(percentWidth);
+        const lines = rows.map(function (row) {
+            return row.target.padEnd(targetWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " " + row.percent.padStart(percentWidth);
         });
 
         return tooltipBlock("DISK", lines.join("\n"));
@@ -821,22 +824,12 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "load") {
-            return tooltipBlock(
-                "LOAD",
-                " 1 min " + formatLoad(metrics.load1) + "\n"
-                    + " 5 min " + formatLoad(metrics.load5) + "\n"
-                    + "15 min " + formatLoad(metrics.load15)
-            );
+            return tooltipBlock("LOAD", " 1 min " + formatLoad(metrics.load1) + "\n" + " 5 min " + formatLoad(metrics.load5) + "\n" + "15 min " + formatLoad(metrics.load15));
         }
 
         if (key === "memory") {
             const labels = ["Total", "Used", "Available", "Buffer/cache"];
-            const values = [
-                formatKibAsGib(metrics.memoryTotalKb),
-                formatKibAsGib(metrics.memoryUsedKb),
-                formatKibAsGib(metrics.memoryAvailableKb),
-                formatKibAsGib(metrics.memoryBuffCacheKb)
-            ];
+            const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb), formatKibAsGib(metrics.memoryBuffCacheKb)];
             const hasKernel = metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
             const kernelValue = hasKernel ? formatKernelKb(metrics.kernelTotalKb) : "";
@@ -888,9 +881,7 @@ BarWidget {
                     const device = devices[i];
                     const usedText = formatKibAsGib(device.usedKb);
                     const totalText = formatKibAsGib(device.sizeKb);
-                    const percent = device.sizeKb > 0
-                        ? Math.round(100 * device.usedKb / device.sizeKb)
-                        : 0;
+                    const percent = device.sizeKb > 0 ? Math.round(100 * device.usedKb / device.sizeKb) : 0;
 
                     nameWidth = Math.max(nameWidth, device.name.length);
                     usedWidth = Math.max(usedWidth, usedText.length);
@@ -906,22 +897,12 @@ BarWidget {
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
 
-                    lines.push(
-                        row.name.padEnd(nameWidth)
-                            + "  " + row.used.padStart(usedWidth)
-                            + " / " + row.total.padStart(totalWidth)
-                            + " (" + row.percent + "%)"
-                    );
+                    lines.push(row.name.padEnd(nameWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
                 }
             } else {
-                const percent = metrics.swapTotalKb > 0
-                    ? Math.round(100 * metrics.swapUsedKb / metrics.swapTotalKb)
-                    : 0;
+                const percent = metrics.swapTotalKb > 0 ? Math.round(100 * metrics.swapUsedKb / metrics.swapTotalKb) : 0;
 
-                lines.push(
-                    formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb)
-                        + " (" + percent + "%)"
-                );
+                lines.push(formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + percent + "%)");
             }
 
             const zramLines = [];
@@ -940,17 +921,9 @@ BarWidget {
                     continue;
                 }
 
-                const ratio = stats.compressedKb > 0
-                    ? stats.originalKb / stats.compressedKb
-                    : 0;
+                const ratio = stats.compressedKb > 0 ? stats.originalKb / stats.compressedKb : 0;
 
-                zramLines.push(
-                    base + ": " + formatKib(stats.compressedKb)
-                        + " compressed -> " + formatKib(stats.originalKb)
-                        + " original"
-                        + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "")
-                        + ", " + formatKib(stats.memKb) + " RAM"
-                );
+                zramLines.push(base + ": " + formatKib(stats.compressedKb) + " compressed -> " + formatKib(stats.originalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + ", " + formatKib(stats.memKb) + " RAM");
             }
 
             if (zramLines.length > 0) {
@@ -963,18 +936,11 @@ BarWidget {
             }
 
             if (metrics.hasZswap) {
-                const ratio = metrics.zswapCompressedKb > 0
-                    ? metrics.zswapOriginalKb / metrics.zswapCompressedKb
-                    : 0;
+                const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
 
                 lines.push("");
                 lines.push(root.sectionMark + "ZSWAP");
-                lines.push(
-                    formatKib(metrics.zswapCompressedKb)
-                        + " compressed -> " + formatKib(metrics.zswapOriginalKb)
-                        + " original"
-                        + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "")
-                );
+                lines.push(formatKib(metrics.zswapCompressedKb) + " compressed -> " + formatKib(metrics.zswapOriginalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 
             return tooltipBlock("SWAP", lines.join("\n"));
@@ -995,6 +961,7 @@ BarWidget {
                 // the tooltip never grows past 10 rows.
                 const columns = Math.max(2, Math.ceil(cores.length / 10));
                 const rows = Math.ceil(cores.length / columns);
+                const labelWidth = cores.length >= 100 ? 3 : 2;
 
                 for (let row = 0; row < rows; row++) {
                     const cells = [];
@@ -1003,7 +970,7 @@ BarWidget {
                         const index = column * rows + row;
 
                         if (index < cores.length) {
-                            cells.push(coreEntry(String(index + 1), cores[index]));
+                            cells.push(coreEntry(String(index + 1), cores[index], labelWidth));
                         }
                     }
 
@@ -1041,13 +1008,7 @@ BarWidget {
                 return tooltipBlock("NET", "Unavailable");
             }
 
-            const lines = [
-                metrics.networkInterface,
-                "↓ " + formatRateLong(metrics.networkRxKib)
-                    + "  (session " + formatKibAsSize(metrics.networkRxSessionKb) + ")",
-                "↑ " + formatRateLong(metrics.networkTxKib)
-                    + "  (session " + formatKibAsSize(metrics.networkTxSessionKb) + ")"
-            ];
+            const lines = [metrics.networkInterface, "↓ " + formatRateLong(metrics.networkRxKib) + "  (session " + formatKibAsSize(metrics.networkRxSessionKb) + ")", "↑ " + formatRateLong(metrics.networkTxKib) + "  (session " + formatKibAsSize(metrics.networkTxSessionKb) + ")"];
 
             return tooltipBlock("NET", lines.join("\n"));
         }
@@ -1057,10 +1018,7 @@ BarWidget {
                 return tooltipBlock("BATTERY", "Unavailable");
             }
 
-            const lines = [
-                Math.round(metrics.batteryPercent) + "% ("
-                    + batteryStateLabel(metrics.batteryStatus) + ")"
-            ];
+            const lines = [Math.round(metrics.batteryPercent) + "% (" + batteryStateLabel(metrics.batteryStatus) + ")"];
 
             if (metrics.batteryStatus === "Charging" && metrics.batteryTimeToFull > 0) {
                 lines.push(formatDuration(metrics.batteryTimeToFull) + " to full");
@@ -1069,10 +1027,11 @@ BarWidget {
             }
 
             if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
-                lines.push(
-                    Math.abs(metrics.batteryPowerW).toFixed(1) + " W "
-                        + batteryPowerDirection()
-                );
+                const direction = batteryPowerDirection();
+
+                if (direction !== "") {
+                    lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W " + direction);
+                }
             }
 
             return tooltipBlock("BATTERY", lines.join("\n"));
@@ -1085,9 +1044,8 @@ BarWidget {
                 return tooltipBlock("TEMPERATURE", "Unavailable");
             }
 
-            const lines = temperatures.map(function(entry) {
-                return entry.celsius.toFixed(1).padStart(4, " ")
-                    + " °C (" + entry.sensor + ")";
+            const lines = temperatures.map(function (entry) {
+                return entry.celsius.toFixed(1).padStart(4, " ") + " °C (" + entry.sensor + ")";
             });
 
             return tooltipBlock("TEMPERATURE", lines.join("\n"));
@@ -1104,6 +1062,9 @@ BarWidget {
         const origin = labelRow.mapToItem(button, 0, 0);
         const localX = x - origin.x;
         const children = labelRow.children;
+        let nearest = null;
+        let nearestCenter = 0;
+        let nearestDistance = Infinity;
 
         for (let i = 0; i < children.length; i++) {
             const child = children[i];
@@ -1118,6 +1079,23 @@ BarWidget {
                     center: origin.x + child.x + child.width / 2
                 };
             }
+
+            // The gap between two modules belongs to the nearest one: without
+            // this, crossing the gap hides the tooltip and restarts ps.
+            const distance = localX < child.x ? child.x - localX : localX - (child.x + child.width);
+
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = child;
+                nearestCenter = origin.x + child.x + child.width / 2;
+            }
+        }
+
+        if (nearest && nearestDistance <= root.moduleGap) {
+            return {
+                key: nearest.metricKey,
+                center: nearestCenter
+            };
         }
 
         return null;
@@ -1179,9 +1157,29 @@ BarWidget {
         root.hoveredSegment = "";
     }
 
+    function recenterTooltip() {
+        if (!root.hoveredSegment) {
+            return;
+        }
+
+        const children = labelRow.children;
+
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+
+            if (child.metricKey === root.hoveredSegment) {
+                const origin = labelRow.mapToItem(button, 0, 0);
+                tooltipAnchor.x = origin.x + child.x + child.width / 2 - tooltipAnchor.width / 2;
+                return;
+            }
+        }
+    }
+
     function updateSetting(name, value) {
         const current = root.settings || {};
-        const entry = { id: root.moduleName };
+        const entry = {
+            id: root.moduleName
+        };
 
         for (const key in current) {
             if (key !== "id") {
@@ -1211,8 +1209,7 @@ BarWidget {
 
         root.settings = entry;
 
-        if (root.bar && root.bar.shell
-                && typeof root.bar.shell.updateEntryInline === "function") {
+        if (root.bar && root.bar.shell && typeof root.bar.shell.updateEntryInline === "function") {
             root.bar.shell.updateEntryInline(root.moduleName, entry);
         }
     }
@@ -1220,14 +1217,17 @@ BarWidget {
     function updateGpuFromSysfs() {
         gpuBusyFile.path = root.gpuPath;
         gpuBusyFile.reload();
-
-        const value = Number(gpuBusyFile.text().trim());
-        root.gpu = Number.isNaN(value) ? null : value;
     }
 
     function updateGpuFromCommand() {
         gpuProcess.command = ["bash", "-c", root.gpuCommand];
         gpuProcess.running = true;
+    }
+
+    function detectGpuIfNeeded() {
+        if (root.showGpu && root.gpuKind === "none" && !gpuDetector.running) {
+            gpuDetector.running = true;
+        }
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -1261,15 +1261,7 @@ BarWidget {
 
         const pos = root.mapToItem(null, 0, 0);
 
-        panel.panelX = Math.max(
-            8,
-            Math.min(
-                pos.x + (root.width / 2) - (panel.panelWidth / 2),
-                window.width - panel.panelWidth - 8
-            )
-        );
-
-        panel.panelY = window.height - panel.barVisibleOffset;
+        panel.panelX = Math.max(8, Math.min(pos.x + (root.width / 2) - (panel.panelWidth / 2), window.width - panel.panelWidth - 8));
 
         if (root.bar && typeof root.bar.requestPopout === "function") {
             root.bar.requestPopout(root);
@@ -1304,11 +1296,20 @@ BarWidget {
         }
     }
 
-    implicitWidth: Math.max(Math.ceil(labelRow.width), Math.ceil(emptyLabel.implicitWidth))
-    implicitHeight: button.implicitHeight
+    implicitWidth: root.barVertical ? 0 : (emptyLabel.visible ? Math.ceil(emptyLabel.implicitWidth) : Math.ceil(labelRow.width))
+    implicitHeight: root.barVertical ? 0 : button.implicitHeight
 
     FileView {
         id: gpuBusyFile
+
+        printErrors: false
+        onLoaded: {
+            const raw = text().trim();
+            const value = raw === "" ? NaN : Number(raw);
+
+            root.gpu = Number.isFinite(value) ? value : null;
+        }
+        onLoadFailed: root.gpu = null
     }
 
     Process {
@@ -1334,10 +1335,22 @@ BarWidget {
     Process {
         id: gpuProcess
 
-        stdout: SplitParser {
-            onRead: data => {
-                const value = Number(data.trim());
-                root.gpu = Number.isNaN(value) ? null : value;
+        stdout: StdioCollector {
+            id: gpuOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                // nvidia-smi prints one line per GPU; use the first one.
+                const first = gpuOutput.text.trim().split("\n")[0];
+                const value = first === "" ? NaN : Number(first);
+
+                root.gpu = Number.isFinite(value) ? value : null;
+            }
+        }
+
+        onExited: function (exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                root.gpu = null;
             }
         }
     }
@@ -1345,7 +1358,7 @@ BarWidget {
     Process {
         id: cpuTopProcess
 
-        command: ["ps", "-eo", "pid=,ppid=,comm=,%cpu=", "--sort=-%cpu"]
+        command: ["timeout", "5", "ps", "-eo", "pid=,ppid=,comm=,%cpu=", "--sort=-%cpu"]
 
         stdout: StdioCollector {
             id: cpuTopOutput
@@ -1360,7 +1373,7 @@ BarWidget {
     Process {
         id: memoryTopProcess
 
-        command: ["ps", "-eo", "pid=,ppid=,comm=,rss=", "--sort=-rss"]
+        command: ["timeout", "5", "ps", "-eo", "pid=,ppid=,comm=,rss=", "--sort=-rss"]
 
         stdout: StdioCollector {
             id: memoryTopOutput
@@ -1381,16 +1394,31 @@ BarWidget {
         onTriggered: root.refreshProcesses()
     }
 
+    // Last-resort watchdog: a bar park/move may not deliver onExited, and a
+    // segment can disappear while the tooltip is open.
+    Timer {
+        interval: 250
+        repeat: true
+        running: root.hoveredSegment !== ""
+
+        onTriggered: {
+            if (!tooltipTracker.containsMouse || !root.segmentVisible(root.hoveredSegment)) {
+                root.hideSegmentTooltip();
+            }
+        }
+    }
+
     // All bar instances share one sampler; the value is identical for each.
     Binding {
         target: Yassm.SystemMetrics
         property: "fastIntervalMs"
         value: root.refreshInterval * 1000
+        restoreMode: Binding.RestoreNone
     }
 
     Timer {
         interval: root.gpuIntervalMs
-        running: root.gpuKind !== "none"
+        running: root.showGpu && root.gpuKind !== "none"
         repeat: true
         triggeredOnStart: true
 
@@ -1412,8 +1440,10 @@ BarWidget {
         labelVisible: false
         tooltipText: ""
 
-        onPressed: function(buttonCode) {
-            root.togglePanel();
+        onPressed: function (buttonCode) {
+            if (buttonCode === Qt.LeftButton) {
+                root.togglePanel();
+            }
         }
 
         TextMetrics {
@@ -1429,7 +1459,7 @@ BarWidget {
 
             font.family: button.fontFamily
             font.pixelSize: button.fontSize
-            text: "0"
+            text: " "
         }
 
         Row {
@@ -1437,6 +1467,7 @@ BarWidget {
 
             anchors.centerIn: parent
             spacing: root.moduleGap
+            onWidthChanged: root.recenterTooltip()
 
             Repeater {
                 model: root.segmentOrder
@@ -1454,13 +1485,9 @@ BarWidget {
                     implicitWidth: segmentContent.implicitWidth + paddingX * 2
                     implicitHeight: segmentContent.implicitHeight + paddingY * 2
                     radius: root.showBoxes ? Style.space(4) : 0
-                    color: root.showBoxes
-                        ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03)
-                        : "transparent"
+                    color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03) : "transparent"
                     border.width: root.showBoxes ? Math.max(1, Style.normalBorderWidth) : 0
-                    border.color: root.showBoxes
-                        ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20)
-                        : "transparent"
+                    border.color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20) : "transparent"
 
                     Row {
                         id: segmentContent
@@ -1533,7 +1560,7 @@ BarWidget {
     PopupWindow {
         id: widgetTooltip
 
-        visible: root.hoveredSegment !== ""
+        visible: root.hoveredSegment !== "" && root.segmentVisible(root.hoveredSegment)
         color: "transparent"
         implicitWidth: tooltipBubble.implicitWidth
         implicitHeight: tooltipBubble.implicitHeight
@@ -1560,15 +1587,15 @@ BarWidget {
                 const popupWidth = widgetTooltip.implicitWidth;
                 const popupHeight = widgetTooltip.implicitHeight;
                 let localX = target.width / 2 - popupWidth / 2;
-                let localY = target.height + 6;
+                let localY = target.height + Style.space(6);
 
                 if (position === "bottom") {
-                    localY = -popupHeight - 6;
+                    localY = -popupHeight - Style.space(6);
                 } else if (position === "left") {
-                    localX = target.width + 6;
+                    localX = target.width + Style.space(6);
                     localY = target.height / 2 - popupHeight / 2;
                 } else if (position === "right") {
-                    localX = -popupWidth - 6;
+                    localX = -popupWidth - Style.space(6);
                     localY = target.height / 2 - popupHeight / 2;
                 }
 
@@ -1581,8 +1608,8 @@ BarWidget {
         BorderSurface {
             id: tooltipBubble
 
-            implicitWidth: tooltipColumn.implicitWidth + 20
-            implicitHeight: tooltipColumn.implicitHeight + 14
+            implicitWidth: tooltipColumn.implicitWidth + Style.space(20)
+            implicitHeight: tooltipColumn.implicitHeight + Style.space(14)
             color: ShellColor.tooltip.background
             borderSpec: Border.surfaceSpec("tooltip", "border", ShellColor.tooltip.border, 1)
             radius: Style.cornerRadius
@@ -1635,12 +1662,23 @@ BarWidget {
     IpcHandler {
         target: root.moduleName
 
-        function open(): void { root.open() }
-        function close(): void { root.close() }
-        function toggle(): void { root.togglePanel() }
-        function show(): void { root.open() }
-        function hide(): void { root.close() }
+        function open(): void {
+            root.open();
+        }
+        function close(): void {
+            root.close();
+        }
+        function toggle(): void {
+            root.togglePanel();
+        }
+        function show(): void {
+            root.open();
+        }
+        function hide(): void {
+            root.close();
+        }
     }
 
-    Component.onCompleted: gpuDetector.running = true
+    Component.onCompleted: root.detectGpuIfNeeded()
+    onShowGpuChanged: root.detectGpuIfNeeded()
 }

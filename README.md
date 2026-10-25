@@ -1,11 +1,11 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.25
+Version 1.10.26
 
 **English** | [Français](README-fr.md)
 
-Omarchy bar widget showing CPU, RAM, swap, system load, temperature, GPU and
-root partition usage.
+Omarchy bar widget showing CPU, RAM, swap, system load, network, temperature,
+GPU and root partition usage.
 
 Repository: <https://github.com/jotenakis2/yassm>
 
@@ -15,11 +15,11 @@ Repository: <https://github.com/jotenakis2/yassm>
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | 1 s / 10 s |
+| Swap | `/proc/meminfo` (bar), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
-| GPU | `nvidia-smi` or sysfs `gpu_busy_percent` | 10 s |
+| GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | 10 s |
 | Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 10 s |
-| Network | `/proc/net/dev` (default route interface) | 1 s |
+| Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
 | Temperature | all normal temperatures, sorted | 10 s |
 
@@ -42,9 +42,12 @@ default and configurable from 1 to 5 s in Settings.
 ## Requirements
 
 - Omarchy 4.x with its Quickshell shell.
-- `bash`, `find`, `sort` and `findmnt` (util-linux).
+- `bash`, `findmnt` (util-linux), `ps` (procps-ng) and `timeout` (coreutils).
 - A Nerd Font for the icons.
 - Optional: `nvidia-smi` for NVIDIA GPUs.
+
+The widget is designed for a horizontal bar (top or bottom). It is hidden on
+vertical bars, where a `barSize`-wide slot cannot hold the module row.
 
 ## Installation
 
@@ -95,7 +98,8 @@ The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 restart their `ps` while open; it goes down to 2 s. Hovering any slider row
-shows a tooltip with the same explanation.
+shows a tooltip with the same explanation. The panel scrolls automatically if
+the screen is too short.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -135,8 +139,9 @@ Hovering a module shows a contextual tooltip:
 - **RAM**: the tooltip opens with a centered `data` heading, then shows
   `Total`, `Used`, `Available` and `Buffer/cache` (`Buffers` + `Cached` +
   `SReclaimable`, like `free`). A centered `proc` heading introduces the
-  `kernel` line (Slab + stacks + page tables + vmalloc + percpu; vmalloc and
-  percpu may slightly overlap) and the top 10 **userland** processes by RSS,
+  `kernel` line (Slab − SReclaimable + stacks + page tables + vmalloc +
+  percpu; SReclaimable is already in Buffer/cache, and vmalloc and percpu may
+  slightly overlap) and the top 10 **userland** processes by RSS,
   grouped by name; the list refreshes every 5 s by default (2–10 s) while the
   tooltip stays open;
   kernel threads are excluded;
@@ -152,9 +157,9 @@ Hovering a module shows a contextual tooltip:
   deduplicated: on a btrfs root with subvolumes, `/home` and `/var/log`
   therefore do not appear separately from `/`;
 - **Network**: active interface, download (↓) and upload (↑) rates, plus the
-  session total (deltas since the shell started, reset on restart). Both rates
-  are colored independently. The driver's absolute counter is not used because
-  it can be bogus;
+  session total (deltas since the shell started, reset on restart and kept
+  across interface changes). Both rates are colored independently. The
+  driver's absolute counter is not used because it can be bogus;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   The icon follows the level (thresholds on the rounded displayed value):
@@ -164,8 +169,8 @@ Hovering a module shows a contextual tooltip:
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
-  heading, then per-core percentages in two columns (1–6 and 7–12); past 20
-  cores, extra columns keep the block at most 10 rows tall. A centered `proc`
+  heading, then per-core percentages in two columns (split in half; three or
+  more columns past 20 cores, at most 10 rows tall). A centered `proc`
   heading then introduces kernel CPU (`system` + `irq` + `softirq`), on the
   same scale as the processes, followed by the top 10 **userland** processes by
   CPU (average since process start, scaled to total CPU capacity like the main
@@ -209,8 +214,8 @@ battery icon return to the normal bar color. It maps to `showColors` in
 
 ## Battery icon
 
-The icon follows the level in 10 % steps (empty battery below 10 %) and the
-power state:
+The icon follows the level in 10 % steps (empty icon at 0 %; 1–9 % shows the
+10 % icon) and the power state:
 
 - **on battery**: battery alone, filled according to the level;
 - **charging**: battery with a bolt, blue icon, value in the normal bar color;
@@ -248,17 +253,18 @@ event-driven), a single sampling series shared by every bar, and tooltips
 launch no process.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
-that wait does not consume CPU.
+the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
+module.
 
-The network module adds two file reads per second (`/proc/net/dev` and
-`/proc/net/route`, ~8 µs), inside the existing timer and without spawning a
-process.
+The network module reads `/proc/net/dev` once per fast tick; `/proc/net/route`
+and `/proc/net/ipv6_route` are read every 5 s, without spawning a process.
 
-The swap detail adds one `/proc/swaps` read per second and one `mm_stat` read
-per zram device every 10 s, also without spawning a process.
+Swap devices are read from `/proc/swaps` every 5 s, and `mm_stat` every 10 s
+per zram device, also without spawning a process.
 
-The CPU and RAM tooltips launch a `ps` (~15 ms) when they open and then every
-5 s by default (2–10 s) while the hover lasts, never in the background.
+The CPU and RAM tooltips launch a `ps` (~15 ms, wrapped in `timeout 5`) when
+they open and then every 5 s by default (2–10 s) while the hover lasts, never
+in the background.
 
 ## Checks
 
@@ -266,15 +272,17 @@ The CPU and RAM tooltips launch a `ps` (~15 ms) when they open and then every
 ./check.sh
 ```
 
-The script validates the manifest, checks shell script syntax, runs
-`shellcheck` when available and `qmllint` (Qt 6) on the QML files.
+The script validates the manifest, checks shell script syntax and version
+consistency, verifies the JSON/thermal output contracts, runs `shellcheck`
+when available and `qmllint` (Qt 6) with a proper `qs.Commons`/`qs.Ui` import
+root.
 
 ## GPU
 
-Sources used:
+Sources used, in order:
 
-1. `nvidia-smi`;
-2. `/sys/class/drm/*/device/gpu_busy_percent`;
+1. `/sys/class/drm/*/device/gpu_busy_percent`;
+2. `nvidia-smi`;
 3. otherwise `GPU --%`.
 
 ### Apple Silicon / Asahi

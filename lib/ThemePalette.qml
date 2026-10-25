@@ -17,8 +17,14 @@ Singleton {
     property color blue: "#7aa2f7"
 
     function apply(raw) {
+        const source = String(raw || "");
+
+        if (source.trim() === "") {
+            return;
+        }
+
         const values = {};
-        const lines = String(raw || "").split("\n");
+        const lines = source.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
             const match = lines[i].match(/^\s*([A-Za-z0-9_-]+)\s*=\s*["']?(#[0-9A-Fa-f]{6})/);
@@ -35,11 +41,38 @@ Singleton {
     }
 
     FileView {
+        id: colorsFile
+
         path: ShellColor.currentThemePath + "/colors.toml"
         watchChanges: true
         printErrors: false
 
         onLoaded: root.apply(text())
+        onLoadFailed: retryTimer.restart()
         onFileChanged: reload()
+    }
+
+    // omarchy-theme-set replaces the whole theme directory, which can make
+    // inotify lose the watched inode. Reload from the palette signals as well.
+    Connections {
+        target: ShellColor
+
+        function onForegroundChanged() {
+            colorsFile.reload();
+        }
+        function onBackgroundChanged() {
+            colorsFile.reload();
+        }
+        function onAccentChanged() {
+            colorsFile.reload();
+        }
+    }
+
+    Timer {
+        id: retryTimer
+        interval: 500
+        repeat: false
+
+        onTriggered: colorsFile.reload()
     }
 }
