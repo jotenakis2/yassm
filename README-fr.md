@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.11
+Version 1.9.12
 
 [English](README.md) | **Français**
 
@@ -110,8 +110,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`Buffers` + `Cached` + `SReclaimable`, comme `free`). Une ligne `kernel`
   indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu) ;
   `vmalloc` et `percpu` peuvent se recouvrir légèrement. Au survol, un
-  échantillon unique de `ps` ajoute le top 10 des processus par RSS, regroupés
-  par nom ;
+  échantillon unique de `ps` ajoute le top 10 des processus **userland** par
+  RSS, regroupés par nom ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -136,9 +136,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`draw` en décharge, `charge` en charge) ;
 - **CPU** : pourcentage courant. Une ligne `kernel` indique le CPU noyau
   (`system` + `irq` + `softirq`), sur la même échelle que les processus. Au
-  survol, un échantillon unique de `ps` ajoute le top 10 des processus par CPU
-  (moyenne depuis leur lancement, ramenée sur la capacité totale des CPU comme
-  la valeur principale), regroupés par nom ;
+  survol, un échantillon unique de `ps` ajoute le top 10 des processus
+  **userland** par CPU (moyenne depuis leur lancement, ramenée sur la capacité
+  totale des CPU comme la valeur principale), regroupés par nom ; les threads
+  noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
 Les infobulles réseau, swap, disque et température ne lancent aucun processus.

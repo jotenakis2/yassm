@@ -561,17 +561,29 @@ BarWidget {
         for (let i = 0; i < lines.length; i++) {
             const parts = lines[i].trim().split(/\s+/);
 
-            if (parts.length < 2) {
+            if (parts.length < 4) {
                 continue;
             }
 
+            const pid = Number(parts[0]);
+            const ppid = Number(parts[1]);
             const value = Number(parts[parts.length - 1]);
+
+            if (!Number.isFinite(pid) || !Number.isFinite(ppid)) {
+                continue;
+            }
+
+            // Kernel threads are children of kthreadd (PID 2); skip them so
+            // only userland processes appear in the tooltip.
+            if (pid === 2 || ppid === 2) {
+                continue;
+            }
 
             if (!Number.isFinite(value) || value <= 0) {
                 continue;
             }
 
-            const name = parts.slice(0, -1).join(" ") || "?";
+            const name = parts.slice(2, -1).join(" ") || "?";
 
             if (name === "ps") {
                 continue;
@@ -1249,7 +1261,7 @@ BarWidget {
     Process {
         id: cpuTopProcess
 
-        command: ["ps", "-eo", "comm=,%cpu=", "--sort=-%cpu"]
+        command: ["ps", "-eo", "pid=,ppid=,comm=,%cpu=", "--sort=-%cpu"]
 
         stdout: StdioCollector {
             id: cpuTopOutput
@@ -1265,7 +1277,7 @@ BarWidget {
     Process {
         id: memoryTopProcess
 
-        command: ["ps", "-eo", "comm=,rss=", "--sort=-rss"]
+        command: ["ps", "-eo", "pid=,ppid=,comm=,rss=", "--sort=-rss"]
 
         stdout: StdioCollector {
             id: memoryTopOutput

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.11
+Version 1.9.12
 
 **English** | [Français](README-fr.md)
 
@@ -109,7 +109,7 @@ Hovering a module shows a contextual tooltip:
   (`Buffers` + `Cached` + `SReclaimable`, like `free`). A `kernel` line shows
   kernel memory (Slab + stacks + page tables + vmalloc + percpu); vmalloc and
   percpu may slightly overlap. On hover, a single `ps` sample adds the top 10
-  processes by RSS, grouped by name;
+  **userland** processes by RSS, grouped by name; kernel threads are excluded;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
@@ -134,8 +134,9 @@ Hovering a module shows a contextual tooltip:
   discharging, `charge` while charging);
 - **CPU**: current percentage. A `kernel` line shows kernel CPU (`system` +
   `irq` + `softirq`), on the same scale as the processes. On hover, a single
-  `ps` sample adds the top 10 processes by CPU (average since process start,
-  scaled to total CPU capacity like the main value), grouped by name;
+  `ps` sample adds the top 10 **userland** processes by CPU (average since
+  process start, scaled to total CPU capacity like the main value), grouped by
+  name; kernel threads are excluded;
 - **GPU**: current percentage.
 
 Network, swap, disk and temperature tooltips launch no process. CPU and RAM
