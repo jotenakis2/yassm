@@ -37,8 +37,7 @@ PanelWindow {
         { key: "showDisk", label: "Disk" },
         { key: "showNet", label: "Network" },
         { key: "showTemp", label: "Temperature" },
-        { key: "showBattery", label: "Battery" },
-        { key: "showColors", label: "Bar colors" }
+        { key: "showBattery", label: "Battery" }
     ]
 
     visible: false
@@ -168,6 +167,22 @@ PanelWindow {
                 onClicked: {
                     if (root.hostWidget) {
                         root.hostWidget.updateSetting("showBoxes", !checked);
+                    }
+                }
+            }
+
+            Toggle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Style.space(40)
+                label: "Colors"
+                fontFamily: Style.font.family
+                titleSize: Style.font.body
+                foreground: ShellColor.popups.text
+                checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
+
+                onClicked: {
+                    if (root.hostWidget) {
+                        root.hostWidget.updateSetting("showColors", !checked);
                     }
                 }
             }

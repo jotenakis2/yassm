@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.16
+Version 1.10.17
 
 **English** | [Français](README-fr.md)
 
@@ -72,11 +72,11 @@ Clicking the widget opens a panel to enable or disable:
 - Network
 - Temperature
 - Battery
-- Bar colors (colored thresholds and blue battery icon on mains)
 
 **Layout**
 
 - Boxes (module frames)
+- Colors (colored thresholds and blue battery icon on mains)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 
@@ -188,7 +188,7 @@ as soon as the machine is on mains power (charging or held at a charge
 threshold), the icon turns theme blue while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
-The **Bar colors** toggle disables all these colors: values and the blue
+The **Colors** toggle disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).
 

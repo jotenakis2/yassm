@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.16
+Version 1.10.17
 
 [English](README.md) | **Français**
 
@@ -72,11 +72,11 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Network
 - Temperature
 - Battery
-- Bar colors (seuils colorés et icône batterie bleue sur secteur)
 
 **Layout**
 
 - Boxes (encadrement des modules)
+- Colors (seuils colorés et icône batterie bleue sur secteur)
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 
@@ -189,7 +189,7 @@ batterie : dès que la machine est sur secteur (en charge ou seuil de charge
 atteint), l'icône passe au bleu du thème tandis que la valeur conserve la
 couleur normale de la barre. Sur batterie, la valeur suit les seuils ci-dessus.
 
-Le toggle **Bar colors** du panneau désactive toutes ces couleurs : les valeurs
+Le toggle **Colors** du panneau désactive toutes ces couleurs : les valeurs
 et l'icône bleue de la batterie reviennent à la couleur normale de la barre.
 Il correspond à `showColors` dans `shell.json` (activé par défaut).
 
