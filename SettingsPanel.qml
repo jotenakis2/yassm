@@ -92,7 +92,7 @@ PanelWindow {
 
             Label {
                 Layout.fillWidth: true
-                text: "Yet Another Simple System Monitoring - Settings"
+                text: "Settings"
                 wrapMode: Text.NoWrap
                 palette.windowText: ShellColor.popups.text
                 font.family: Style.font.family
