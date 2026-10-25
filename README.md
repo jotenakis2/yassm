@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.12
+Version 1.10.13
 
 **English** | [Français](README-fr.md)
 
@@ -118,7 +118,8 @@ Hovering a module shows a contextual tooltip:
   `SReclaimable`, like `free`). A centered `proc` heading introduces the
   `kernel` line (Slab + stacks + page tables + vmalloc + percpu; vmalloc and
   percpu may slightly overlap) and the top 10 **userland** processes by RSS,
-  grouped by name; kernel threads are excluded;
+  grouped by name; the list refreshes every 5 s while the tooltip stays open;
+  kernel threads are excluded;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
@@ -148,14 +149,15 @@ Hovering a module shows a contextual tooltip:
   heading then introduces kernel CPU (`system` + `irq` + `softirq`), on the
   same scale as the processes, followed by the top 10 **userland** processes by
   CPU (average since process start, scaled to total CPU capacity like the main
-  value), grouped by name; kernel threads are excluded;
+  value), grouped by name; the list refreshes every 5 s while the tooltip stays
+  open; kernel threads are excluded;
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
 `data`, `proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
 the body uses the theme `muted` color. Network, swap, disk and temperature
-tooltips launch no process. CPU and RAM tooltips launch a single `ps` when they
-open and do not refresh it while the hover lasts.
+tooltips launch no process. CPU and RAM tooltips launch a `ps` when they open
+and then every 5 s while the hover lasts.
 
 ## Bar colors
 
@@ -167,7 +169,7 @@ value:
 | CPU, RAM, Swap, Disk, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Network | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
-| Battery | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
+| Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Temperatures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 Load is not capped: it can exceed 100 % when the run queue is longer than the
@@ -234,8 +236,8 @@ process.
 The swap detail adds one `/proc/swaps` read per second and one `mm_stat` read
 per zram device every 10 s, also without spawning a process.
 
-The CPU and RAM tooltips launch a single `ps` (~15 ms) when they open, never in
-the background.
+The CPU and RAM tooltips launch a `ps` (~15 ms) when they open and then every
+5 s while the hover lasts, never in the background.
 
 ## Checks
 

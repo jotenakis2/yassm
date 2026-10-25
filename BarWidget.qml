@@ -426,7 +426,7 @@ BarWidget {
             return button.foreground;
         }
 
-        if (value < 10) {
+        if (value <= 10) {
             return Yassm.ThemePalette.red;
         }
 
@@ -1110,6 +1110,18 @@ BarWidget {
         return null;
     }
 
+    function refreshProcesses() {
+        if (root.hoveredSegment === "cpu") {
+            if (!cpuTopProcess.running) {
+                cpuTopProcess.running = true;
+            }
+        } else if (root.hoveredSegment === "memory") {
+            if (!memoryTopProcess.running) {
+                memoryTopProcess.running = true;
+            }
+        }
+    }
+
     function updateTooltip() {
         if (root.opened) {
             root.hideSegmentTooltip();
@@ -1136,17 +1148,11 @@ BarWidget {
 
         if (hit.key === "cpu") {
             root.processCpu = [];
-
-            if (!cpuTopProcess.running) {
-                cpuTopProcess.running = true;
-            }
         } else if (hit.key === "memory") {
             root.processMemory = [];
-
-            if (!memoryTopProcess.running) {
-                memoryTopProcess.running = true;
-            }
         }
+
+        root.refreshProcesses();
 
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
     }
@@ -1349,6 +1355,15 @@ BarWidget {
                 root.applyProcessMemory(memoryTopOutput.text);
             }
         }
+    }
+
+    // Keep the process list live while the CPU or RAM tooltip is open.
+    Timer {
+        interval: 5000
+        repeat: true
+        running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory"
+
+        onTriggered: root.refreshProcesses()
     }
 
     Timer {

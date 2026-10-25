@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.12
+Version 1.10.13
 
 [English](README.md) | **Français**
 
@@ -118,7 +118,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab +
   piles + tables de pages + vmalloc + percpu ; `vmalloc` et `percpu` peuvent se
   recouvrir légèrement) et le top 10 des processus **userland** par RSS,
-  regroupés par nom ; les threads noyau sont exclus ;
+  regroupés par nom ; la liste est rafraîchie toutes les 5 s tant que le
+  tooltip reste ouvert ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -149,7 +150,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
   le top 10 des processus **userland** par CPU (moyenne depuis leur lancement,
   ramenée sur la capacité totale des CPU comme la valeur principale), regroupés
-  par nom ; les threads noyau sont exclus ;
+  par nom ; la liste est rafraîchie toutes les 5 s tant que le tooltip reste
+  ouvert ; les threads noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
@@ -167,7 +169,7 @@ valeur arrondie affichée :
 | CPU, RAM, Swap, Disque, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Réseau | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
-| Batterie | ≥ 50 % | 20–49 % | 10–19 % | < 10 % |
+| Batterie | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Températures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 Le LOAD n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente
@@ -235,8 +237,8 @@ et `/proc/net/route`, ~8 µs), dans le timer existant et sans processus.
 Le détail swap ajoute une lecture de `/proc/swaps` par seconde et une lecture
 de `mm_stat` par périphérique zram toutes les 10 s, également sans processus.
 
-Les tooltips CPU et RAM lancent un seul `ps` (~15 ms) à l'ouverture, jamais en
-arrière-plan.
+Les tooltips CPU et RAM lancent un `ps` (~15 ms) à l'ouverture puis toutes les
+5 s pendant le survol, jamais en arrière-plan.
 
 ## Vérifications
 
