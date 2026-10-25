@@ -691,7 +691,7 @@ BarWidget {
 
     function coreEntry(label, value) {
         const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
-        return String(label).padStart(3, " ") + " " + String(percent).padStart(3, " ") + "%";
+        return String(label).padStart(2, " ") + " " + String(percent).padStart(3, " ") + "%";
     }
 
     function batteryStateLabel(status) {
@@ -962,7 +962,7 @@ BarWidget {
 
         if (key === "cpu") {
             const cores = metrics.corePercents || [];
-            const lines = [coreEntry("Avg", metrics.cpuPercent)];
+            const lines = [];
 
             if (cores.length > 0) {
                 const rows = Math.ceil(cores.length / 2);
@@ -983,7 +983,10 @@ BarWidget {
             const nameWidth = Math.max(6, table.nameWidth);
             const valueWidth = Math.max(kernelValue.length, table.valueWidth);
 
-            lines.push("");
+            if (lines.length > 0) {
+                lines.push("");
+            }
+
             lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
 
             if (root.processCpu.length > 0) {

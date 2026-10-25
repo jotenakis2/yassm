@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.7
+Version 1.10.8
 
 [English](README.md) | **Français**
 
@@ -142,8 +142,8 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
-- **CPU** : pourcentage courant. Le tooltip affiche `Avg` puis les 12 cœurs sur
-  deux colonnes (1–6 et 7–12), en pourcentage par cœur. Une ligne `kernel`
+- **CPU** : pourcentage courant. Le tooltip affiche les 12 cœurs sur deux
+  colonnes (1–6 et 7–12), en pourcentage par cœur. Une ligne `kernel`
   indique le CPU noyau (`system` + `irq` + `softirq`), sur la même échelle que
   les processus. Au survol, un échantillon unique de `ps` ajoute le top 10 des
   processus **userland** par CPU (moyenne depuis leur lancement, ramenée sur la

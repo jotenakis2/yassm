@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.7
+Version 1.10.8
 
 **English** | [Français](README-fr.md)
 
@@ -141,8 +141,8 @@ Hovering a module shows a contextual tooltip:
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
   discharging, `charge` while charging);
-- **CPU**: current percentage. The tooltip shows `Avg` then the 12 cores in two
-  columns (1–6 and 7–12), as per-core percentages. A `kernel` line shows kernel
+- **CPU**: current percentage. The tooltip shows the 12 cores in two columns
+  (1–6 and 7–12), as per-core percentages. A `kernel` line shows kernel
   CPU (`system` + `irq` + `softirq`), on the same scale as the processes. On
   hover, a single `ps` sample adds the top 10 **userland** processes by CPU
   (average since process start, scaled to total CPU capacity like the main
