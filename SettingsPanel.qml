@@ -135,7 +135,7 @@ PanelWindow {
                 Label {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
-                    text: "Spacing"
+                    text: "Between modules"
                     palette.windowText: ShellColor.popups.text
                     font.family: Style.font.family
                     font.pixelSize: Style.font.body
@@ -177,7 +177,7 @@ PanelWindow {
                 Label {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
-                    text: "Icon gap"
+                    text: "Between icon and value"
                     palette.windowText: ShellColor.popups.text
                     font.family: Style.font.family
                     font.pixelSize: Style.font.body

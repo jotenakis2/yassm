@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.4
+Version 1.10.5
 
 [English](README.md) | **Français**
 
@@ -72,13 +72,13 @@ Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
 - Battery
 - Bar colors (seuils colorés et batterie bleue sur secteur)
 - Boxes (encadrement des modules)
-- Spacing (espacement entre modules, 0–5 espaces ; 2 par défaut)
-- Icon gap (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
+- Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
+- Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 
-Le curseur **Spacing** règle l'espacement entre les modules de 0 à 5 espaces
-(2 par défaut). Le curseur **Icon gap** règle l'espace entre l'icône et la
-valeur de chaque module de 0 à 3 espaces (1 par défaut, soit 7,19 px). À 0, un
-écart minimal de 2 px est conservé.
+Le curseur **Between modules** règle l'espacement entre les modules de 0 à 5
+espaces (2 par défaut). Le curseur **Between icon and value** règle l'espace
+entre l'icône et la valeur de chaque module de 0 à 3 espaces (1 par défaut,
+soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.4
+Version 1.10.5
 
 **English** | [Français](README-fr.md)
 
@@ -72,13 +72,13 @@ Clicking the widget opens a panel to enable or disable:
 - Battery
 - Bar colors (colored thresholds and blue battery on mains)
 - Boxes (module frames)
-- Spacing (gap between modules, 0–5 spaces; default 2)
-- Icon gap (gap between icon and value, 0–3 spaces; default 1)
+- Between modules (gap between modules, 0–5 spaces; default 2)
+- Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 
-The **Spacing** slider sets the gap between modules from 0 to 5 spaces
-(default 2). The **Icon gap** slider sets the gap between each module's icon
-and value from 0 to 3 spaces (default 1, i.e. 7.19 px). At 0, a minimum gap of
-2 px is kept.
+The **Between modules** slider sets the gap between modules from 0 to 5 spaces
+(default 2). The **Between icon and value** slider sets the gap between each
+module's icon and value from 0 to 3 spaces (default 1, i.e. 7.19 px). At 0, a
+minimum gap of 2 px is kept.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
