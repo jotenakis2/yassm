@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Commons
 import qs.Ui
 import "lib" as Yassm
 
@@ -1335,51 +1336,68 @@ BarWidget {
             Repeater {
                 model: root.segmentOrder
 
-                Row {
+                Rectangle {
+                    id: segmentBox
+
                     required property string modelData
 
                     readonly property string metricKey: modelData
+                    readonly property int paddingX: Style.space(4)
+                    readonly property int paddingY: Style.space(2)
 
                     visible: root.segmentVisible(metricKey)
+                    implicitWidth: segmentContent.implicitWidth + paddingX * 2
+                    implicitHeight: segmentContent.implicitHeight + paddingY * 2
+                    radius: Style.space(4)
+                    color: Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03)
+                    border.width: Math.max(1, Style.normalBorderWidth)
+                    border.color: Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20)
 
-                    Text {
-                        text: root.segmentIcon(metricKey)
-                        color: root.segmentIconColor(metricKey)
-                        font.family: button.fontFamily
-                        font.pixelSize: button.fontSize
-                        renderType: Text.NativeRendering
-                    }
+                    Row {
+                        id: segmentContent
 
-                    Text {
-                        text: " " + root.segmentValue(metricKey)
-                        color: root.segmentColor(metricKey)
-                        font.family: button.fontFamily
-                        font.pixelSize: button.fontSize
-                        renderType: Text.NativeRendering
-                    }
+                        anchors.centerIn: parent
+                        spacing: 0
 
-                    Item {
-                        visible: root.segmentSecondaryValue(metricKey) !== ""
-                        width: root.moduleGap
-                        height: 1
-                    }
+                        Text {
+                            text: root.segmentIcon(metricKey)
+                            color: root.segmentIconColor(metricKey)
+                            font.family: button.fontFamily
+                            font.pixelSize: button.fontSize
+                            renderType: Text.NativeRendering
+                        }
 
-                    Text {
-                        visible: root.segmentSecondaryIcon(metricKey) !== ""
-                        text: root.segmentSecondaryIcon(metricKey)
-                        color: button.foreground
-                        font.family: button.fontFamily
-                        font.pixelSize: button.fontSize
-                        renderType: Text.NativeRendering
-                    }
+                        Text {
+                            text: " " + root.segmentValue(metricKey)
+                            color: root.segmentColor(metricKey)
+                            font.family: button.fontFamily
+                            font.pixelSize: button.fontSize
+                            renderType: Text.NativeRendering
+                        }
 
-                    Text {
-                        visible: root.segmentSecondaryValue(metricKey) !== ""
-                        text: root.segmentSecondaryValue(metricKey)
-                        color: root.segmentSecondaryColor(metricKey)
-                        font.family: button.fontFamily
-                        font.pixelSize: button.fontSize
-                        renderType: Text.NativeRendering
+                        Item {
+                            visible: root.segmentSecondaryValue(metricKey) !== ""
+                            width: root.moduleGap
+                            height: 1
+                        }
+
+                        Text {
+                            visible: root.segmentSecondaryIcon(metricKey) !== ""
+                            text: root.segmentSecondaryIcon(metricKey)
+                            color: button.foreground
+                            font.family: button.fontFamily
+                            font.pixelSize: button.fontSize
+                            renderType: Text.NativeRendering
+                        }
+
+                        Text {
+                            visible: root.segmentSecondaryValue(metricKey) !== ""
+                            text: root.segmentSecondaryValue(metricKey)
+                            color: root.segmentSecondaryColor(metricKey)
+                            font.family: button.fontFamily
+                            font.pixelSize: button.fontSize
+                            renderType: Text.NativeRendering
+                        }
                     }
                 }
             }
