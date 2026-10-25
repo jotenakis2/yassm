@@ -922,10 +922,16 @@ BarWidget {
 
         if (key === "cpu") {
             const lines = [Math.round(metrics.cpuPercent) + "%"];
+            const table = processTable(root.processCpu, false);
+            const kernelValue = metrics.kernelPercent.toFixed(1) + "%";
+            const nameWidth = Math.max(6, table.nameWidth);
+            const valueWidth = Math.max(kernelValue.length, table.valueWidth);
+
+            lines.push("");
+            lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
 
             if (root.processCpu.length > 0) {
-                lines.push("");
-                appendProcessRows(lines, root.processCpu, false);
+                appendTableRows(lines, table, nameWidth, valueWidth);
             }
 
             return tooltipBlock("CPU", lines.join("\n"));

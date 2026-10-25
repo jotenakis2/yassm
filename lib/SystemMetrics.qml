@@ -18,6 +18,7 @@ Singleton {
     property int nproc: 1
 
     property real cpuPercent: 0
+    property real kernelPercent: 0
     property var previousCpuTimes: null
 
     property real memoryPercent: 0
@@ -124,6 +125,7 @@ Singleton {
         }
 
         const idle = fields[3] + fields[4];
+        const kernel = (fields[2] || 0) + (fields[5] || 0) + (fields[6] || 0);
         const total = fields.reduce(function(sum, value) {
             return sum + value;
         }, 0);
@@ -132,13 +134,15 @@ Singleton {
         if (previous) {
             const totalDelta = total - previous.total;
             const idleDelta = idle - previous.idle;
+            const kernelDelta = kernel - previous.kernel;
 
             if (totalDelta > 0) {
                 metrics.cpuPercent = Math.max(0, Math.min(100, 100 * (totalDelta - idleDelta) / totalDelta));
+                metrics.kernelPercent = Math.max(0, Math.min(100, 100 * kernelDelta / totalDelta));
             }
         }
 
-        metrics.previousCpuTimes = { idle: idle, total: total };
+        metrics.previousCpuTimes = { idle: idle, total: total, kernel: kernel };
     }
 
     function applyMemoryInfo(content) {
