@@ -297,6 +297,15 @@ PanelWindow {
                 Layout.preferredHeight: Style.space(40)
                 spacing: Style.space(8)
 
+                HoverHandler {
+                    id: refreshHover
+                }
+
+                PanelToolTip {
+                    visible: refreshHover.hovered
+                    text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram stay at 10 s."
+                }
+
                 Label {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
@@ -338,6 +347,15 @@ PanelWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.space(40)
                 spacing: Style.space(8)
+
+                HoverHandler {
+                    id: processesHover
+                }
+
+                PanelToolTip {
+                    visible: processesHover.hovered
+                    text: "Top processes refresh while a CPU/RAM tooltip is open.\nOne ps per tick; 2 s minimum."
+                }
 
                 Label {
                     Layout.fillWidth: true
