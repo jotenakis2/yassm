@@ -796,15 +796,8 @@ BarWidget {
             valueWidth = hasKernel ? Math.max(kernelValue.length, table.valueWidth) : table.valueWidth;
 
             if (hasKernel) {
-                const reclaimable = metrics.kernelReclaimableKb > 0
-                    ? " (" + formatKernelKb(metrics.kernelReclaimableKb) + " reclaimable max)"
-                    : "";
-
                 lines.push("");
-                lines.push(
-                    "kernel".padEnd(nameWidth) + "  "
-                        + kernelValue.padStart(valueWidth) + reclaimable
-                );
+                lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
             }
 
             if (root.processMemory.length > 0) {

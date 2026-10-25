@@ -26,7 +26,6 @@ Singleton {
     property real memoryAvailableKb: 0
     property real memoryBuffCacheKb: 0
     property real kernelTotalKb: 0
-    property real kernelReclaimableKb: 0
 
     property bool hasSwap: false
     property real swapPercent: 0
@@ -158,7 +157,6 @@ Singleton {
         let pageTables = 0;
         let vmallocUsed = 0;
         let percpu = 0;
-        let kReclaimable = 0;
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].startsWith("MemTotal:")) {
@@ -189,8 +187,6 @@ Singleton {
                 vmallocUsed = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Percpu:")) {
                 percpu = Number(lines[i].split(/\s+/)[1]);
-            } else if (lines[i].startsWith("KReclaimable:")) {
-                kReclaimable = Number(lines[i].split(/\s+/)[1]);
             }
         }
 
@@ -204,7 +200,6 @@ Singleton {
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
         metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
         metrics.kernelTotalKb = slab + kernelStack + pageTables + vmallocUsed + percpu;
-        metrics.kernelReclaimableKb = kReclaimable > 0 ? kReclaimable : sReclaimable;
 
         if (swapTotal > 0) {
             metrics.hasSwap = true;

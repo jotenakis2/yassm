@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.7
+Version 1.9.8
 
 [English](README.md) | **Français**
 
@@ -108,10 +108,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées ;
 - **RAM** : le tooltip affiche `Total`, `Used`, `Available` et `Buffer/cache`
   (`Buffers` + `Cached` + `SReclaimable`, comme `free`). Une ligne `kernel`
-  indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu)
-  et son maximum récupérable (`KReclaimable`) ; `vmalloc` et `percpu` peuvent
-  se recouvrir légèrement. Au survol, un échantillon unique de `ps` ajoute le
-  top 5 des processus par RSS, regroupés par nom ;
+  indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu) ;
+  `vmalloc` et `percpu` peuvent se recouvrir légèrement. Au survol, un
+  échantillon unique de `ps` ajoute le top 5 des processus par RSS, regroupés
+  par nom ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
