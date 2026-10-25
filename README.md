@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.13
+Version 1.9.14
 
 **English** | [Français](README-fr.md)
 
@@ -24,7 +24,8 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Temperature | all normal temperatures, sorted | 10 s |
 
 Swap is hidden when the machine has no active swap. The GPU shows `--%` when
-no reliable source is available.
+no reliable source is available. The network is displayed in two separate
+boxes, ↓ and ↑.
 
 ## Architecture
 

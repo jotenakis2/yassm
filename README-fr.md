@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.9.13
+Version 1.9.14
 
 [English](README.md) | **Français**
 
@@ -24,7 +24,8 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | Température | toutes les températures normales, triées | 10 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
-`--%` lorsqu'aucune source fiable n'est disponible.
+`--%` lorsqu'aucune source fiable n'est disponible. Le réseau est affiché dans
+deux boîtes distinctes, ↓ et ↑.
 
 ## Architecture
 

@@ -165,18 +165,23 @@ BarWidget {
             const up = metrics.networkTxKib;
             const downText = formatRate(down);
             const upText = formatRate(up);
-            const gap = " ".repeat(root.moduleSpacing);
 
             segments.push({
-                key: "net",
+                key: "netDown",
                 icon: iconNetDown,
                 valueText: downText,
-                text: iconNetDown + " " + downText + gap + iconNetUp + " " + upText,
+                text: iconNetDown + " " + downText,
                 value: Math.round(down),
-                kind: "net",
-                secondaryIcon: iconNetUp,
-                secondaryValueText: " " + upText,
-                secondaryValue: Math.round(up)
+                kind: "net"
+            });
+
+            segments.push({
+                key: "netUp",
+                icon: iconNetUp,
+                valueText: upText,
+                text: iconNetUp + " " + upText,
+                value: Math.round(up),
+                kind: "net"
             });
         }
 
@@ -221,7 +226,7 @@ BarWidget {
         }).join(gap);
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "net", "temp", "battery"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "temp", "battery"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -240,30 +245,6 @@ BarWidget {
 
     function segmentValue(key) {
         return segmentMap[key] ? segmentMap[key].valueText : "";
-    }
-
-    function segmentSecondaryIcon(key) {
-        return segmentMap[key] && segmentMap[key].secondaryIcon
-            ? segmentMap[key].secondaryIcon : "";
-    }
-
-    function segmentSecondaryValue(key) {
-        return segmentMap[key] && segmentMap[key].secondaryValueText
-            ? segmentMap[key].secondaryValueText : "";
-    }
-
-    function segmentSecondaryColor(key) {
-        if (!root.showColors) {
-            return button.foreground;
-        }
-
-        const segment = segmentMap[key];
-
-        if (!segment || segment.secondaryValue === undefined) {
-            return button.foreground;
-        }
-
-        return networkColor(segment.secondaryValue);
     }
 
     function segmentVisible(key) {
@@ -954,7 +935,7 @@ BarWidget {
             return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
-        if (key === "net") {
+        if (key === "net" || key === "netDown" || key === "netUp") {
             const metrics = Yassm.SystemMetrics;
 
             if (!metrics.hasNetwork) {
@@ -1370,30 +1351,6 @@ BarWidget {
                         Text {
                             text: " " + root.segmentValue(metricKey)
                             color: root.segmentColor(metricKey)
-                            font.family: button.fontFamily
-                            font.pixelSize: button.fontSize
-                            renderType: Text.NativeRendering
-                        }
-
-                        Item {
-                            visible: root.segmentSecondaryValue(metricKey) !== ""
-                            width: root.moduleGap
-                            height: 1
-                        }
-
-                        Text {
-                            visible: root.segmentSecondaryIcon(metricKey) !== ""
-                            text: root.segmentSecondaryIcon(metricKey)
-                            color: button.foreground
-                            font.family: button.fontFamily
-                            font.pixelSize: button.fontSize
-                            renderType: Text.NativeRendering
-                        }
-
-                        Text {
-                            visible: root.segmentSecondaryValue(metricKey) !== ""
-                            text: root.segmentSecondaryValue(metricKey)
-                            color: root.segmentSecondaryColor(metricKey)
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize
                             renderType: Text.NativeRendering
