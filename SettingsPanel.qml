@@ -303,7 +303,7 @@ PanelWindow {
 
                 PanelToolTip {
                     visible: refreshHover.hovered
-                    text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram stay at 10 s."
+                    text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead."
                 }
 
                 Label {
