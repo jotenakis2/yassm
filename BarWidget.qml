@@ -839,21 +839,22 @@ BarWidget {
             valueWidth = Math.max(valueWidth, table.valueWidth);
 
             const lines = [];
+            lines.push(root.centeredMark + root.iconMemory + " data");
 
             for (let i = 0; i < labels.length; i++) {
                 lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth));
             }
 
-            if (hasKernel) {
+            if (hasKernel || root.processMemory.length > 0) {
                 lines.push("");
+                lines.push(root.centeredMark + "proc");
+            }
+
+            if (hasKernel) {
                 lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
             }
 
             if (root.processMemory.length > 0) {
-                if (!hasKernel) {
-                    lines.push("");
-                }
-
                 appendTableRows(lines, table, nameWidth, valueWidth);
             }
 

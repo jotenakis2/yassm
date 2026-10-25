@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.11
+Version 1.10.12
 
 [English](README.md) | **Français**
 
@@ -113,12 +113,12 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
   alignées. L'icône change d'inclinaison selon la charge : aiguille basse
   jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
-- **RAM** : le tooltip affiche `Total`, `Used`, `Available` et `Buffer/cache`
-  (`Buffers` + `Cached` + `SReclaimable`, comme `free`). Une ligne `kernel`
-  indique la mémoire noyau (Slab + piles + tables de pages + vmalloc + percpu) ;
-  `vmalloc` et `percpu` peuvent se recouvrir légèrement. Au survol, un
-  échantillon unique de `ps` ajoute le top 10 des processus **userland** par
-  RSS, regroupés par nom ; les threads noyau sont exclus ;
+- **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
+  `Used`, `Available` et `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
+  comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab +
+  piles + tables de pages + vmalloc + percpu ; `vmalloc` et `percpu` peuvent se
+  recouvrir légèrement) et le top 10 des processus **userland** par RSS,
+  regroupés par nom ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -153,9 +153,9 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
-(`cores`, `proc`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de texte
-du tooltip ; le corps utilise la couleur `muted` du thème. Les valeurs sont
-formatées à la demande, uniquement pendant le survol.
+(`cores`, `data`, `proc`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur
+de texte du tooltip ; le corps utilise la couleur `muted` du thème. Les valeurs
+sont formatées à la demande, uniquement pendant le survol.
 
 ## Couleurs de la barre
 

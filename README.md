@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.11
+Version 1.10.12
 
 **English** | [Français](README-fr.md)
 
@@ -113,11 +113,12 @@ Hovering a module shows a contextual tooltip:
 - **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns.
   The icon tilts with the load: needle low up to 50 %, medium from 51 to 90 %,
   high above that;
-- **RAM**: the tooltip shows `Total`, `Used`, `Available` and `Buffer/cache`
-  (`Buffers` + `Cached` + `SReclaimable`, like `free`). A `kernel` line shows
-  kernel memory (Slab + stacks + page tables + vmalloc + percpu); vmalloc and
-  percpu may slightly overlap. On hover, a single `ps` sample adds the top 10
-  **userland** processes by RSS, grouped by name; kernel threads are excluded;
+- **RAM**: the tooltip opens with a centered `data` heading, then shows
+  `Total`, `Used`, `Available` and `Buffer/cache` (`Buffers` + `Cached` +
+  `SReclaimable`, like `free`). A centered `proc` heading introduces the
+  `kernel` line (Slab + stacks + page tables + vmalloc + percpu; vmalloc and
+  percpu may slightly overlap) and the top 10 **userland** processes by RSS,
+  grouped by name; kernel threads are excluded;
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
@@ -151,10 +152,10 @@ Hovering a module shows a contextual tooltip:
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
-`proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color; the body
-uses the theme `muted` color. Network, swap, disk and temperature tooltips
-launch no process. CPU and RAM tooltips launch a single `ps` when they open and
-do not refresh it while the hover lasts.
+`data`, `proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
+the body uses the theme `muted` color. Network, swap, disk and temperature
+tooltips launch no process. CPU and RAM tooltips launch a single `ps` when they
+open and do not refresh it while the hover lasts.
 
 ## Bar colors
 
