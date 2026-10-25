@@ -23,6 +23,8 @@ Singleton {
     property real memoryPercent: 0
     property real memoryTotalKb: 0
     property real memoryUsedKb: 0
+    property real kernelTotalKb: 0
+    property real kernelReclaimableKb: 0
 
     property bool hasSwap: false
     property real swapPercent: 0
@@ -146,6 +148,10 @@ Singleton {
         let swapFree = 0;
         let zswapCompressed = 0;
         let zswapOriginal = 0;
+        let slab = 0;
+        let sReclaimable = 0;
+        let kernelStack = 0;
+        let pageTables = 0;
 
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].startsWith("MemTotal:")) {
@@ -160,6 +166,14 @@ Singleton {
                 zswapCompressed = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Zswapped:")) {
                 zswapOriginal = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Slab:")) {
+                slab = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("SReclaimable:")) {
+                sReclaimable = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("KernelStack:")) {
+                kernelStack = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("PageTables:")) {
+                pageTables = Number(lines[i].split(/\s+/)[1]);
             }
         }
 
@@ -170,6 +184,8 @@ Singleton {
         metrics.memoryTotalKb = total;
         metrics.memoryUsedKb = Math.max(0, total - available);
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
+        metrics.kernelTotalKb = slab + kernelStack + pageTables;
+        metrics.kernelReclaimableKb = sReclaimable;
 
         if (swapTotal > 0) {
             metrics.hasSwap = true;

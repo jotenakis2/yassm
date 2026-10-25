@@ -476,6 +476,24 @@ BarWidget {
         return Math.round(value * 1024) + " B";
     }
 
+    function formatKernelKb(kilobytes) {
+        const value = Number(kilobytes);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "0 B";
+        }
+
+        if (value >= 1048576) {
+            return (value / 1048576).toFixed(2) + " GiB";
+        }
+
+        if (value >= 1024) {
+            return Math.round(value / 1024) + " MiB";
+        }
+
+        return Math.round(value * 1024) + " B";
+    }
+
     // Compact 4-character rate for the bar (KiB/s): "  0K" … "999K", "1.0M",
     // " 10M", "1.0G". Keeping the value field at 3 characters makes a network
     // half as wide as a percentage module.
@@ -740,6 +758,14 @@ BarWidget {
             const lines = [
                 formatKibAsGib(metrics.memoryUsedKb) + " / " + formatKibAsGib(metrics.memoryTotalKb)
             ];
+
+            if (metrics.kernelTotalKb > 0) {
+                const reclaimable = metrics.kernelReclaimableKb > 0
+                    ? " (" + formatKernelKb(metrics.kernelReclaimableKb) + " reclaimable max)"
+                    : "";
+
+                lines.push("kernel  " + formatKernelKb(metrics.kernelTotalKb) + reclaimable);
+            }
 
             if (root.processMemory.length > 0) {
                 lines.push("");
