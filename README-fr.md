@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.9
+Version 1.10.10
 
 [English](README.md) | **Français**
 
@@ -142,19 +142,19 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
   (`draw` en décharge, `charge` en charge) ;
-- **CPU** : pourcentage courant. Le tooltip liste les cœurs sous un titre
-  `cores`, en pourcentage par cœur sur deux colonnes (1–6 et 7–12) ; au-delà
-  de 20 cœurs, des colonnes supplémentaires maintiennent le bloc à 10 lignes
-  maximum. Une ligne `kernel` indique le CPU noyau (`system` + `irq` +
-  `softirq`), sur la même échelle que les processus. Au survol, un échantillon
-  unique de `ps` ajoute le top 10 des processus **userland** par CPU (moyenne
-  depuis leur lancement, ramenée sur la capacité totale des CPU comme la
-  valeur principale), regroupés par nom ; les threads noyau sont exclus ;
+- **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
+  centré, puis le pourcentage par cœur sur deux colonnes (1–6 et 7–12) ;
+  au-delà de 20 cœurs, des colonnes supplémentaires maintiennent le bloc à
+  10 lignes maximum. Un titre `proc` centré introduit ensuite le CPU noyau
+  (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
+  le top 10 des processus **userland** par CPU (moyenne depuis leur lancement,
+  ramenée sur la capacité totale des CPU comme la valeur principale), regroupés
+  par nom ; les threads noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
-(`cores`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de texte du
-tooltip ; le corps utilise la couleur `muted` du thème. Les valeurs sont
+(`cores`, `proc`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de texte
+du tooltip ; le corps utilise la couleur `muted` du thème. Les valeurs sont
 formatées à la demande, uniquement pendant le survol.
 
 ## Couleurs de la barre

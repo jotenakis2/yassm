@@ -22,6 +22,7 @@ BarWidget {
     property string hoveredSegment: ""
 
     readonly property string sectionMark: "\u0001"
+    readonly property string centeredMark: "\u0002"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
@@ -39,7 +40,8 @@ BarWidget {
 
             for (let i = 0; i < raw.length; i++) {
                 const line = raw[i];
-                const heading = line.startsWith(root.sectionMark);
+                const heading = line.startsWith(root.sectionMark)
+                    || line.startsWith(root.centeredMark);
 
                 lines.push({
                     text: heading ? line.slice(1).replace(/\u00A0+$/, "") : line,
@@ -746,6 +748,14 @@ BarWidget {
         function padLine(line) {
             // NBSP padding keeps every line the same width, so the bar's
             // centered Text lines up their left edges in a monospace font.
+            if (line.startsWith(root.centeredMark)) {
+                const body = line.slice(1);
+                const visible = body.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_").length;
+                const indent = Math.max(0, Math.floor((width - visible) / 2));
+
+                return root.centeredMark + "\u00A0".repeat(indent) + body.padEnd(width - indent, "\u00A0");
+            }
+
             return line.padEnd(width, "\u00A0");
         }
 
@@ -965,7 +975,7 @@ BarWidget {
             const lines = [];
 
             if (cores.length > 0) {
-                lines.push(root.sectionMark + root.iconCpu + " cores");
+                lines.push(root.centeredMark + root.iconCpu + " cores");
 
                 // Two columns fit up to 20 cores; beyond that, add columns so
                 // the tooltip never grows past 10 rows.
@@ -996,6 +1006,7 @@ BarWidget {
                 lines.push("");
             }
 
+            lines.push(root.centeredMark + "proc");
             lines.push("kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
 
             if (root.processCpu.length > 0) {
