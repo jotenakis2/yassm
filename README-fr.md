@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.32
+Version 1.10.34
 
 [English](README.md) | **Français**
 
@@ -255,7 +255,7 @@ rythme.
 
 ## Alertes
 
-Le module **Alerts** est désactivé par défaut ; activez-le dans Settings.
+Le module **Alerts** est activé par défaut ; il peut être désactivé dans Settings.
 Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
 
 - les unités systemd en état `failed`, côté système et utilisateur (icône
@@ -264,8 +264,9 @@ Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
 
 Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
 compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
-en échec sous `SYSTEM` et `USER`, puis les zombies avec PID, nom et âge.
-Avec **Colors** désactivé, l'icône reprend la couleur normale de la barre.
+en échec sous un titre `systemd` centré en minuscules, puis `systemd --user`,
+puis `proc zombie` ; une ligne vide sépare les sections. Avec **Colors**
+désactivé, l'icône reprend la couleur normale de la barre.
 
 ## Performances
 

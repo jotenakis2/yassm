@@ -79,7 +79,7 @@ PanelWindow {
         {
             key: "showAlerts",
             label: "Alerts",
-            defaultValue: false
+            defaultValue: true
         }
     ]
 

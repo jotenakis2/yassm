@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.32
+Version 1.10.34
 
 **English** | [Français](README-fr.md)
 
@@ -252,7 +252,7 @@ needed, the bar reacts to D-Bus signals. UPower polls the hardware about every
 
 ## Alerts
 
-The **Alerts** module is disabled by default; enable it in Settings. When
+The **Alerts** module is enabled by default; it can be disabled in Settings. When
 enabled, `alerts.sh` runs every 60 s and reports:
 
 - systemd units in the `failed` state, for the system and user managers
@@ -261,8 +261,9 @@ enabled, `alerts.sh` runs every 60 s and reports:
 
 It appears at the far right, after Battery, with an icon only (no counter),
 and only while at least one alert exists. The tooltip lists the failed units
-under `SYSTEM` and `USER`, then the zombies with their PID, name and age.
-With **Colors** disabled the icon uses the normal bar color.
+under a centered lowercase `systemd` heading, then `systemd --user`, then
+`proc zombie`; a blank line separates the sections. With **Colors** disabled
+the icon uses the normal bar color.
 
 ## Performance
 

@@ -93,7 +93,7 @@ BarWidget {
     property bool showSwap: setting("showSwap", true)
     property bool showGpu: setting("showGpu", true)
     property bool showBattery: setting("showBattery", true)
-    property bool showAlerts: setting("showAlerts", false)
+    property bool showAlerts: setting("showAlerts", true)
     property bool showNet: setting("showNet", true)
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
@@ -1220,7 +1220,7 @@ BarWidget {
             const lines = [];
 
             if (systemUnits.length > 0) {
-                lines.push(root.sectionMark + "SYSTEM");
+                lines.push(root.centeredMark + "systemd");
                 for (let i = 0; i < systemUnits.length; i++) {
                     lines.push(systemUnits[i]);
                 }
@@ -1229,10 +1229,9 @@ BarWidget {
             if (userUnits.length > 0) {
                 if (lines.length > 0) {
                     lines.push("");
-                    lines.push("────────────────");
                 }
 
-                lines.push(root.sectionMark + "USER");
+                lines.push(root.centeredMark + "systemd --user");
                 for (let i = 0; i < userUnits.length; i++) {
                     lines.push(userUnits[i]);
                 }
@@ -1241,10 +1240,9 @@ BarWidget {
             if (zombies.length > 0) {
                 if (lines.length > 0) {
                     lines.push("");
-                    lines.push("────────────────");
                 }
 
-                lines.push(root.sectionMark + "ZOMBIES");
+                lines.push(root.centeredMark + "proc zombie");
                 for (let i = 0; i < zombies.length; i++) {
                     lines.push(zombies[i].pid + " " + zombies[i].name + " (" + formatDuration(zombies[i].age) + ")");
                 }
