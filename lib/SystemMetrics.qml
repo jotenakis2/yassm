@@ -902,7 +902,7 @@ Singleton {
     Process {
         id: mountProcess
 
-        command: ["timeout", "5", "findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL"]
+        command: ["timeout", "5", "findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL", "-t", "ext2,ext3,ext4,btrfs,xfs,f2fs,vfat,exfat,ntfs,ntfs3,iso9660,udf,zfs,bcachefs,overlay,fuseblk,jfs,reiserfs,nilfs2,hfs,hfsplus,ufs"]
 
         stdout: StdioCollector {
             id: mountOutput

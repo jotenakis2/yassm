@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.31
+Version 1.10.32
 
 **English** | [Français](README-fr.md)
 
@@ -18,7 +18,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Swap | `/proc/meminfo` (bar), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
 | GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | 10 s |
-| Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 10 s |
+| Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | 10 s |
 | Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
 | Alerts | systemd failed units + zombies older than 60 s | 60 s |
@@ -164,16 +164,20 @@ Hovering a module shows a contextual tooltip:
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
   block shows the compressed size, the original size and the compression
   ratio;
-- **Disk**: one line per detected real filesystem, in GiB, with the
+- **Disk**: one line per detected **local** filesystem, in GiB, with the
   percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
   are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
-  `/run/user`. Mount points that share the same device/source are
-  deduplicated: on a btrfs root with subvolumes, `/home` and `/var/log`
-  therefore do not appear separately from `/`;
+  `/run/user`. Network filesystems (NFS, CIFS, SSHFS…) are skipped: querying
+  their usage can block for seconds when the server is unreachable. Mount
+  points that share the same device/source are deduplicated: on a btrfs root
+  with subvolumes, `/home` and `/var/log` therefore do not appear separately
+  from `/`;
 - **Network**: active interface, download (↓) and upload (↑) rates, plus the
   session total (deltas since the shell started, reset on restart and kept
   across interface changes). Both rates are colored independently. The
-  driver's absolute counter is not used because it can be bogus;
+  driver's absolute counter is not used because it can be bogus. Without a
+  default route (loopback only), a red crossed-network icon and `--` replace
+  both rates;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   The icon follows the level (thresholds on the rounded displayed value):

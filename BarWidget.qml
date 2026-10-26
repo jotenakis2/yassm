@@ -138,6 +138,7 @@ BarWidget {
     readonly property string iconBatteryPlug: String.fromCodePoint(0xF06A5)
     readonly property string iconNetDown: String.fromCodePoint(0xF01DA)
     readonly property string iconNetUp: String.fromCodePoint(0xF0552)
+    readonly property string iconNetOff: String.fromCodePoint(0xF0C9B)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
@@ -245,29 +246,40 @@ BarWidget {
             segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "disk"));
         }
 
-        if (showNet && metrics.hasNetwork) {
-            const down = metrics.networkRxKib;
-            const up = metrics.networkTxKib;
-            const downText = formatRate(down);
-            const upText = formatRate(up);
+        if (showNet) {
+            if (metrics.hasNetwork) {
+                const down = metrics.networkRxKib;
+                const up = metrics.networkTxKib;
+                const downText = formatRate(down);
+                const upText = formatRate(up);
 
-            segments.push({
-                key: "netDown",
-                icon: iconNetDown,
-                valueText: downText,
-                text: iconNetDown + " " + downText,
-                value: Math.round(down),
-                kind: "net"
-            });
+                segments.push({
+                    key: "netDown",
+                    icon: iconNetDown,
+                    valueText: downText,
+                    text: iconNetDown + " " + downText,
+                    value: Math.round(down),
+                    kind: "net"
+                });
 
-            segments.push({
-                key: "netUp",
-                icon: iconNetUp,
-                valueText: upText,
-                text: iconNetUp + " " + upText,
-                value: Math.round(up),
-                kind: "net"
-            });
+                segments.push({
+                    key: "netUp",
+                    icon: iconNetUp,
+                    valueText: upText,
+                    text: iconNetUp + " " + upText,
+                    value: Math.round(up),
+                    kind: "net"
+                });
+            } else {
+                segments.push({
+                    key: "netOffline",
+                    icon: iconNetOff,
+                    valueText: " --",
+                    text: iconNetOff + " --",
+                    value: null,
+                    kind: "netOffline"
+                });
+            }
         }
 
         if (showBattery && metrics.hasBattery) {
@@ -292,7 +304,7 @@ BarWidget {
         return segments;
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "temp", "battery", "alerts"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "netOffline", "temp", "battery", "alerts"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -328,6 +340,10 @@ BarWidget {
             return metrics.hasSystemFailure ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
 
+        if (key === "netOffline") {
+            return Yassm.ThemePalette.red;
+        }
+
         if (key !== "battery") {
             return button.foreground;
         }
@@ -347,7 +363,15 @@ BarWidget {
         }
         const segment = segmentMap[key];
 
-        if (!segment || segment.value === null || !Number.isFinite(segment.value)) {
+        if (!segment) {
+            return button.foreground;
+        }
+
+        if (segment.kind === "netOffline") {
+            return Yassm.ThemePalette.red;
+        }
+
+        if (segment.value === null || !Number.isFinite(segment.value)) {
             return button.foreground;
         }
 
@@ -1147,14 +1171,20 @@ BarWidget {
             return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
         }
 
-        if (key === "net" || key === "netDown" || key === "netUp") {
+        if (key === "net" || key === "netDown" || key === "netUp" || key === "netOffline") {
             const metrics = Yassm.SystemMetrics;
 
             if (!metrics.hasNetwork) {
                 return tooltipBlock("NET", "Unavailable");
             }
 
-            const lines = [metrics.networkInterface, "↓ " + formatRateLong(metrics.networkRxKib) + "  (session " + formatKibAsSize(metrics.networkRxSessionKb) + ")", "↑ " + formatRateLong(metrics.networkTxKib) + "  (session " + formatKibAsSize(metrics.networkTxSessionKb) + ")"];
+            const downRate = formatRateLong(metrics.networkRxKib);
+            const upRate = formatRateLong(metrics.networkTxKib);
+            const downSession = formatKibAsSize(metrics.networkRxSessionKb);
+            const upSession = formatKibAsSize(metrics.networkTxSessionKb);
+            const rateWidth = Math.max(downRate.length, upRate.length);
+            const sessionWidth = Math.max(downSession.length, upSession.length);
+            const lines = [metrics.networkInterface, "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
 
             return tooltipBlock("NET", lines.join("\n"));
         }
@@ -1199,6 +1229,7 @@ BarWidget {
             if (userUnits.length > 0) {
                 if (lines.length > 0) {
                     lines.push("");
+                    lines.push("────────────────");
                 }
 
                 lines.push(root.sectionMark + "USER");
@@ -1210,6 +1241,7 @@ BarWidget {
             if (zombies.length > 0) {
                 if (lines.length > 0) {
                     lines.push("");
+                    lines.push("────────────────");
                 }
 
                 lines.push(root.sectionMark + "ZOMBIES");
@@ -1723,7 +1755,7 @@ BarWidget {
                     required property string modelData
 
                     readonly property string metricKey: modelData
-                    readonly property int paddingX: root.showBoxes ? Style.space(4) : 0
+                    readonly property int paddingX: metricKey === "alerts" ? (root.showBoxes ? Style.space(8) : Style.space(4)) : (root.showBoxes ? Style.space(4) : 0)
                     readonly property int paddingY: root.showBoxes ? Style.space(2) : 0
 
                     visible: root.segmentVisible(metricKey)

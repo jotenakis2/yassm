@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.31
+Version 1.10.32
 
 [English](README.md) | **Français**
 
@@ -18,7 +18,7 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | Swap | `/proc/meminfo` (barre), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
 | GPU | `gpu_busy_percent` sysfs, ou `nvidia-smi` | 10 s |
-| Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 10 s |
+| Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | 10 s |
 | Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
 | Alertes | unités systemd en échec + zombies de plus de 60 s | 60 s |
@@ -165,17 +165,20 @@ Le survol d'un module affiche une infobulle contextuelle :
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
   ZSWAP est utilisé, un bloc `ZSWAP` affiche la taille compressée, la taille
   originale et le ratio de compression ;
-- **Disk** : une ligne par système de fichiers réel détecté, en GiB, avec le
-  pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
+- **Disk** : une ligne par système de fichiers **local** détecté, en GiB, avec
+  le pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
   etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
-  FUSE) et `/run/user`. Les points de montage qui partagent le même
+  FUSE) et `/run/user`. Les systèmes de fichiers réseau (NFS, CIFS, SSHFS…)
+  sont ignorés : interroger leur usage peut bloquer plusieurs secondes quand
+  le serveur est injoignable. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/` ;
 - **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
   total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface). Les deux débits
   sont colorés indépendamment. Le compteur absolu du pilote n'est pas utilisé,
-  car il peut être aberrant ;
+  car il peut être aberrant. Sans route par défaut (uniquement `lo`), une
+  icône réseau barrée rouge et `--` remplacent les deux débits ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. L'icône suit le niveau (seuils sur la valeur
