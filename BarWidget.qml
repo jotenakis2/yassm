@@ -94,6 +94,8 @@ BarWidget {
     property bool showGpu: setting("showGpu", true)
     property bool showBattery: setting("showBattery", true)
     property bool showAlerts: setting("showAlerts", true)
+    property bool showUptime: setting("showUptime", true)
+    property bool showExtended: setting("extendedTooltips", true)
     property bool showNet: setting("showNet", true)
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
@@ -148,6 +150,7 @@ BarWidget {
     readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
     readonly property string iconAlert: String.fromCodePoint(0xF071)
+    readonly property string iconUptime: String.fromCodePoint(0xF017)
 
     // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
     // they cannot be derived from a single base like the plain battery icons.
@@ -221,6 +224,19 @@ BarWidget {
     readonly property var segmentCache: {
         const metrics = Yassm.SystemMetrics;
         const segments = [];
+
+        if (showUptime) {
+            const uptimeText = formatUptime(metrics.uptimeSeconds);
+
+            segments.push({
+                key: "uptime",
+                icon: iconUptime,
+                valueText: uptimeText,
+                text: iconUptime + " " + uptimeText,
+                value: metrics.uptimeSeconds,
+                kind: "uptime"
+            });
+        }
 
         if (showCpu) {
             segments.push(makeSegment("cpu", iconCpu, Math.round(metrics.cpuPercent), "%", "percent"));
@@ -304,7 +320,7 @@ BarWidget {
         return segments;
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "netOffline", "temp", "battery", "alerts"]
+    readonly property var segmentOrder: ["uptime", "cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "netOffline", "temp", "battery", "alerts"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -369,6 +385,10 @@ BarWidget {
 
         if (segment.kind === "netOffline") {
             return Yassm.ThemePalette.red;
+        }
+
+        if (segment.kind === "uptime") {
+            return button.foreground;
         }
 
         if (segment.value === null || !Number.isFinite(segment.value)) {
@@ -899,6 +919,36 @@ BarWidget {
         return minutes + "m";
     }
 
+    function formatUptime(seconds) {
+        const totalMinutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return hours > 0 ? hours + "h" + String(minutes).padStart(2, "0") : minutes + "m";
+    }
+
+    function formatUptimeLong(seconds) {
+        const totalMinutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
+    }
+
+    function formatFrequency(mhz) {
+        const value = Number(mhz);
+
+        if (!Number.isFinite(value) || value <= 0) {
+            return "0 MHz";
+        }
+
+        return value >= 1000 ? (value / 1000).toFixed(2) + " GHz" : Math.round(value) + " MHz";
+    }
+
+    function formatPsi(ten, sixty, threeHundred) {
+        return "10s " + Number(ten || 0).toFixed(1) + "%" + "  60s " + Number(sixty || 0).toFixed(1) + "%" + "  300s " + Number(threeHundred || 0).toFixed(1) + "%";
+    }
+
     function tooltipBlock(title, body) {
         const lines = body.split("\n");
         let width = title.length;
@@ -965,6 +1015,14 @@ BarWidget {
             return row.target.padEnd(targetWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " " + row.percent.padStart(percentWidth);
         });
 
+        const metrics = Yassm.SystemMetrics;
+
+        if (root.showExtended) {
+            lines.push("");
+            lines.push("I/O  ↓ " + formatRateLong(metrics.diskReadKib) + "  ↑ " + formatRateLong(metrics.diskWriteKib));
+            lines.push("pressure " + formatPsi(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300));
+        }
+
         return tooltipBlock("DISK", lines.join("\n"));
     }
 
@@ -1019,6 +1077,11 @@ BarWidget {
 
             for (let i = 0; i < labels.length; i++) {
                 lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth));
+            }
+
+            if (root.showExtended) {
+                lines.push("");
+                lines.push("pressure " + formatPsi(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300));
             }
 
             if (hasKernel || root.processMemory.length > 0) {
@@ -1148,6 +1211,10 @@ BarWidget {
                 }
             }
 
+            if (root.showExtended && metrics.cpuFreqMhz > 0) {
+                lines.push("freq " + formatFrequency(metrics.cpuFreqMhz));
+            }
+
             const table = processTable(root.processCpu, false);
             const kernelValue = metrics.kernelPercent.toFixed(1) + "%";
             const nameWidth = Math.max(6, table.nameWidth);
@@ -1186,6 +1253,10 @@ BarWidget {
             const sessionWidth = Math.max(downSession.length, upSession.length);
             const lines = [metrics.networkInterface, "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
 
+            if (root.showExtended && metrics.hasWifi) {
+                lines.push("Wi-Fi " + Math.round(metrics.wifiQuality) + "/70 (" + Math.round(metrics.wifiLevel) + " dBm)");
+            }
+
             return tooltipBlock("NET", lines.join("\n"));
         }
 
@@ -1207,6 +1278,22 @@ BarWidget {
 
                 if (direction !== "") {
                     lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W " + direction);
+                }
+            }
+
+            if (root.showExtended) {
+                const health = [];
+
+                if (metrics.batteryHealth > 0) {
+                    health.push(Math.round(metrics.batteryHealth) + "%");
+                }
+
+                if (metrics.batteryCycles > 0) {
+                    health.push(metrics.batteryCycles + " cycles");
+                }
+
+                if (health.length > 0) {
+                    lines.push("health " + health.join(" (") + (health.length > 1 ? ")" : ""));
                 }
             }
 
@@ -1253,6 +1340,10 @@ BarWidget {
             }
 
             return tooltipBlock("ALERTS", lines.join("\n"));
+        }
+
+        if (key === "uptime") {
+            return tooltipBlock("UPTIME", formatUptimeLong(metrics.uptimeSeconds));
         }
 
         if (key === "temp") {
@@ -1419,6 +1510,8 @@ BarWidget {
         entry.showGpu = root.showGpu;
         entry.showBattery = root.showBattery;
         entry.showAlerts = root.showAlerts;
+        entry.showUptime = root.showUptime;
+        entry.extendedTooltips = root.showExtended;
         entry.showNet = root.showNet;
         entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;

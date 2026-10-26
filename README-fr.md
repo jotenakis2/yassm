@@ -1,11 +1,11 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.35
+Version 1.11.0
 
 [English](README.md) | **Français**
 
-Widget de barre Omarchy affichant CPU, RAM, swap, charge système, réseau,
-température, GPU et usage de la partition racine.
+Widget de barre Omarchy affichant l'uptime, CPU, RAM, swap, charge système,
+réseau, température, GPU, batterie, alertes et usage de la partition racine.
 
 Dépôt : <https://github.com/jotenakis2/yassm>
 
@@ -22,6 +22,7 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
 | Alertes | unités systemd en échec + zombies de plus de 60 s | 60 s |
+| Uptime | `/proc/uptime`, affiché en minutes ou `hMM` | 5 s |
 | Température | toutes les températures normales, triées | 10 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
@@ -75,6 +76,7 @@ Le panneau permet d'activer ou de désactiver :
 
 **Modules**
 
+- Uptime
 - CPU
 - Load
 - GPU
@@ -90,6 +92,7 @@ Le panneau permet d'activer ou de désactiver :
 
 - Boxes (encadrement des modules)
 - Colors (seuils colorés et icône batterie bleue sur secteur)
+- Extended data in tooltip (fréquence CPU, PSI, I/O disque, Wi-Fi, santé batterie)
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 
@@ -110,7 +113,9 @@ les fausse pas. Le curseur **Processes** règle la fréquence de rafraîchisseme
 des tooltips CPU et RAM ; il descend jusqu'à 2 s. Le curseur **Processes shown**
 plafonne la liste userland à 1–20 lignes (10 par défaut) ; la ligne `kernel`
 est toujours en plus. La liste CPU est instantanée (deltas `/proc/<pid>/stat`),
-la RAM utilise le RSS de `ps`. Survoler
+la RAM utilise le RSS de `ps`. **Extended data in tooltip** ajoute la fréquence
+CPU, la pression PSI, les I/O disque, le signal Wi-Fi et la santé de la
+batterie à leurs tooltips ; l'option est active par défaut. Survoler
 n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
 Le panneau défile automatiquement si l'écran est trop court ; Échap le ferme.
 
@@ -131,6 +136,9 @@ Exemple d'entrée :
   "showLoad": true,
   "showDisk": true,
   "showNet": true,
+  "showUptime": true,
+  "showAlerts": true,
+  "extendedTooltips": true,
   "showColors": true,
   "showBoxes": true,
   "spacing": 2,
@@ -159,7 +167,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   légèrement) et le top des processus **userland** par RSS (jusqu'à la valeur
   **Processes shown**, 10 par défaut),
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
-  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
+  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
+  Extended data ajoute une ligne de pression mémoire (`10s`, `60s`, `300s`) ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
   pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
   taille compressée, la taille originale, le ratio et la RAM utilisée. Si
@@ -172,13 +181,16 @@ Le survol d'un module affiche une infobulle contextuelle :
   sont ignorés : interroger leur usage peut bloquer plusieurs secondes quand
   le serveur est injoignable. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
-  et `/var/log` n'apparaissent donc pas séparément de `/` ;
+  et `/var/log` n'apparaissent donc pas séparément de `/`. Extended data
+  ajoute les débits lecture/écriture disque et la pression I/O ;
 - **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
   total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface). Les deux débits
   sont colorés indépendamment. Le compteur absolu du pilote n'est pas utilisé,
   car il peut être aberrant. Sans route par défaut (uniquement `lo`), une
-  icône réseau barrée rouge et `--` remplacent les deux débits ;
+  icône réseau barrée rouge et `--` remplacent les deux débits. Extended data
+  ajoute la qualité Wi-Fi et le niveau du signal quand l'interface active est
+  sans fil ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. L'icône suit le niveau (seuils sur la valeur
@@ -186,7 +198,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   50 à 59 °C, alerte à partir de 60 °C ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
   puissance instantanée quand UPower la fournit, avec la direction
-  (`draw` en décharge, `charge` en charge) ;
+  (`draw` en décharge, `charge` en charge). Extended data ajoute la santé de
+  la batterie et le nombre de cycles ;
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
   centré, puis le pourcentage par cœur sur deux colonnes (réparties par
   moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un
@@ -197,7 +210,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   principale ; jusqu'à **Processes shown**, 10 par défaut), regroupés
   par nom ; si moins de processus sont actifs, des lignes inactives à 0,0 %
   complètent la liste ; la liste est rafraîchie toutes les 5 s par défaut
-  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
+  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
+  Extended data ajoute la fréquence CPU moyenne ;
+- **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
+  affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
@@ -251,7 +267,10 @@ simplement branchée d'une machine en train de charger. Le pourcentage, l'état
 et la puissance sont fournis par les propriétés UPower : aucun script ni timer
 n'est nécessaire, la barre réagit aux signaux D-Bus. UPower interroge le
 matériel environ toutes les 30 s, donc le pourcentage peut évoluer à ce
-rythme.
+rythme. La santé de la batterie vient du périphérique UPower réel (le
+`DisplayDevice` agrégé la laisse vide) ; le nombre de cycles est lu dans sysfs
+(`/sys/class/power_supply/*/cycle_count`) au démarrage puis toutes les 10
+minutes.
 
 ## Alertes
 
@@ -267,6 +286,12 @@ compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
 en échec sous un titre `systemd` centré en minuscules, puis `systemd --user`,
 puis `proc zombie` ; une ligne vide sépare les sections. Avec **Colors**
 désactivé, l'icône reprend la couleur normale de la barre.
+
+## Uptime
+
+Le module **Uptime** est activé par défaut et peut être désactivé dans
+Settings. Il lit `/proc/uptime` toutes les 5 s. La barre affiche `42m` sous une
+heure, puis `3h42` ; le tooltip affiche `3h 42m`.
 
 ## Performances
 
@@ -286,6 +311,7 @@ Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
 | `temperature.sh` | 11,0 ms | 6×/min | 66 ms |
 | `findmnt` | 2,0 ms | 6×/min | 12 ms |
 | `alerts.sh` | ~110 ms | 1×/min | 110 ms |
+| `cpu-freq.sh` | 3,0 ms | 12×/min | 36 ms |
 | Batterie (UPower) | 0 | événementiel | 0 |
 
 **Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
@@ -312,6 +338,11 @@ complètement les scripts.
 
 `alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
 zombies), uniquement si Alerts est activé.
+
+La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
+`/proc/diskstats`, `/proc/net/wireless` et `/proc/uptime` sont lus toutes les
+5 s sans lancer de processus. La fréquence CPU est moyennée par `cpu-freq.sh`
+toutes les 5 s.
 
 ## Vérifications
 

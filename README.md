@@ -1,11 +1,11 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.35
+Version 1.11.0
 
 **English** | [Français](README-fr.md)
 
-Omarchy bar widget showing CPU, RAM, swap, system load, network, temperature,
-GPU and root partition usage.
+Omarchy bar widget showing uptime, CPU, RAM, swap, system load, network,
+temperature, GPU, battery, alerts and root partition usage.
 
 Repository: <https://github.com/jotenakis2/yassm>
 
@@ -22,6 +22,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
 | Alerts | systemd failed units + zombies older than 60 s | 60 s |
+| Uptime | `/proc/uptime`, shown as minutes or `hMM` | 5 s |
 | Temperature | all normal temperatures, sorted | 10 s |
 
 Swap is hidden when the machine has no active swap. The GPU shows `--%` when
@@ -74,6 +75,7 @@ The panel lets you enable or disable:
 
 **Modules**
 
+- Uptime
 - CPU
 - Load
 - GPU
@@ -89,6 +91,7 @@ The panel lets you enable or disable:
 
 - Boxes (module frames)
 - Colors (colored thresholds and blue battery icon on mains)
+- Extended data in tooltip (CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 
@@ -109,9 +112,10 @@ distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
 list at 1–20 rows (default 10); the `kernel` line is always extra. The CPU list
 is instantaneous (deltas from `/proc/<pid>/stat`), while RAM uses RSS from
-`ps`. Hovering any slider row
-shows a tooltip with the same explanation. The panel scrolls automatically if
-the screen is too short; Escape closes it.
+`ps`. **Extended data in tooltip** adds CPU frequency, PSI, disk I/O, Wi-Fi
+signal and battery health to their tooltips; it is on by default. Hovering any
+slider row shows a tooltip with the same explanation. The panel scrolls
+automatically if the screen is too short; Escape closes it.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -130,6 +134,9 @@ Example entry:
   "showLoad": true,
   "showDisk": true,
   "showNet": true,
+  "showUptime": true,
+  "showAlerts": true,
+  "extendedTooltips": true,
   "showColors": true,
   "showBoxes": true,
   "spacing": 2,
@@ -158,7 +165,8 @@ Hovering a module shows a contextual tooltip:
   **Processes shown** value, default 10),
   grouped by name; the list refreshes every 5 s by default (2–10 s) while the
   tooltip stays open;
-  kernel threads are excluded;
+  kernel threads are excluded. Extended data adds a memory-pressure line
+  (`10s`, `60s`, `300s`);
 - **Swap**: each swap device is listed with used / total and its percentage,
   including zram. A `ZRAM` section shows, for each zram device, the compressed
   size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
@@ -171,13 +179,14 @@ Hovering a module shows a contextual tooltip:
   their usage can block for seconds when the server is unreachable. Mount
   points that share the same device/source are deduplicated: on a btrfs root
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
-  from `/`;
+  from `/`. Extended data adds disk read/write rates and I/O pressure;
 - **Network**: active interface, download (↓) and upload (↑) rates, plus the
   session total (deltas since the shell started, reset on restart and kept
   across interface changes). Both rates are colored independently. The
   driver's absolute counter is not used because it can be bogus. Without a
   default route (loopback only), a red crossed-network icon and `--` replace
-  both rates;
+  both rates. Extended data adds Wi-Fi quality and signal level when the
+  active interface is wireless;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   The icon follows the level (thresholds on the rounded displayed value):
@@ -185,7 +194,8 @@ Hovering a module shows a contextual tooltip:
   alert from 60 °C;
 - **Battery**: percentage, state, time remaining or time to full, and
   instantaneous power when UPower provides it, with direction (`draw` while
-  discharging, `charge` while charging);
+  discharging, `charge` while charging). Extended data adds battery health and
+  charge cycles;
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`
@@ -195,7 +205,10 @@ Hovering a module shows a contextual tooltip:
   capacity like the main value; up to **Processes shown**, default 10),
   grouped by name; when fewer processes are active, idle ones fill the
   remaining rows at 0.0%; the list refreshes every 5 s by default (2–10 s)
-  while the tooltip stays open; kernel threads are excluded;
+  while the tooltip stays open; kernel threads are excluded. Extended data
+  adds the average CPU frequency;
+- **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
+  the same duration with a space (`3h 42m`);
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
@@ -248,7 +261,10 @@ The "plugged" state comes from `UPower.onBattery`, which distinguishes a
 machine that is merely plugged in from one that is charging. Percentage,
 state and power are provided by UPower properties: no script or timer is
 needed, the bar reacts to D-Bus signals. UPower polls the hardware about every
-30 s, so the percentage may change at that rate.
+30 s, so the percentage may change at that rate. Battery health comes from the
+UPower battery device (the aggregate `DisplayDevice` leaves it empty); the
+cycle count is read from sysfs (`/sys/class/power_supply/*/cycle_count`) once
+at startup and every 10 minutes.
 
 ## Alerts
 
@@ -264,6 +280,12 @@ and only while at least one alert exists. The tooltip lists the failed units
 under a centered lowercase `systemd` heading, then `systemd --user`, then
 `proc zombie`; a blank line separates the sections. With **Colors** disabled
 the icon uses the normal bar color.
+
+## Uptime
+
+The **Uptime** module is enabled by default and can be disabled in Settings.
+It reads `/proc/uptime` every 5 s. The bar shows `42m` below one hour, then
+`3h42`; the tooltip shows `3h 42m`.
 
 ## Performance
 
@@ -283,6 +305,7 @@ Plus the short-lived scripts (CPU measured over 50 runs):
 | `temperature.sh` | 11.0 ms | 6×/min | 66 ms |
 | `findmnt` | 2.0 ms | 6×/min | 12 ms |
 | `alerts.sh` | ~110 ms | 1×/min | 110 ms |
+| `cpu-freq.sh` | 3.0 ms | 12×/min | 36 ms |
 | Battery (UPower) | 0 | event-driven | 0 |
 
 **Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
@@ -310,6 +333,10 @@ the corresponding module enabled; hiding them stops the scripts entirely.
 
 `alerts.sh` runs every 60 s (systemd system/user plus a `/proc` zombie scan),
 only while Alerts is enabled.
+
+PSI (`/proc/pressure/memory`, `/proc/pressure/io`), `/proc/diskstats`,
+`/proc/net/wireless` and `/proc/uptime` are read every 5 s without spawning a
+process. The CPU frequency is averaged by `cpu-freq.sh` every 5 s.
 
 ## Checks
 

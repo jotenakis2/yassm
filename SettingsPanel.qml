@@ -41,6 +41,11 @@ PanelWindow {
 
     readonly property var moduleSettings: [
         {
+            key: "showUptime",
+            label: "Uptime",
+            defaultValue: true
+        },
+        {
             key: "showCpu",
             label: "CPU"
         },
@@ -239,6 +244,22 @@ PanelWindow {
                     onClicked: {
                         if (root.hostWidget) {
                             root.hostWidget.updateSetting("showColors", !checked);
+                        }
+                    }
+                }
+
+                Toggle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.toggleRowHeight
+                    label: "Extended data in tooltip"
+                    fontFamily: Style.font.family
+                    titleSize: Style.font.body
+                    foreground: ShellColor.popups.text
+                    checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
+
+                    onClicked: {
+                        if (root.hostWidget) {
+                            root.hostWidget.updateSetting("extendedTooltips", !checked);
                         }
                     }
                 }

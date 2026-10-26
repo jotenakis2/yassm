@@ -50,6 +50,17 @@ Singleton {
 
     property real diskPercent: 0
     property var mounts: []
+    property real diskReadKib: 0
+    property real diskWriteKib: 0
+    property var diskIoPrevious: null
+    property real diskIoPreviousTime: 0
+
+    property real memoryPressure10: 0
+    property real memoryPressure60: 0
+    property real memoryPressure300: 0
+    property real ioPressure10: 0
+    property real ioPressure60: 0
+    property real ioPressure300: 0
 
     // Reference lists: each bar instance registers while a module is enabled.
     // The expensive samplers only run while at least one instance needs them.
@@ -99,12 +110,19 @@ Singleton {
     property real networkTxSessionKb: 0
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
+    property real wifiQuality: 0
+    property real wifiLevel: 0
+    readonly property bool hasWifi: networkInterface !== "" && wifiQuality > 0
 
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
     property real temperatureC: 0
     property var temperatures: []
+
+    readonly property string cpuFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../cpu-freq.sh").toString().replace("file://", ""))
+    property real cpuFreqMhz: 0
+    property real uptimeSeconds: 0
 
     readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
     readonly property int alertsIntervalMs: 60000
@@ -115,6 +133,12 @@ Singleton {
     readonly property bool hasZombies: zombieAlerts.length > 0
     readonly property bool hasAlerts: hasSystemFailure || hasZombies
 
+    // UPower exposes its devices as an untyped model; keep the single access
+    // here so qmllint has only one known "values" warning to tolerate.
+    function upowerDevices() {
+        return UPower.devices ? UPower.devices.values : [];
+    }
+
     readonly property var batteryDevice: {
         const display = UPower.displayDevice;
 
@@ -122,7 +146,7 @@ Singleton {
             return display;
         }
 
-        const devices = UPower.devices ? UPower.devices.values : [];
+        const devices = upowerDevices();
 
         for (let i = 0; i < devices.length; i++) {
             const device = devices[i];
@@ -141,6 +165,26 @@ Singleton {
     readonly property real batteryTimeToFull: hasBattery ? (Number(batteryDevice.timeToFull) || 0) : 0
     readonly property real batteryPowerW: hasBattery ? (Number(batteryDevice.changeRate) || 0) : 0
     readonly property bool batteryPlugged: hasBattery && !UPower.onBattery
+
+    // The aggregate DisplayDevice exposes percentage and power but leaves
+    // nativePath and healthPercentage empty; the real battery device carries
+    // them, so health and cycle count read from that one.
+    readonly property var batteryDetailDevice: {
+        const devices = upowerDevices();
+
+        for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+
+            if (device && device.isPresent && device.isLaptopBattery && device.nativePath !== "") {
+                return device;
+            }
+        }
+
+        return batteryDevice;
+    }
+    readonly property real batteryHealth: batteryDetailDevice ? (Number(batteryDetailDevice.healthPercentage) || 0) : 0
+    readonly property string batteryCyclePath: batteryDetailDevice && batteryDetailDevice.nativePath ? "/sys/class/power_supply/" + batteryDetailDevice.nativePath + "/cycle_count" : ""
+    property int batteryCycles: 0
 
     function batteryStateName(state) {
         switch (state) {
@@ -774,6 +818,136 @@ Singleton {
         metrics.zombieAlerts = zombies;
     }
 
+    function applyDiskIo(content) {
+        const now = Date.now();
+        const current = {};
+        const lines = content.split("\n");
+        const wholeDisk = /^(nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+|xvd[a-z]+|dasd[a-z]+)$/;
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length < 10 || !wholeDisk.test(fields[2])) {
+                continue;
+            }
+
+            const read = Number(fields[5]);
+            const write = Number(fields[9]);
+
+            if (Number.isFinite(read) && Number.isFinite(write)) {
+                current[fields[2]] = {
+                    read: read,
+                    write: write
+                };
+            }
+        }
+
+        const previous = metrics.diskIoPrevious;
+        const previousTime = metrics.diskIoPreviousTime;
+
+        if (previous && previousTime > 0 && now > previousTime) {
+            const elapsed = (now - previousTime) / 1000;
+            let readSectors = 0;
+            let writeSectors = 0;
+
+            for (const name in current) {
+                const before = previous[name];
+
+                if (!before || current[name].read < before.read || current[name].write < before.write) {
+                    continue;
+                }
+
+                readSectors += current[name].read - before.read;
+                writeSectors += current[name].write - before.write;
+            }
+
+            metrics.diskReadKib = readSectors * 512 / 1024 / elapsed;
+            metrics.diskWriteKib = writeSectors * 512 / 1024 / elapsed;
+        } else {
+            metrics.diskReadKib = 0;
+            metrics.diskWriteKib = 0;
+        }
+
+        metrics.diskIoPrevious = current;
+        metrics.diskIoPreviousTime = now;
+    }
+
+    function applyPressure(content) {
+        const values = {
+            avg10: 0,
+            avg60: 0,
+            avg300: 0
+        };
+        const line = content.split("\n")[0] || "";
+        const fields = line.trim().split(/\s+/);
+
+        for (let i = 0; i < fields.length; i++) {
+            const match = fields[i].match(/^(avg10|avg60|avg300)=([0-9.]+)$/);
+
+            if (match) {
+                values[match[1]] = Number(match[2]) || 0;
+            }
+        }
+
+        return values;
+    }
+
+    function applyMemoryPressure(content) {
+        const values = applyPressure(content);
+
+        metrics.memoryPressure10 = values.avg10;
+        metrics.memoryPressure60 = values.avg60;
+        metrics.memoryPressure300 = values.avg300;
+    }
+
+    function applyIoPressure(content) {
+        const values = applyPressure(content);
+
+        metrics.ioPressure10 = values.avg10;
+        metrics.ioPressure60 = values.avg60;
+        metrics.ioPressure300 = values.avg300;
+    }
+
+    function applyWireless(content) {
+        const iface = metrics.networkInterface;
+        const lines = content.split("\n");
+        let quality = 0;
+        let level = 0;
+
+        if (iface !== "") {
+            for (let i = 2; i < lines.length; i++) {
+                const colon = lines[i].indexOf(":");
+
+                if (colon < 0 || lines[i].slice(0, colon).trim() !== iface) {
+                    continue;
+                }
+
+                const fields = lines[i].slice(colon + 1).trim().split(/\s+/);
+                quality = Number.parseFloat(fields[1]) || 0;
+                level = Number.parseFloat(fields[2]) || 0;
+                break;
+            }
+        }
+
+        metrics.wifiQuality = quality;
+        metrics.wifiLevel = level;
+    }
+
+    function applyCpuFreq(content) {
+        const value = Number(String(content).trim());
+        metrics.cpuFreqMhz = Number.isFinite(value) ? value : 0;
+    }
+
+    function applyUptime(content) {
+        const value = Number(String(content).trim().split(/\s+/)[0]);
+        metrics.uptimeSeconds = Number.isFinite(value) ? value : 0;
+    }
+
+    function applyBatteryCycles(content) {
+        const value = Number(String(content).trim());
+        metrics.batteryCycles = Number.isFinite(value) ? value : 0;
+    }
+
     FileView {
         id: procStat
         path: "/proc/stat"
@@ -790,6 +964,47 @@ Singleton {
         id: procLoadAvg
         path: "/proc/loadavg"
         onLoaded: metrics.applyLoad(text())
+    }
+
+    FileView {
+        id: memoryPressureFile
+        path: "/proc/pressure/memory"
+        printErrors: false
+        onLoaded: metrics.applyMemoryPressure(text())
+    }
+
+    FileView {
+        id: ioPressureFile
+        path: "/proc/pressure/io"
+        printErrors: false
+        onLoaded: metrics.applyIoPressure(text())
+    }
+
+    FileView {
+        id: procDiskStats
+        path: "/proc/diskstats"
+        onLoaded: metrics.applyDiskIo(text())
+    }
+
+    FileView {
+        id: procWireless
+        path: "/proc/net/wireless"
+        printErrors: false
+        onLoaded: metrics.applyWireless(text())
+    }
+
+    FileView {
+        id: procUptime
+        path: "/proc/uptime"
+        onLoaded: metrics.applyUptime(text())
+    }
+
+    FileView {
+        id: batteryCyclesFile
+        path: metrics.batteryCyclePath
+        printErrors: false
+        onLoaded: metrics.applyBatteryCycles(text())
+        onLoadFailed: metrics.batteryCycles = 0
     }
 
     FileView {
@@ -872,7 +1087,25 @@ Singleton {
         onTriggered: {
             procNetRoute.reload();
             procNetIpv6Route.reload();
+            memoryPressureFile.reload();
+            ioPressureFile.reload();
+            procWireless.reload();
+            procUptime.reload();
+
+            if (metrics.diskEnabled) {
+                procDiskStats.reload();
+            }
         }
+    }
+
+    Timer {
+        // Cycle count only changes when a full cycle completes, so a rare
+        // refresh is enough; the FileView already loads once the path exists.
+        interval: 600000
+        running: metrics.batteryCyclePath !== ""
+        repeat: true
+
+        onTriggered: batteryCyclesFile.reload()
     }
 
     Timer {
@@ -951,6 +1184,27 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: mountProcess.running = true
+    }
+
+    Process {
+        id: cpuFreqProcess
+
+        command: ["bash", metrics.cpuFreqScriptPath]
+
+        stdout: StdioCollector {
+            id: cpuFreqOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyCpuFreq(cpuFreqOutput.text)
+        }
+    }
+
+    Timer {
+        interval: 5000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: cpuFreqProcess.running = true
     }
 
     Process {
