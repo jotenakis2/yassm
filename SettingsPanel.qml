@@ -164,25 +164,32 @@ PanelWindow {
                     fontFamily: Style.font.family
                 }
 
-                Repeater {
-                    model: root.moduleSettings
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: Style.space(8)
+                    rowSpacing: Style.space(4)
 
-                    Toggle {
-                        id: control
+                    Repeater {
+                        model: root.moduleSettings
 
-                        required property var modelData
+                        Toggle {
+                            id: control
 
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: root.toggleRowHeight
-                        label: control.modelData.label
-                        fontFamily: Style.font.family
-                        titleSize: Style.font.body
-                        foreground: ShellColor.popups.text
-                        checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, control.modelData.defaultValue !== false) : false
+                            required property var modelData
 
-                        onClicked: {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting(control.modelData.key, !control.checked);
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.toggleRowHeight
+                            label: control.modelData.label
+                            fontFamily: Style.font.family
+                            titleSize: Style.font.body
+                            foreground: ShellColor.popups.text
+                            checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, control.modelData.defaultValue !== false) : false
+
+                            onClicked: {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting(control.modelData.key, !control.checked);
+                                }
                             }
                         }
                     }
