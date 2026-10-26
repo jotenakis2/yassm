@@ -56,9 +56,11 @@ Singleton {
     property var temperatureUsers: []
     property var diskUsers: []
     property var swapUsers: []
+    property var alertsUsers: []
     readonly property bool temperatureEnabled: temperatureUsers.length > 0
     readonly property bool diskEnabled: diskUsers.length > 0
     readonly property bool swapEnabled: swapUsers.length > 0
+    readonly property bool alertsEnabled: alertsUsers.length > 0
 
     function withUser(users, widget, enabled) {
         const next = users.filter(function (item) {
@@ -84,6 +86,10 @@ Singleton {
         metrics.swapUsers = withUser(metrics.swapUsers, widget, enabled);
     }
 
+    function setAlertsUser(widget, enabled) {
+        metrics.alertsUsers = withUser(metrics.alertsUsers, widget, enabled);
+    }
+
     property string networkInterface: ""
     property string networkRouteV4: ""
     property string networkRouteV6: ""
@@ -99,6 +105,15 @@ Singleton {
     property bool hasTemperature: false
     property real temperatureC: 0
     property var temperatures: []
+
+    readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
+    readonly property int alertsIntervalMs: 60000
+    property var failedSystemUnits: []
+    property var failedUserUnits: []
+    property var zombieAlerts: []
+    readonly property bool hasSystemFailure: failedSystemUnits.length > 0 || failedUserUnits.length > 0
+    readonly property bool hasZombies: zombieAlerts.length > 0
+    readonly property bool hasAlerts: hasSystemFailure || hasZombies
 
     readonly property var batteryDevice: {
         const display = UPower.displayDevice;
@@ -713,6 +728,52 @@ Singleton {
         metrics.temperatureC = entries.length > 0 ? entries[0].celsius : 0;
     }
 
+    function applyAlerts(content) {
+        const systemUnits = [];
+        const userUnits = [];
+        const zombies = [];
+        const lines = String(content || "").split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            if (line === "") {
+                continue;
+            }
+
+            const fields = line.split("\t");
+            const kind = fields[0];
+            const value = fields[1] || "";
+
+            if (kind === "system" && value !== "") {
+                systemUnits.push(value);
+            } else if (kind === "user" && value !== "") {
+                userUnits.push(value);
+            } else if (kind === "zombie") {
+                const pid = Number(value);
+                const age = Number(fields[3]);
+
+                if (Number.isFinite(pid) && Number.isFinite(age)) {
+                    zombies.push({
+                        pid: pid,
+                        name: fields[2] || "?",
+                        age: age
+                    });
+                }
+            }
+        }
+
+        systemUnits.sort();
+        userUnits.sort();
+        zombies.sort(function (left, right) {
+            return right.age - left.age;
+        });
+
+        metrics.failedSystemUnits = systemUnits;
+        metrics.failedUserUnits = userUnits;
+        metrics.zombieAlerts = zombies;
+    }
+
     FileView {
         id: procStat
         path: "/proc/stat"
@@ -890,5 +951,26 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: mountProcess.running = true
+    }
+
+    Process {
+        id: alertsProcess
+
+        command: ["timeout", "10", "bash", metrics.alertsScriptPath]
+
+        stdout: StdioCollector {
+            id: alertsOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyAlerts(alertsOutput.text)
+        }
+    }
+
+    Timer {
+        interval: metrics.alertsIntervalMs
+        running: metrics.alertsEnabled
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: alertsProcess.running = true
     }
 }

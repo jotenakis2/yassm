@@ -12,10 +12,10 @@ fail() {
 
 omarchy plugin validate .
 
-bash -n check.sh detect-gpu.sh proc-snapshot.sh temperature.sh
+bash -n check.sh alerts.sh detect-gpu.sh proc-snapshot.sh temperature.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
-	shellcheck --severity=warning check.sh detect-gpu.sh proc-snapshot.sh temperature.sh
+	shellcheck --severity=warning check.sh alerts.sh detect-gpu.sh proc-snapshot.sh temperature.sh
 fi
 
 # ---------------------------------------------------------------- metadata

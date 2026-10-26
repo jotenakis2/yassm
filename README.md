@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.30
+Version 1.10.31
 
 **English** | [Français](README-fr.md)
 
@@ -21,6 +21,7 @@ Repository: <https://github.com/jotenakis2/yassm>
 | Disk | `findmnt` (root for the bar, all filesystems in the tooltip) | 10 s |
 | Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
+| Alerts | systemd failed units + zombies older than 60 s | 60 s |
 | Temperature | all normal temperatures, sorted | 10 s |
 
 Swap is hidden when the machine has no active swap. The GPU shows `--%` when
@@ -46,6 +47,7 @@ default and configurable from 1 to 5 s in Settings.
 - A Nerd Font for the icons.
 - Optional: `nvidia-smi` for NVIDIA GPUs.
 - Optional: `btop` for the left-click launcher.
+- Optional: `systemctl` (systemd) for the Alerts module.
 
 The widget is designed for a horizontal bar (top or bottom). It is hidden on
 vertical bars, where a `barSize`-wide slot cannot hold the module row.
@@ -81,6 +83,7 @@ The panel lets you enable or disable:
 - Network
 - Temperature
 - Battery
+- Alerts
 
 **Layout**
 
@@ -243,6 +246,20 @@ state and power are provided by UPower properties: no script or timer is
 needed, the bar reacts to D-Bus signals. UPower polls the hardware about every
 30 s, so the percentage may change at that rate.
 
+## Alerts
+
+The **Alerts** module is disabled by default; enable it in Settings. When
+enabled, `alerts.sh` runs every 60 s and reports:
+
+- systemd units in the `failed` state, for the system and user managers
+  (red icon);
+- zombies older than **60 s** (orange icon).
+
+It appears at the far right, after Battery, with an icon only (no counter),
+and only while at least one alert exists. The tooltip lists the failed units
+under `SYSTEM` and `USER`, then the zombies with their PID, name and age.
+With **Colors** disabled the icon uses the normal bar color.
+
 ## Performance
 
 Measured over two 5-minute windows, machine idle, screensaver and locking
@@ -260,6 +277,7 @@ Plus the short-lived scripts (CPU measured over 50 runs):
 | --- | --- | --- | --- |
 | `temperature.sh` | 11.0 ms | 6×/min | 66 ms |
 | `findmnt` | 2.0 ms | 6×/min | 12 ms |
+| `alerts.sh` | ~110 ms | 1×/min | 110 ms |
 | Battery (UPower) | 0 | event-driven | 0 |
 
 **Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
@@ -282,8 +300,11 @@ instantaneous deltas; the RAM tooltip launches a `ps` (~15 ms, wrapped in
 `timeout 5`) when it opens and then every 5 s by default (2–10 s) while the
 hover lasts, never in the background.
 
-Temperature, disk and swap/ZRAM sampling only run while at least one bar has
+Temperature, disk, swap/ZRAM and alerts only run while at least one bar has
 the corresponding module enabled; hiding them stops the scripts entirely.
+
+`alerts.sh` runs every 60 s (systemd system/user plus a `/proc` zombie scan),
+only while Alerts is enabled.
 
 ## Checks
 

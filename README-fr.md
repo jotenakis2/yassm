@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.30
+Version 1.10.31
 
 [English](README.md) | **Français**
 
@@ -21,6 +21,7 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 | Disque | `findmnt` (racine pour la barre, tous les FS dans le tooltip) | 10 s |
 | Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
+| Alertes | unités systemd en échec + zombies de plus de 60 s | 60 s |
 | Température | toutes les températures normales, triées | 10 s |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
@@ -46,6 +47,7 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 - Une police Nerd Font pour les icônes.
 - Optionnel : `nvidia-smi` pour les GPU NVIDIA.
 - Optionnel : `btop` pour le lanceur au clic gauche.
+- Optionnel : `systemctl` (systemd) pour le module Alerts.
 
 Le widget est conçu pour une barre horizontale (haut ou bas). Il est masqué
 sur une barre verticale, où un emplacement de `barSize` de large ne peut pas
@@ -82,6 +84,7 @@ Le panneau permet d'activer ou de désactiver :
 - Network
 - Temperature
 - Battery
+- Alerts
 
 **Layout**
 
@@ -247,6 +250,20 @@ n'est nécessaire, la barre réagit aux signaux D-Bus. UPower interroge le
 matériel environ toutes les 30 s, donc le pourcentage peut évoluer à ce
 rythme.
 
+## Alertes
+
+Le module **Alerts** est désactivé par défaut ; activez-le dans Settings.
+Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
+
+- les unités systemd en état `failed`, côté système et utilisateur (icône
+  rouge) ;
+- les zombies de plus de **60 s** (icône orange).
+
+Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
+compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
+en échec sous `SYSTEM` et `USER`, puis les zombies avec PID, nom et âge.
+Avec **Colors** désactivé, l'icône reprend la couleur normale de la barre.
+
 ## Performances
 
 Mesure sur deux fenêtres de 5 minutes, machine au repos, écran de veille et
@@ -264,6 +281,7 @@ Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
 | --- | --- | --- | --- |
 | `temperature.sh` | 11,0 ms | 6×/min | 66 ms |
 | `findmnt` | 2,0 ms | 6×/min | 12 ms |
+| `alerts.sh` | ~110 ms | 1×/min | 110 ms |
 | Batterie (UPower) | 0 | événementiel | 0 |
 
 **Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
@@ -284,9 +302,12 @@ Les périphériques de swap sont relus depuis `/proc/swaps` toutes les 5 s, et
 Le tooltip CPU lit des snapshots de `/proc/<pid>/stat` (aucun processus) pour
 des deltas instantanés ; seul le tooltip RAM utilise `ps` (RSS).
 
-Température, disque et swap/ZRAM ne sont échantillonnés que si au moins une
-barre a le module correspondant activé ; les masquer arrête complètement les
-scripts.
+Température, disque, swap/ZRAM et alertes ne sont échantillonnés que si au
+moins une barre a le module correspondant activé ; les masquer arrête
+complètement les scripts.
+
+`alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
+zombies), uniquement si Alerts est activé.
 
 ## Vérifications
 

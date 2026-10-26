@@ -75,6 +75,11 @@ PanelWindow {
         {
             key: "showBattery",
             label: "Battery"
+        },
+        {
+            key: "showAlerts",
+            label: "Alerts",
+            defaultValue: false
         }
     ]
 
@@ -173,7 +178,7 @@ PanelWindow {
                         fontFamily: Style.font.family
                         titleSize: Style.font.body
                         foreground: ShellColor.popups.text
-                        checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, true) : false
+                        checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, control.modelData.defaultValue !== false) : false
 
                         onClicked: {
                             if (root.hostWidget) {

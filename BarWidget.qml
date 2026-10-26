@@ -93,6 +93,7 @@ BarWidget {
     property bool showSwap: setting("showSwap", true)
     property bool showGpu: setting("showGpu", true)
     property bool showBattery: setting("showBattery", true)
+    property bool showAlerts: setting("showAlerts", false)
     property bool showNet: setting("showNet", true)
     property bool showTemp: setting("showTemp", true)
     property bool showLoad: setting("showLoad", true)
@@ -145,6 +146,7 @@ BarWidget {
     readonly property string iconLoadMedium: String.fromCodePoint(0xF0F85)
     readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
     readonly property string iconDisk: String.fromCodePoint(0xF02CA)
+    readonly property string iconAlert: String.fromCodePoint(0xF071)
 
     // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
     // they cannot be derived from a single base like the plain battery icons.
@@ -272,6 +274,17 @@ BarWidget {
             segments.push(makeSegment("battery", root.batteryIcon(metrics.batteryPercent, metrics.batteryStatus, metrics.batteryPlugged), Math.round(metrics.batteryPercent), "%", "battery"));
         }
 
+        if (showAlerts && metrics.hasAlerts) {
+            segments.push({
+                key: "alerts",
+                icon: iconAlert,
+                valueText: "",
+                text: iconAlert,
+                value: null,
+                kind: "alerts"
+            });
+        }
+
         if (showTemp) {
             segments.push(makeSegment("temp", root.temperatureIcon(metrics.hasTemperature ? metrics.temperatureC : null), metrics.hasTemperature ? Math.round(metrics.temperatureC) : null, "°C", "temp"));
         }
@@ -279,7 +292,7 @@ BarWidget {
         return segments;
     }
 
-    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "temp", "battery"]
+    readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "temp", "battery", "alerts"]
 
     readonly property var segmentMap: {
         const map = {};
@@ -309,11 +322,15 @@ BarWidget {
             return button.foreground;
         }
 
+        const metrics = Yassm.SystemMetrics;
+
+        if (key === "alerts") {
+            return metrics.hasSystemFailure ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
+        }
+
         if (key !== "battery") {
             return button.foreground;
         }
-
-        const metrics = Yassm.SystemMetrics;
 
         // On mains power, charging or held at a charge threshold, the battery
         // icon uses the theme blue. The value stays in the normal bar color.
@@ -1166,6 +1183,48 @@ BarWidget {
             return tooltipBlock("BATTERY", lines.join("\n"));
         }
 
+        if (key === "alerts") {
+            const systemUnits = metrics.failedSystemUnits || [];
+            const userUnits = metrics.failedUserUnits || [];
+            const zombies = metrics.zombieAlerts || [];
+            const lines = [];
+
+            if (systemUnits.length > 0) {
+                lines.push(root.sectionMark + "SYSTEM");
+                for (let i = 0; i < systemUnits.length; i++) {
+                    lines.push(systemUnits[i]);
+                }
+            }
+
+            if (userUnits.length > 0) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.sectionMark + "USER");
+                for (let i = 0; i < userUnits.length; i++) {
+                    lines.push(userUnits[i]);
+                }
+            }
+
+            if (zombies.length > 0) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.sectionMark + "ZOMBIES");
+                for (let i = 0; i < zombies.length; i++) {
+                    lines.push(zombies[i].pid + " " + zombies[i].name + " (" + formatDuration(zombies[i].age) + ")");
+                }
+            }
+
+            if (lines.length === 0) {
+                lines.push("No alerts");
+            }
+
+            return tooltipBlock("ALERTS", lines.join("\n"));
+        }
+
         if (key === "temp") {
             const temperatures = metrics.temperatures;
 
@@ -1329,6 +1388,7 @@ BarWidget {
         entry.showSwap = root.showSwap;
         entry.showGpu = root.showGpu;
         entry.showBattery = root.showBattery;
+        entry.showAlerts = root.showAlerts;
         entry.showNet = root.showNet;
         entry.showTemp = root.showTemp;
         entry.showLoad = root.showLoad;
@@ -1381,6 +1441,7 @@ BarWidget {
         metrics.setTemperatureUser(root, root.showTemp);
         metrics.setDiskUser(root, root.showDisk);
         metrics.setSwapUser(root, root.showSwap);
+        metrics.setAlertsUser(root, root.showAlerts);
     }
 
     function releaseMetricsSubscriptions() {
@@ -1389,6 +1450,7 @@ BarWidget {
         metrics.setTemperatureUser(root, false);
         metrics.setDiskUser(root, false);
         metrics.setSwapUser(root, false);
+        metrics.setAlertsUser(root, false);
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -1689,6 +1751,7 @@ BarWidget {
                         Item {
                             width: Math.max(2, root.iconGap * cellMetrics.advanceWidth)
                             height: 1
+                            visible: root.segmentValue(metricKey) !== ""
                         }
 
                         Text {
@@ -1697,6 +1760,7 @@ BarWidget {
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize
                             renderType: Text.NativeRendering
+                            visible: root.segmentValue(metricKey) !== ""
                         }
                     }
                 }
@@ -1874,4 +1938,5 @@ BarWidget {
     onShowTempChanged: Yassm.SystemMetrics.setTemperatureUser(root, root.showTemp)
     onShowDiskChanged: Yassm.SystemMetrics.setDiskUser(root, root.showDisk)
     onShowSwapChanged: Yassm.SystemMetrics.setSwapUser(root, root.showSwap)
+    onShowAlertsChanged: Yassm.SystemMetrics.setAlertsUser(root, root.showAlerts)
 }
