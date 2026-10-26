@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.27
+Version 1.10.28
 
 [English](README.md) | **Français**
 
@@ -33,7 +33,7 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 - `lib/SystemMetrics.qml` est un singleton partagé : un seul échantillonneur
   `/proc` et un seul `findmnt` pour toutes les instances de barre, y compris
   sur plusieurs écrans. La batterie vient directement d'UPower (événementiel).
-- `SettingsPanel.qml` est chargé à la demande au premier clic, puis conservé
+- `SettingsPanel.qml` est chargé à la demande à la première ouverture, puis conservé
   pour les ouvertures suivantes. Ses contrôles sont des `Toggle`/`ToggleSwitch`
   Omarchy, avec les polices, couleurs et espacements du thème courant.
 - Le GPU reste géré par le widget, conformément à la limite actuelle du
@@ -45,6 +45,7 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 - `bash`, `findmnt` (util-linux), `ps` (procps-ng) et `timeout` (coreutils).
 - Une police Nerd Font pour les icônes.
 - Optionnel : `nvidia-smi` pour les GPU NVIDIA.
+- Optionnel : `btop` pour le lanceur au clic gauche.
 
 Le widget est conçu pour une barre horizontale (haut ou bas). Il est masqué
 sur une barre verticale, où un emplacement de `barSize` de large ne peut pas
@@ -64,7 +65,11 @@ adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 
 ## Panneau de configuration
 
-Un clic sur le widget ouvre un panneau permettant d'activer ou de désactiver :
+**Clic droit** sur le widget pour ouvrir le panneau ; **clic gauche** lance ou
+focus `btop` s'il est installé (Omarchy le rend flottant en 875×600). Si `btop`
+n'est pas installé, le clic gauche ouvre le panneau à la place.
+
+Le panneau permet d'activer ou de désactiver :
 
 **Modules**
 
@@ -100,7 +105,7 @@ Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle
 les fausse pas. Le curseur **Processes** règle la fréquence de relance du `ps`
 des tooltips CPU et RAM pendant le survol ; il descend jusqu'à 2 s. Survoler
 n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
-Le panneau défile automatiquement si l'écran est trop court.
+Le panneau défile automatiquement si l'écran est trop court ; Échap le ferme.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -194,7 +199,8 @@ valeur arrondie affichée :
 
 | Module | Normale | Verte | Orange | Rouge |
 | --- | --- | --- | --- | --- |
-| CPU, RAM, Swap, Disque, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| Disque | < 21 % | 21–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Réseau | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Batterie | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |

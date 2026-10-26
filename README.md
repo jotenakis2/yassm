@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.27
+Version 1.10.28
 
 **English** | [Français](README-fr.md)
 
@@ -33,7 +33,7 @@ default and configurable from 1 to 5 s in Settings.
 - `lib/SystemMetrics.qml` is a shared singleton: a single `/proc` sampler and a
   single `findmnt` for every bar instance, including multi-monitor setups.
   Battery data comes directly from UPower (event-driven).
-- `SettingsPanel.qml` is loaded on demand on first click, then kept for
+- `SettingsPanel.qml` is loaded on demand on first open, then kept for
   subsequent openings. Its controls are Omarchy `Toggle`/`ToggleSwitch`,
   using the current theme's fonts, colors and spacing.
 - GPU support remains handled by the widget, consistent with the current
@@ -45,6 +45,7 @@ default and configurable from 1 to 5 s in Settings.
 - `bash`, `findmnt` (util-linux), `ps` (procps-ng) and `timeout` (coreutils).
 - A Nerd Font for the icons.
 - Optional: `nvidia-smi` for NVIDIA GPUs.
+- Optional: `btop` for the left-click launcher.
 
 The widget is designed for a horizontal bar (top or bottom). It is hidden on
 vertical bars, where a `barSize`-wide slot cannot hold the module row.
@@ -63,7 +64,11 @@ The last command places the widget in the bar's `left` section; adjust
 
 ## Settings panel
 
-Clicking the widget opens a panel to enable or disable:
+**Right-click** the widget to open the panel; **left-click** launches or
+focuses `btop` when it is installed (Omarchy floats it at 875×600). If `btop`
+is not installed, the left click opens the panel instead.
+
+The panel lets you enable or disable:
 
 **Modules**
 
@@ -99,7 +104,7 @@ Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 restart their `ps` while open; it goes down to 2 s. Hovering any slider row
 shows a tooltip with the same explanation. The panel scrolls automatically if
-the screen is too short.
+the screen is too short; Escape closes it.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
 entry. There is no separate configuration file.
@@ -192,7 +197,8 @@ value:
 
 | Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
-| CPU, RAM, Swap, Disk, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| Disk | < 21 % | 21–32 % | 33–65 % | ≥ 66 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Network | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |

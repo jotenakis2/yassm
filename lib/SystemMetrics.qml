@@ -660,7 +660,7 @@ Singleton {
             const tab = line.indexOf("\t");
             const raw = Number((tab >= 0 ? line.slice(0, tab) : line).trim());
 
-            if (!Number.isFinite(raw) || raw === 0 || raw <= -50000 || raw >= 200000) {
+            if (!Number.isFinite(raw) || raw <= 0 || raw >= 200000) {
                 continue;
             }
 

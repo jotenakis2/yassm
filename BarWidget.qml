@@ -69,6 +69,8 @@ BarWidget {
     property var processCpu: []
     property var processMemory: []
 
+    property bool hasBtop: false
+
     property string gpuKind: "none"
     property string gpuPath: ""
     property string gpuCommand: ""
@@ -128,17 +130,16 @@ BarWidget {
 
     // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
     // they cannot be derived from a single base like the plain battery icons.
-    readonly property var batteryChargingIcons: [
-        0xF089C, // charging-10
-        0xF0086, // charging-20
-        0xF0087, // charging-30
-        0xF0088, // charging-40
-        0xF089D, // charging-50
-        0xF0089, // charging-60
-        0xF089E, // charging-70
-        0xF008A, // charging-80
-        0xF008B, // charging-90
-        0xF0085  // charging-100
+    readonly property var batteryChargingIcons: [0xF089C // charging-10
+        , 0xF0086 // charging-20
+        , 0xF0087 // charging-30
+        , 0xF0088 // charging-40
+        , 0xF089D // charging-50
+        , 0xF0089 // charging-60
+        , 0xF089E // charging-70
+        , 0xF008A // charging-80
+        , 0xF008B // charging-90
+        , 0xF0085  // charging-100
     ]
 
     // Plain battery icons run from 0xF007A (battery-10) to 0xF0082
@@ -221,7 +222,7 @@ BarWidget {
         }
 
         if (showDisk) {
-            segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "percent"));
+            segments.push(makeSegment("disk", iconDisk, Math.round(metrics.diskPercent), "%", "disk"));
         }
 
         if (showNet && metrics.hasNetwork) {
@@ -258,20 +259,6 @@ BarWidget {
         }
 
         return segments;
-    }
-
-    readonly property string displayText: {
-        const segments = segmentCache;
-
-        if (segments.length === 0) {
-            return "No module enabled";
-        }
-
-        const gap = " ".repeat(root.moduleSpacing);
-
-        return segments.map(function (segment) {
-            return segment.text;
-        }).join(gap);
     }
 
     readonly property var segmentOrder: ["cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "temp", "battery"]
@@ -333,6 +320,10 @@ BarWidget {
             return batteryColor(segment.value);
         }
 
+        if (segment.kind === "disk") {
+            return diskColor(segment.value);
+        }
+
         if (segment.kind === "load") {
             return loadColor(segment.value);
         }
@@ -350,6 +341,24 @@ BarWidget {
 
     function percentColor(value) {
         if (!Number.isFinite(value) || value < 10) {
+            return button.foreground;
+        }
+
+        if (value < 33) {
+            return Yassm.ThemePalette.green;
+        }
+
+        if (value < 66) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return Yassm.ThemePalette.red;
+    }
+
+    function diskColor(value) {
+        // Disks fill slowly: 20 % full is ordinary. Keep the orange/red
+        // boundaries shared with the other percentage modules.
+        if (!Number.isFinite(value) || value < 21) {
             return button.foreground;
         }
 
@@ -520,24 +529,6 @@ BarWidget {
         return Math.round(value * 1024) + " B";
     }
 
-    function formatKernelKb(kilobytes) {
-        const value = Number(kilobytes);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0 B";
-        }
-
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(2) + " GiB";
-        }
-
-        if (value >= 1024) {
-            return Math.round(value / 1024) + " MiB";
-        }
-
-        return Math.round(value * 1024) + " B";
-    }
-
     // Compact 4-character rate for the bar (KiB/s): "  0K" … "999K", "1.0M",
     // " 10M", "1.0G". Keeping the value field at 3 characters makes a network
     // half as wide as a percentage module.
@@ -596,8 +587,7 @@ BarWidget {
     }
 
     function formatBytesAsGib(bytes) {
-        const value = Number(bytes) / 1073741824;
-        return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
+        return formatKibAsGib(Number(bytes) / 1024);
     }
 
     function aggregateProcesses(content) {
@@ -699,10 +689,6 @@ BarWidget {
             const row = table.rows[i];
             lines.push(row.name.padEnd(nw) + "  " + row.value.padStart(vw));
         }
-    }
-
-    function appendProcessRows(lines, entries, memory) {
-        appendTableRows(lines, processTable(entries, memory));
     }
 
     function coreEntry(label, value, labelWidth) {
@@ -832,7 +818,7 @@ BarWidget {
             const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb), formatKibAsGib(metrics.memoryBuffCacheKb)];
             const hasKernel = metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
-            const kernelValue = hasKernel ? formatKernelKb(metrics.kernelTotalKb) : "";
+            const kernelValue = hasKernel ? formatKib(metrics.kernelTotalKb) : "";
             let nameWidth = 6;
             let valueWidth = kernelValue.length;
 
@@ -1230,6 +1216,16 @@ BarWidget {
         }
     }
 
+    function launchBtop() {
+        if (root.hasBtop) {
+            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "btop"]);
+            return;
+        }
+
+        // btop is not installed: keep the left click useful.
+        root.togglePanel();
+    }
+
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
 
     function open() {
@@ -1310,6 +1306,16 @@ BarWidget {
             root.gpu = Number.isFinite(value) ? value : null;
         }
         onLoadFailed: root.gpu = null
+    }
+
+    Process {
+        id: btopCheck
+
+        command: ["bash", "-c", "command -v btop >/dev/null 2>&1"]
+
+        onExited: function (exitCode, exitStatus) {
+            root.hasBtop = exitCode === 0;
+        }
     }
 
     Process {
@@ -1436,12 +1442,14 @@ BarWidget {
 
         anchors.fill: parent
         bar: root.bar
-        text: root.displayText
+        text: "YASSM"
         labelVisible: false
         tooltipText: ""
 
         onPressed: function (buttonCode) {
             if (buttonCode === Qt.LeftButton) {
+                root.launchBtop();
+            } else if (buttonCode === Qt.RightButton) {
                 root.togglePanel();
             }
         }
@@ -1679,6 +1687,9 @@ BarWidget {
         }
     }
 
-    Component.onCompleted: root.detectGpuIfNeeded()
+    Component.onCompleted: {
+        root.detectGpuIfNeeded();
+        btopCheck.running = true;
+    }
     onShowGpuChanged: root.detectGpuIfNeeded()
 }

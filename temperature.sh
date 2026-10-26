@@ -70,7 +70,7 @@ for path in /sys/class/hwmon/hwmon*/temp*_input; do
 	[[ $raw =~ ^-?[0-9]+$ ]] || continue
 	raw=$(normalize_raw "$raw")
 
-	if (( raw != 0 && raw > -50000 && raw < 200000 )); then
+	if (( raw > 0 && raw < 200000 )); then
 		label=$(sensor_label "$path")
 		printf '%d\t%s\n' "$raw" "$label"
 
@@ -97,7 +97,7 @@ for path in /sys/class/thermal/thermal_zone*/temp; do
 	[[ $raw =~ ^-?[0-9]+$ ]] || continue
 	raw=$(normalize_raw "$raw")
 
-	if (( raw != 0 && raw > -50000 && raw < 200000 )); then
+	if (( raw > 0 && raw < 200000 )); then
 		label=$(sensor_label "$path")
 		if [[ -n ${hwmon_keys[$label]:-} ]]; then
 			continue

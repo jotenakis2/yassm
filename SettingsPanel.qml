@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
@@ -17,12 +18,26 @@ PanelWindow {
     readonly property int panelPadding: Style.space(16)
     readonly property int toggleRowHeight: Style.space(36)
     readonly property int panelMargin: Style.space(4)
+    readonly property var hostBar: {
+        const widget = root.hostWidget;
+        return widget && widget.bar ? widget.bar : null;
+    }
     readonly property string barPosition: {
-        const bar = hostWidget ? hostWidget.bar : null;
+        const bar = root.hostBar;
         return bar && bar.position ? String(bar.position) : "top";
     }
     readonly property int maxPanelHeight: Math.max(Style.space(160), root.height - root.panelMargin * 2)
     readonly property int panelHeight: Math.min(settingsColumn.implicitHeight + root.panelPadding * 2, root.maxPanelHeight)
+
+    function scrollPanel(deltaY) {
+        const max = Math.max(0, settingsFlick.contentHeight - settingsFlick.height);
+
+        if (max <= 0) {
+            return;
+        }
+
+        settingsFlick.contentY = Math.max(0, Math.min(max, settingsFlick.contentY - deltaY));
+    }
 
     readonly property var moduleSettings: [
         {
@@ -65,6 +80,8 @@ PanelWindow {
 
     visible: false
     color: "transparent"
+
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     anchors {
         top: true
@@ -219,6 +236,15 @@ PanelWindow {
                     Layout.preferredHeight: Style.space(40)
                     spacing: Style.space(8)
 
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
                     HoverHandler {
                         id: modulesGapHover
                     }
@@ -250,7 +276,7 @@ PanelWindow {
                     PanelSlider {
                         Layout.preferredWidth: Style.space(160)
                         Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostWidget && root.hostWidget.bar ? root.hostWidget.bar : null
+                        bar: root.hostBar
                         minimum: 0
                         maximum: 5
                         step: 1
@@ -269,6 +295,15 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Style.space(40)
                     spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
 
                     HoverHandler {
                         id: iconGapHover
@@ -301,7 +336,7 @@ PanelWindow {
                     PanelSlider {
                         Layout.preferredWidth: Style.space(160)
                         Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostWidget && root.hostWidget.bar ? root.hostWidget.bar : null
+                        bar: root.hostBar
                         minimum: 0
                         maximum: 3
                         step: 1
@@ -337,6 +372,15 @@ PanelWindow {
                     Layout.preferredHeight: Style.space(40)
                     spacing: Style.space(8)
 
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
                     HoverHandler {
                         id: refreshHover
                     }
@@ -368,7 +412,7 @@ PanelWindow {
                     PanelSlider {
                         Layout.preferredWidth: Style.space(160)
                         Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostWidget && root.hostWidget.bar ? root.hostWidget.bar : null
+                        bar: root.hostBar
                         minimum: 1
                         maximum: 5
                         step: 1
@@ -387,6 +431,15 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Style.space(40)
                     spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
 
                     HoverHandler {
                         id: processesHover
@@ -419,7 +472,7 @@ PanelWindow {
                     PanelSlider {
                         Layout.preferredWidth: Style.space(160)
                         Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostWidget && root.hostWidget.bar ? root.hostWidget.bar : null
+                        bar: root.hostBar
                         minimum: 2
                         maximum: 10
                         step: 1
@@ -469,6 +522,16 @@ PanelWindow {
                     const range = Math.max(1, settingsFlick.height - scrollIndicator.height);
                     const offset = (mouse.y - dragStartY) * scrollIndicator.maxOffset / range;
                     settingsFlick.contentY = Math.max(0, Math.min(scrollIndicator.maxOffset, dragStartContentY + offset));
+                }
+            }
+        }
+
+        PanelKeyCatcher {
+            anchors.fill: parent
+
+            onCloseRequested: {
+                if (root.hostWidget) {
+                    root.hostWidget.close();
                 }
             }
         }
