@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.28
+Version 1.10.29
 
 **English** | [Français](README-fr.md)
 
@@ -93,6 +93,7 @@ The panel lets you enable or disable:
 
 - Refresh (metrics sampling interval, 1–5 s; default 1)
 - Processes (tooltip process refresh, 2–10 s; default 5)
+- Processes shown (userland processes in tooltips, 1–20; default 10)
 
 The **Between modules** slider sets the gap between modules from 0 to 5 spaces
 (default 2). The **Between icon and value** slider sets the gap between each
@@ -102,7 +103,10 @@ minimum gap of 2 px is kept.
 The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
-restart their `ps` while open; it goes down to 2 s. Hovering any slider row
+refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
+list at 1–20 rows (default 10); the `kernel` line is always extra. The CPU list
+is instantaneous (deltas from `/proc/<pid>/stat`), while RAM uses RSS from
+`ps`. Hovering any slider row
 shows a tooltip with the same explanation. The panel scrolls automatically if
 the screen is too short; Escape closes it.
 
@@ -128,7 +132,8 @@ Example entry:
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
-  "processInterval": 5
+  "processInterval": 5,
+  "maxProcesses": 10
 }
 ```
 
@@ -146,7 +151,8 @@ Hovering a module shows a contextual tooltip:
   `SReclaimable`, like `free`). A centered `proc` heading introduces the
   `kernel` line (Slab − SReclaimable + stacks + page tables + vmalloc +
   percpu; SReclaimable is already in Buffer/cache, and vmalloc and percpu may
-  slightly overlap) and the top 10 **userland** processes by RSS,
+  slightly overlap) and the top **userland** processes by RSS (up to the
+  **Processes shown** value, default 10),
   grouped by name; the list refreshes every 5 s by default (2–10 s) while the
   tooltip stays open;
   kernel threads are excluded;
@@ -177,9 +183,10 @@ Hovering a module shows a contextual tooltip:
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`
   heading then introduces kernel CPU (`system` + `irq` + `softirq`), on the
-  same scale as the processes, followed by the top 10 **userland** processes by
-  CPU (average since process start, scaled to total CPU capacity like the main
-  value), grouped by name; the list refreshes every 5 s by default (2–10 s)
+  same scale as the processes, followed by the top **userland** processes by
+  CPU (instantaneous deltas from `/proc/<pid>/stat`, scaled to total CPU
+  capacity like the main value; up to **Processes shown**, default 10),
+  grouped by name; the list refreshes every 5 s by default (2–10 s)
   while the tooltip stays open; kernel threads are excluded;
 - **GPU**: current percentage.
 
@@ -187,8 +194,9 @@ Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
 `data`, `proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
 the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
 tooltips is bold too, but keeps the body color. Network, swap, disk and
-temperature tooltips launch no process. CPU and RAM tooltips launch a `ps` when
-they open and then every 5 s by default (2–10 s) while the hover lasts.
+temperature tooltips launch no process. The RAM tooltip launches a `ps` when
+it opens and every 5 s by default (2–10 s) while the hover lasts; the CPU
+tooltip uses `/proc/<pid>/stat` snapshots instead.
 
 ## Bar colors
 
@@ -268,9 +276,13 @@ and `/proc/net/ipv6_route` are read every 5 s, without spawning a process.
 Swap devices are read from `/proc/swaps` every 5 s, and `mm_stat` every 10 s
 per zram device, also without spawning a process.
 
-The CPU and RAM tooltips launch a `ps` (~15 ms, wrapped in `timeout 5`) when
-they open and then every 5 s by default (2–10 s) while the hover lasts, never
-in the background.
+The CPU tooltip reads `/proc/<pid>/stat` snapshots (no process) for
+instantaneous deltas; the RAM tooltip launches a `ps` (~15 ms, wrapped in
+`timeout 5`) when it opens and then every 5 s by default (2–10 s) while the
+hover lasts, never in the background.
+
+Temperature, disk and swap/ZRAM sampling only run while at least one bar has
+the corresponding module enabled; hiding them stops the scripts entirely.
 
 ## Checks
 

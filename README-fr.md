@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.28
+Version 1.10.29
 
 [English](README.md) | **Français**
 
@@ -94,6 +94,7 @@ Le panneau permet d'activer ou de désactiver :
 
 - Refresh (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
 - Processes (rafraîchissement des processus du tooltip, 2–10 s ; 5 par défaut)
+- Processes shown (processus userland affichés, 1–20 ; 10 par défaut)
 
 Le curseur **Between modules** règle l'espacement entre les modules de 0 à 5
 espaces (2 par défaut). Le curseur **Between icon and value** règle l'espace
@@ -102,8 +103,11 @@ soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
 
 Le curseur **Refresh** pilote la boucle rapide (CPU, RAM, swap, load, réseau).
 Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle ne
-les fausse pas. Le curseur **Processes** règle la fréquence de relance du `ps`
-des tooltips CPU et RAM pendant le survol ; il descend jusqu'à 2 s. Survoler
+les fausse pas. Le curseur **Processes** règle la fréquence de rafraîchissement
+des tooltips CPU et RAM ; il descend jusqu'à 2 s. Le curseur **Processes shown**
+plafonne la liste userland à 1–20 lignes (10 par défaut) ; la ligne `kernel`
+est toujours en plus. La liste CPU est instantanée (deltas `/proc/<pid>/stat`),
+la RAM utilise le RSS de `ps`. Survoler
 n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
 Le panneau défile automatiquement si l'écran est trop court ; Échap le ferme.
 
@@ -129,7 +133,8 @@ Exemple d'entrée :
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
-  "processInterval": 5
+  "processInterval": 5,
+  "maxProcesses": 10
 }
 ```
 
@@ -148,7 +153,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab −
   SReclaimable + piles + tables de pages + vmalloc + percpu ; SReclaimable est
   déjà dans Buffer/cache, et `vmalloc` et `percpu` peuvent se recouvrir
-  légèrement) et le top 10 des processus **userland** par RSS,
+  légèrement) et le top des processus **userland** par RSS (jusqu'à la valeur
+  **Processes shown**, 10 par défaut),
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
@@ -180,8 +186,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un
   titre `proc` centré introduit ensuite le CPU noyau
   (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
-  le top 10 des processus **userland** par CPU (moyenne depuis leur lancement,
-  ramenée sur la capacité totale des CPU comme la valeur principale), regroupés
+  le top des processus **userland** par CPU (deltas instantanés depuis
+  `/proc/<pid>/stat`, ramenés sur la capacité totale des CPU comme la valeur
+  principale ; jusqu'à **Processes shown**, 10 par défaut), regroupés
   par nom ; la liste est rafraîchie toutes les 5 s par défaut (2–10 s) tant que
   le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **GPU** : pourcentage courant.
@@ -273,9 +280,12 @@ et `/proc/net/ipv6_route` sont relus toutes les 5 s, sans processus.
 Les périphériques de swap sont relus depuis `/proc/swaps` toutes les 5 s, et
 `mm_stat` toutes les 10 s par zram, également sans processus.
 
-Les tooltips CPU et RAM lancent un `ps` (~15 ms, encadré par `timeout 5`) à
-l'ouverture puis toutes les 5 s par défaut (réglable de 2 à 10 s) pendant le
-survol, jamais en arrière-plan.
+Le tooltip CPU lit des snapshots de `/proc/<pid>/stat` (aucun processus) pour
+des deltas instantanés ; seul le tooltip RAM utilise `ps` (RSS).
+
+Température, disque et swap/ZRAM ne sont échantillonnés que si au moins une
+barre a le module correspondant activé ; les masquer arrête complètement les
+scripts.
 
 ## Vérifications
 

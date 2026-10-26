@@ -14,10 +14,17 @@ BarWidget {
     moduleName: "io.github.jotenakis2.yassm"
 
     readonly property string detectScriptPath: decodeURIComponent(Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", ""))
+    readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
 
     readonly property int gpuIntervalMs: 10000
 
+    // Linux USER_HZ is 100 on the supported architectures.
+    readonly property int clkTck: 100
+
     property var gpu: null
+
+    property var cpuSnapshot: null
+    property real cpuSnapshotTime: 0
 
     property string hoveredSegment: ""
 
@@ -66,6 +73,12 @@ BarWidget {
         };
     }
 
+    onTooltipContentChanged: root.syncTooltipModel()
+
+    ListModel {
+        id: tooltipLineModel
+    }
+
     property var processCpu: []
     property var processMemory: []
 
@@ -105,6 +118,11 @@ BarWidget {
     readonly property int processInterval: {
         const value = Math.round(Number(setting("processInterval", 5)));
         return Number.isFinite(value) ? Math.max(2, Math.min(10, value)) : 5;
+    }
+
+    readonly property int maxProcesses: {
+        const value = Math.round(Number(setting("maxProcesses", 10)));
+        return Number.isFinite(value) ? Math.max(1, Math.min(20, value)) : 10;
     }
 
     // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.
@@ -590,7 +608,7 @@ BarWidget {
         return formatKibAsGib(Number(bytes) / 1024);
     }
 
-    function aggregateProcesses(content) {
+    function aggregateProcesses(content, limit) {
         const byName = {};
         const lines = content.split("\n");
 
@@ -639,22 +657,117 @@ BarWidget {
             return right.value - left.value;
         });
 
-        return entries.slice(0, 10);
-    }
-
-    function applyProcessCpu(content) {
-        const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
-
-        root.processCpu = aggregateProcesses(content).map(function (entry) {
-            return {
-                name: entry.name,
-                value: entry.value / cores
-            };
-        });
+        return entries.slice(0, limit || 10);
     }
 
     function applyProcessMemory(content) {
-        root.processMemory = aggregateProcesses(content);
+        root.processMemory = aggregateProcesses(content, root.maxProcesses);
+    }
+
+    function startCpuSnapshot() {
+        if (!procSnapshotProcess.running) {
+            procSnapshotProcess.running = true;
+        }
+    }
+
+    function applyProcSnapshot(content) {
+        if (root.hoveredSegment !== "cpu") {
+            root.cpuSnapshot = null;
+            return;
+        }
+
+        const now = Date.now();
+        const current = {};
+        const lines = content.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            if (line === "") {
+                continue;
+            }
+
+            const open = line.indexOf("(");
+            const close = line.lastIndexOf(")");
+
+            if (open < 0 || close <= open) {
+                continue;
+            }
+
+            const pid = Number(line.slice(0, open).trim());
+            const comm = line.slice(open + 1, close);
+            const fields = line.slice(close + 2).trim().split(/\s+/);
+
+            if (!Number.isFinite(pid) || fields.length < 13) {
+                continue;
+            }
+
+            const ppid = Number(fields[1]);
+            const ticks = Number(fields[11]) + Number(fields[12]);
+
+            if (!Number.isFinite(ppid) || !Number.isFinite(ticks)) {
+                continue;
+            }
+
+            current[pid] = {
+                comm: comm,
+                ppid: ppid,
+                ticks: ticks
+            };
+        }
+
+        const previous = root.cpuSnapshot;
+        const previousTime = root.cpuSnapshotTime;
+
+        root.cpuSnapshot = current;
+        root.cpuSnapshotTime = now;
+
+        if (!previous) {
+            // First snapshot is only a baseline; take a second one quickly so
+            // the tooltip does not stay empty for a whole refresh interval.
+            cpuWarmupTimer.restart();
+            return;
+        }
+
+        const elapsed = (now - previousTime) / 1000;
+
+        if (!(elapsed > 0)) {
+            return;
+        }
+
+        const byName = {};
+        const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
+
+        for (const key in current) {
+            const entry = current[key];
+            const before = previous[key];
+
+            if (!before || before.ticks >= entry.ticks) {
+                continue;
+            }
+
+            // Kernel threads are children of kthreadd (PID 2).
+            if (Number(key) === 2 || entry.ppid === 2) {
+                continue;
+            }
+
+            const seconds = (entry.ticks - before.ticks) / root.clkTck;
+            const percent = 100 * seconds / elapsed / cores;
+            byName[entry.comm] = (byName[entry.comm] || 0) + percent;
+        }
+
+        const entries = Object.keys(byName).map(function (name) {
+            return {
+                name: name,
+                value: byName[name]
+            };
+        });
+
+        entries.sort(function (left, right) {
+            return right.value - left.value;
+        });
+
+        root.processCpu = entries.slice(0, root.maxProcesses);
     }
 
     function processTable(entries, memory) {
@@ -804,6 +917,28 @@ BarWidget {
         });
 
         return tooltipBlock("DISK", lines.join("\n"));
+    }
+
+    function syncTooltipModel() {
+        const lines = root.tooltipContent.lines;
+
+        while (tooltipLineModel.count > lines.length) {
+            tooltipLineModel.remove(tooltipLineModel.count - 1);
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            if (i >= tooltipLineModel.count) {
+                tooltipLineModel.append({
+                    lineText: "",
+                    lineHeading: false,
+                    lineBold: false
+                });
+            }
+
+            tooltipLineModel.setProperty(i, "lineText", lines[i].text);
+            tooltipLineModel.setProperty(i, "lineHeading", lines[i].heading);
+            tooltipLineModel.setProperty(i, "lineBold", lines[i].bold);
+        }
     }
 
     function moduleTooltip(key) {
@@ -1089,9 +1224,7 @@ BarWidget {
 
     function refreshProcesses() {
         if (root.hoveredSegment === "cpu") {
-            if (!cpuTopProcess.running) {
-                cpuTopProcess.running = true;
-            }
+            root.startCpuSnapshot();
         } else if (root.hoveredSegment === "memory") {
             if (!memoryTopProcess.running) {
                 memoryTopProcess.running = true;
@@ -1125,6 +1258,8 @@ BarWidget {
 
         if (hit.key === "cpu") {
             root.processCpu = [];
+            root.cpuSnapshot = null;
+            root.cpuSnapshotTime = 0;
         } else if (hit.key === "memory") {
             root.processMemory = [];
         }
@@ -1140,6 +1275,11 @@ BarWidget {
     }
 
     function hideSegmentTooltip() {
+        if (root.hoveredSegment === "cpu") {
+            root.cpuSnapshot = null;
+            root.cpuSnapshotTime = 0;
+        }
+
         root.hoveredSegment = "";
     }
 
@@ -1191,6 +1331,7 @@ BarWidget {
         entry.spacing = root.moduleSpacing;
         entry.refreshInterval = root.refreshInterval;
         entry.processInterval = root.processInterval;
+        entry.maxProcesses = root.maxProcesses;
         entry[name] = value;
 
         root.settings = entry;
@@ -1224,6 +1365,22 @@ BarWidget {
 
         // btop is not installed: keep the left click useful.
         root.togglePanel();
+    }
+
+    function syncMetricsSubscriptions() {
+        const metrics = Yassm.SystemMetrics;
+
+        metrics.setTemperatureUser(root, root.showTemp);
+        metrics.setDiskUser(root, root.showDisk);
+        metrics.setSwapUser(root, root.showSwap);
+    }
+
+    function releaseMetricsSubscriptions() {
+        const metrics = Yassm.SystemMetrics;
+
+        metrics.setTemperatureUser(root, false);
+        metrics.setDiskUser(root, false);
+        metrics.setSwapUser(root, false);
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -1362,16 +1519,16 @@ BarWidget {
     }
 
     Process {
-        id: cpuTopProcess
+        id: procSnapshotProcess
 
-        command: ["timeout", "5", "ps", "-eo", "pid=,ppid=,comm=,%cpu=", "--sort=-%cpu"]
+        command: ["bash", root.procSnapshotPath]
 
         stdout: StdioCollector {
-            id: cpuTopOutput
+            id: procSnapshotOutput
             waitForEnd: true
 
             onStreamFinished: {
-                root.applyProcessCpu(cpuTopOutput.text);
+                root.applyProcSnapshot(procSnapshotOutput.text);
             }
         }
     }
@@ -1389,6 +1546,16 @@ BarWidget {
                 root.applyProcessMemory(memoryTopOutput.text);
             }
         }
+    }
+
+    // First CPU sample only gives a baseline; take a second one quickly so the
+    // tooltip does not stay empty for the whole Processes interval.
+    Timer {
+        id: cpuWarmupTimer
+        interval: 1000
+        repeat: false
+
+        onTriggered: root.startCpuSnapshot()
     }
 
     // Keep the process list live while the CPU or RAM tooltip is open.
@@ -1642,17 +1809,19 @@ BarWidget {
                 }
 
                 Repeater {
-                    model: root.tooltipContent.lines
+                    model: tooltipLineModel
 
                     Text {
-                        required property var modelData
+                        required property string lineText
+                        required property bool lineHeading
+                        required property bool lineBold
 
                         textFormat: Text.PlainText
-                        text: modelData.text
-                        color: modelData.heading ? ShellColor.tooltip.text : ShellColor.muted
+                        text: lineText
+                        color: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
                         font.family: button.fontFamily
                         font.pixelSize: Style.font.body
-                        font.weight: modelData.heading || modelData.bold ? Font.Bold : Font.Normal
+                        font.weight: lineHeading || lineBold ? Font.Bold : Font.Normal
                         renderType: Text.NativeRendering
                     }
                 }
@@ -1689,7 +1858,12 @@ BarWidget {
 
     Component.onCompleted: {
         root.detectGpuIfNeeded();
+        root.syncMetricsSubscriptions();
         btopCheck.running = true;
     }
+    Component.onDestruction: root.releaseMetricsSubscriptions()
     onShowGpuChanged: root.detectGpuIfNeeded()
+    onShowTempChanged: Yassm.SystemMetrics.setTemperatureUser(root, root.showTemp)
+    onShowDiskChanged: Yassm.SystemMetrics.setDiskUser(root, root.showDisk)
+    onShowSwapChanged: Yassm.SystemMetrics.setSwapUser(root, root.showSwap)
 }

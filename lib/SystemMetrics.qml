@@ -51,6 +51,39 @@ Singleton {
     property real diskPercent: 0
     property var mounts: []
 
+    // Reference lists: each bar instance registers while a module is enabled.
+    // The expensive samplers only run while at least one instance needs them.
+    property var temperatureUsers: []
+    property var diskUsers: []
+    property var swapUsers: []
+    readonly property bool temperatureEnabled: temperatureUsers.length > 0
+    readonly property bool diskEnabled: diskUsers.length > 0
+    readonly property bool swapEnabled: swapUsers.length > 0
+
+    function withUser(users, widget, enabled) {
+        const next = users.filter(function (item) {
+            return item !== widget;
+        });
+
+        if (enabled) {
+            next.push(widget);
+        }
+
+        return next;
+    }
+
+    function setTemperatureUser(widget, enabled) {
+        metrics.temperatureUsers = withUser(metrics.temperatureUsers, widget, enabled);
+    }
+
+    function setDiskUser(widget, enabled) {
+        metrics.diskUsers = withUser(metrics.diskUsers, widget, enabled);
+    }
+
+    function setSwapUser(widget, enabled) {
+        metrics.swapUsers = withUser(metrics.swapUsers, widget, enabled);
+    }
+
     property string networkInterface: ""
     property string networkRouteV4: ""
     property string networkRouteV6: ""
@@ -758,7 +791,7 @@ Singleton {
 
             Timer {
                 interval: 10000
-                running: true
+                running: metrics.swapEnabled
                 repeat: true
                 triggeredOnStart: true
 
@@ -778,8 +811,16 @@ Singleton {
         onTriggered: {
             procNetRoute.reload();
             procNetIpv6Route.reload();
-            procSwaps.reload();
         }
+    }
+
+    Timer {
+        interval: 5000
+        running: metrics.swapEnabled
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: procSwaps.reload()
     }
 
     Timer {
@@ -835,7 +876,7 @@ Singleton {
 
     Timer {
         interval: metrics.temperatureIntervalMs
-        running: true
+        running: metrics.temperatureEnabled
         repeat: true
         triggeredOnStart: true
 
@@ -844,7 +885,7 @@ Singleton {
 
     Timer {
         interval: metrics.diskIntervalMs
-        running: true
+        running: metrics.diskEnabled
         repeat: true
         triggeredOnStart: true
 
