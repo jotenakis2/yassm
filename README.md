@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.29
+Version 1.10.30
 
 **English** | [Français](README-fr.md)
 
@@ -186,7 +186,8 @@ Hovering a module shows a contextual tooltip:
   same scale as the processes, followed by the top **userland** processes by
   CPU (instantaneous deltas from `/proc/<pid>/stat`, scaled to total CPU
   capacity like the main value; up to **Processes shown**, default 10),
-  grouped by name; the list refreshes every 5 s by default (2–10 s)
+  grouped by name; when fewer processes are active, idle ones fill the
+  remaining rows at 0.0%; the list refreshes every 5 s by default (2–10 s)
   while the tooltip stays open; kernel threads are excluded;
 - **GPU**: current percentage.
 

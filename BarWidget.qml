@@ -740,19 +740,23 @@ BarWidget {
 
         for (const key in current) {
             const entry = current[key];
-            const before = previous[key];
-
-            if (!before || before.ticks >= entry.ticks) {
-                continue;
-            }
 
             // Kernel threads are children of kthreadd (PID 2).
             if (Number(key) === 2 || entry.ppid === 2) {
                 continue;
             }
 
-            const seconds = (entry.ticks - before.ticks) / root.clkTck;
-            const percent = 100 * seconds / elapsed / cores;
+            const before = previous[key];
+            let percent = 0;
+
+            if (before && entry.ticks > before.ticks) {
+                const seconds = (entry.ticks - before.ticks) / root.clkTck;
+                percent = 100 * seconds / elapsed / cores;
+            }
+
+            // Keep zero-delta processes too: the list is capped by the
+            // "Processes shown" setting, so 20 always means 20 userland rows
+            // when that many processes exist (idle ones display 0.0%).
             byName[entry.comm] = (byName[entry.comm] || 0) + percent;
         }
 
@@ -764,7 +768,11 @@ BarWidget {
         });
 
         entries.sort(function (left, right) {
-            return right.value - left.value;
+            if (right.value !== left.value) {
+                return right.value - left.value;
+            }
+
+            return left.name < right.name ? -1 : (left.name > right.name ? 1 : 0);
         });
 
         root.processCpu = entries.slice(0, root.maxProcesses);

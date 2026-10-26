@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.10.29
+Version 1.10.30
 
 [English](README.md) | **Français**
 
@@ -189,8 +189,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   le top des processus **userland** par CPU (deltas instantanés depuis
   `/proc/<pid>/stat`, ramenés sur la capacité totale des CPU comme la valeur
   principale ; jusqu'à **Processes shown**, 10 par défaut), regroupés
-  par nom ; la liste est rafraîchie toutes les 5 s par défaut (2–10 s) tant que
-  le tooltip reste ouvert ; les threads noyau sont exclus ;
+  par nom ; si moins de processus sont actifs, des lignes inactives à 0,0 %
+  complètent la liste ; la liste est rafraîchie toutes les 5 s par défaut
+  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
