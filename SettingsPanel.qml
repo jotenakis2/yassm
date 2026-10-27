@@ -80,6 +80,14 @@ PanelWindow {
         settingsFlick.contentY = Math.max(0, Math.min(max, settingsFlick.contentY - deltaY));
     }
 
+    function clampScroll() {
+        const max = Math.max(0, settingsFlick.contentHeight - settingsFlick.height);
+
+        if (settingsFlick.contentY > max) {
+            settingsFlick.contentY = max;
+        }
+    }
+
     readonly property var moduleSettings: [
         {
             key: "showUptime",
@@ -132,6 +140,12 @@ PanelWindow {
 
     property int dragFrom: -1
     property int dragTo: -1
+
+    // Section disclosure state, kept for the session only.
+    property bool modulesOpen: true
+    property bool layoutOpen: false
+    property bool temperatureOpen: false
+    property bool timersOpen: false
 
     function orderKey(settingKey) {
         return settingKey.startsWith("show") ? settingKey.charAt(4).toLowerCase() + settingKey.slice(5) : settingKey;
@@ -262,6 +276,9 @@ PanelWindow {
             contentHeight: settingsColumn.implicitHeight
             boundsBehavior: Flickable.StopAtBounds
 
+            onContentHeightChanged: root.clampScroll()
+            onHeightChanged: root.clampScroll()
+
             ColumnLayout {
                 id: settingsColumn
 
@@ -319,21 +336,51 @@ PanelWindow {
                     }
                 }
 
-                PanelSectionHeader {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(2)
                     Layout.bottomMargin: Style.space(2)
-                    text: "MODULES"
-                    foreground: ShellColor.popups.text
-                    fontFamily: Style.font.family
+                    spacing: Style.space(4)
 
-                    HoverHandler {
-                        id: modulesHeaderHover
+                    Text {
+                        id: modulesChevron
+
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredWidth: Style.space(10)
+                        text: String.fromCodePoint(root.modulesOpen ? 0xF0140 : 0xF0142)
+                        color: modulesChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+
+                        MouseArea {
+                            id: modulesChevronArea
+
+                            anchors.fill: parent
+                            anchors.margins: -Style.space(4)
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: root.modulesOpen = !root.modulesOpen
+                        }
                     }
 
-                    PanelToolTip {
-                        visible: modulesHeaderHover.hovered
-                        text: "Drag the handle to reorder the modules."
+                    PanelSectionHeader {
+                        text: "MODULES"
+                        foreground: ShellColor.popups.text
+                        fontFamily: Style.font.family
+
+                        HoverHandler {
+                            id: modulesHeaderHover
+                        }
+
+                        PanelToolTip {
+                            visible: modulesHeaderHover.hovered
+                            text: "Drag the handle to reorder the modules."
+                        }
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
                     }
                 }
 
@@ -341,6 +388,7 @@ PanelWindow {
                     id: moduleList
 
                     Layout.fillWidth: true
+                    visible: root.modulesOpen
                     spacing: Style.space(2)
 
                     Repeater {
@@ -469,274 +517,310 @@ PanelWindow {
                     color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
                 }
 
-                PanelSectionHeader {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
-                    text: "LAYOUT"
-                    foreground: ShellColor.popups.text
-                    fontFamily: Style.font.family
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.toggleRowHeight
-                    spacing: Style.space(6)
-
-                    // Spacer matching the drag handle of the module rows, so
-                    // the Layout boxes line up with the module boxes.
-                    Item {
-                        Layout.preferredWidth: Style.space(18)
-                    }
-
-                    Toggle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: root.toggleRowHeight
-                        label: "Boxes"
-                        fontFamily: Style.font.family
-                        titleSize: Style.font.body
-                        foreground: ShellColor.popups.text
-                        checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
-
-                        onClicked: {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("showBoxes", !checked);
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.toggleRowHeight
-                    spacing: Style.space(6)
-
-                    // Spacer matching the drag handle of the module rows, so
-                    // the Layout boxes line up with the module boxes.
-                    Item {
-                        Layout.preferredWidth: Style.space(18)
-                    }
-
-                    Toggle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: root.toggleRowHeight
-                        label: "Colors"
-                        fontFamily: Style.font.family
-                        titleSize: Style.font.body
-                        foreground: ShellColor.popups.text
-                        checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
-
-                        onClicked: {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("showColors", !checked);
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.toggleRowHeight
-                    spacing: Style.space(6)
-
-                    // Spacer matching the drag handle of the module rows, so
-                    // the Layout boxes line up with the module boxes.
-                    Item {
-                        Layout.preferredWidth: Style.space(18)
-                    }
-
-                    Toggle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: root.toggleRowHeight
-                        label: "Extended data in tooltips"
-                        fontFamily: Style.font.family
-                        titleSize: Style.font.body
-                        foreground: ShellColor.popups.text
-                        checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
-
-                        onClicked: {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("extendedTooltips", !checked);
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: modulesGapHover
-                    }
-
-                    PanelToolTip {
-                        visible: modulesGapHover.hovered
-                        text: "Gap between module boxes, in character cells.\n0–5 cells, with a 2 px minimum at 0."
-                    }
-
-                    Label {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Between modules"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                    spacing: Style.space(4)
 
                     Text {
-                        Layout.preferredWidth: Style.space(14)
+                        id: layoutChevron
+
                         Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.moduleSpacing) : "2"
-                        color: ShellColor.popups.text
+                        Layout.preferredWidth: Style.space(10)
+                        text: String.fromCodePoint(root.layoutOpen ? 0xF0140 : 0xF0142)
+                        color: layoutChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
+
+                        MouseArea {
+                            id: layoutChevronArea
+
+                            anchors.fill: parent
+                            anchors.margins: -Style.space(4)
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: root.layoutOpen = !root.layoutOpen
+                        }
                     }
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 0
-                        maximum: 5
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.moduleSpacing : 2
+                    PanelSectionHeader {
+                        text: "LAYOUT"
+                        foreground: ShellColor.popups.text
+                        fontFamily: Style.font.family
+                    }
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("spacing", Math.round(value));
-                            }
-                        }
+                    Item {
+                        Layout.fillWidth: true
                     }
                 }
 
-                RowLayout {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
+                    spacing: Style.space(4)
+                    visible: root.layoutOpen
 
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: iconGapHover
-                    }
-
-                    PanelToolTip {
-                        visible: iconGapHover.hovered
-                        text: "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0."
-                    }
-
-                    Label {
+                    RowLayout {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Between icon and value"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        Layout.preferredHeight: root.toggleRowHeight
+                        spacing: Style.space(6)
 
-                    Text {
-                        Layout.preferredWidth: Style.space(14)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.iconGap) : "1"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        // Spacer matching the drag handle of the module rows, so
+                        // the Layout boxes line up with the module boxes.
+                        Item {
+                            Layout.preferredWidth: Style.space(18)
+                        }
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 0
-                        maximum: 3
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.iconGap : 1
+                        Toggle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.toggleRowHeight
+                            label: "Boxes"
+                            fontFamily: Style.font.family
+                            titleSize: Style.font.body
+                            foreground: ShellColor.popups.text
+                            checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("iconGap", Math.round(value));
+                            onClicked: {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("showBoxes", !checked);
+                                }
                             }
                         }
                     }
-                }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.toggleRowHeight
+                        spacing: Style.space(6)
 
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
+                        // Spacer matching the drag handle of the module rows, so
+                        // the Layout boxes line up with the module boxes.
+                        Item {
+                            Layout.preferredWidth: Style.space(18)
+                        }
 
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
+                        Toggle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.toggleRowHeight
+                            label: "Colors"
+                            fontFamily: Style.font.family
+                            titleSize: Style.font.body
+                            foreground: ShellColor.popups.text
+                            checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
+
+                            onClicked: {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("showColors", !checked);
+                                }
+                            }
                         }
                     }
 
-                    HoverHandler {
-                        id: maxProcessesHover
-                    }
-
-                    PanelToolTip {
-                        visible: maxProcessesHover.hovered
-                        text: "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra."
-                    }
-
-                    Label {
+                    RowLayout {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Processes shown"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
+                        Layout.preferredHeight: root.toggleRowHeight
+                        spacing: Style.space(6)
+
+                        // Spacer matching the drag handle of the module rows, so
+                        // the Layout boxes line up with the module boxes.
+                        Item {
+                            Layout.preferredWidth: Style.space(18)
+                        }
+
+                        Toggle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.toggleRowHeight
+                            label: "Extended data in tooltips"
+                            fontFamily: Style.font.family
+                            titleSize: Style.font.body
+                            foreground: ShellColor.popups.text
+                            checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
+
+                            onClicked: {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("extendedTooltips", !checked);
+                                }
+                            }
+                        }
                     }
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.maxProcesses) : "10"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: modulesGapHover
+                        }
+
+                        PanelToolTip {
+                            visible: modulesGapHover.hovered
+                            text: "Gap between module boxes, in character cells.\n0–5 cells, with a 2 px minimum at 0."
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "Between modules"
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(14)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: root.hostWidget ? String(root.hostWidget.moduleSpacing) : "2"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 0
+                            maximum: 5
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.moduleSpacing : 2
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("spacing", Math.round(value));
+                                }
+                            }
+                        }
                     }
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 1
-                        maximum: 20
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.maxProcesses : 10
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("maxProcesses", Math.round(value));
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: iconGapHover
+                        }
+
+                        PanelToolTip {
+                            visible: iconGapHover.hovered
+                            text: "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0."
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "Between icon and value"
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(14)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: root.hostWidget ? String(root.hostWidget.iconGap) : "1"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 0
+                            maximum: 3
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.iconGap : 1
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("iconGap", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: maxProcessesHover
+                        }
+
+                        PanelToolTip {
+                            visible: maxProcessesHover.hovered
+                            text: "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra."
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "Processes shown"
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(28)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: root.hostWidget ? String(root.hostWidget.maxProcesses) : "10"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 1
+                            maximum: 20
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.maxProcesses : 10
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("maxProcesses", Math.round(value));
+                                }
                             }
                         }
                     }
@@ -749,17 +833,49 @@ PanelWindow {
                     color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
                 }
 
-                PanelSectionHeader {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
-                    text: "TEMPERATURE (°C)"
-                    foreground: ShellColor.popups.text
-                    fontFamily: Style.font.family
+                    spacing: Style.space(4)
+
+                    Text {
+                        id: temperatureChevron
+
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredWidth: Style.space(10)
+                        text: String.fromCodePoint(root.temperatureOpen ? 0xF0140 : 0xF0142)
+                        color: temperatureChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+
+                        MouseArea {
+                            id: temperatureChevronArea
+
+                            anchors.fill: parent
+                            anchors.margins: -Style.space(4)
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: root.temperatureOpen = !root.temperatureOpen
+                        }
+                    }
+
+                    PanelSectionHeader {
+                        text: "TEMPERATURE (°C)"
+                        foreground: ShellColor.popups.text
+                        fontFamily: Style.font.family
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
                 }
 
                 Item {
                     id: tempBlock
+
+                    visible: root.temperatureOpen
 
                     property string tipText: tempWarmArea.containsMouse ? tempWarmArea.tip : tempHotArea.containsMouse ? tempHotArea.tip : tempCriticalArea.containsMouse ? tempCriticalArea.tip : ""
 
@@ -991,130 +1107,166 @@ PanelWindow {
                     color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
                 }
 
-                PanelSectionHeader {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
-                    text: "TIMERS"
-                    foreground: ShellColor.popups.text
-                    fontFamily: Style.font.family
-                }
+                    spacing: Style.space(4)
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
+                    Text {
+                        id: timersChevron
 
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredWidth: Style.space(10)
+                        text: String.fromCodePoint(root.timersOpen ? 0xF0140 : 0xF0142)
+                        color: timersChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
 
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
+                        MouseArea {
+                            id: timersChevronArea
+
+                            anchors.fill: parent
+                            anchors.margins: -Style.space(4)
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: root.timersOpen = !root.timersOpen
                         }
                     }
 
-                    HoverHandler {
-                        id: refreshHover
+                    PanelSectionHeader {
+                        text: "TIMERS"
+                        foreground: ShellColor.popups.text
+                        fontFamily: Style.font.family
                     }
 
-                    PanelToolTip {
-                        visible: refreshHover.hovered
-                        text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead."
-                    }
-
-                    Label {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Refresh"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
                     }
+                }
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: (root.hostWidget ? String(root.hostWidget.refreshInterval) : "1") + " s"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Style.space(4)
+                    visible: root.timersOpen
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 1
-                        maximum: 5
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.refreshInterval : 1
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("refreshInterval", Math.round(value));
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: refreshHover
+                        }
+
+                        PanelToolTip {
+                            visible: refreshHover.hovered
+                            text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead."
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "Refresh"
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(28)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: (root.hostWidget ? String(root.hostWidget.refreshInterval) : "1") + " s"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 1
+                            maximum: 5
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.refreshInterval : 1
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("refreshInterval", Math.round(value));
+                                }
                             }
                         }
                     }
-                }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: processesHover
-                    }
-
-                    PanelToolTip {
-                        visible: processesHover.hovered
-                        text: "Top processes refresh while a CPU/RAM tooltip is open.\nOne ps per tick; 2 s minimum."
-                    }
-
-                    Label {
+                    RowLayout {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Processes"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: (root.hostWidget ? String(root.hostWidget.processInterval) : "5") + " s"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 2
-                        maximum: 10
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.processInterval : 5
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("processInterval", Math.round(value));
+                        HoverHandler {
+                            id: processesHover
+                        }
+
+                        PanelToolTip {
+                            visible: processesHover.hovered
+                            text: "Top processes refresh while a CPU/RAM tooltip is open.\nOne ps per tick; 2 s minimum."
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "Processes"
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(28)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: (root.hostWidget ? String(root.hostWidget.processInterval) : "5") + " s"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 2
+                            maximum: 10
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.processInterval : 5
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("processInterval", Math.round(value));
+                                }
                             }
                         }
                     }

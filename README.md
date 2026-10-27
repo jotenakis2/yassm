@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.7
+Version 1.24.8
 
 **English** | [Français](README-fr.md)
 
@@ -111,6 +111,10 @@ The panel lets you enable or disable each module, and reorder them by
 dragging the handle on the left of each row (hover the MODULES header for the
 hint). The order is applied to the bar
 immediately and saved in `moduleOrder`.
+
+Each section header carries a chevron: click it to collapse or expand that
+section independently. Only **Modules** is expanded by default; the state is
+kept for the session and is not written to `shell.json`.
 
 **Modules**
 

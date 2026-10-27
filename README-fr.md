@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.7
+Version 1.24.8
 
 [English](README.md) | **Français**
 
@@ -113,6 +113,11 @@ Le panneau permet d'activer ou de désactiver chaque module, et de les
 réordonner en faisant glisser la poignée à gauche de chaque ligne (survoler
 l'en-tête MODULES pour l'indication). L'ordre est
 appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
+
+Chaque en-tête de section porte un chevron : cliquez dessus pour plier ou
+déplier cette section indépendamment. Seul **Modules** est déplié par défaut ;
+l'état n'est conservé que pendant la session et n'est pas écrit dans
+`shell.json`.
 
 **Modules**
 
