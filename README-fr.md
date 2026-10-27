@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.5
+Version 1.24.6
 
 [English](README.md) | **Français**
 
@@ -292,9 +292,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   processus) et la fréquence de chaque cœur entre parenthèses, alignée par
   colonne, relevée pendant que le tooltip est ouvert ;
 - **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
-  affiche `Time since boot : 3h 42m` et `Installation date : 9 sept. 2026`
-  (tirée de la première transaction `pacman`, avec repli sur la date de
-  création de la racine ; le mois suit la locale de la session) ;
+  affiche `Time since boot : 3h 42m`, `Time since installation : 49 days` et
+  `Installation date : 9 sept. 2026` (tirée de la première transaction
+  `pacman`, avec repli sur la date de création de la racine ; le mois suit la
+  locale de la session) ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) et les intitulés
@@ -386,8 +387,9 @@ module signale.
 Le module **Uptime** est activé par défaut et peut être désactivé dans
 Settings. Il lit `/proc/uptime` toutes les 5 s. La barre affiche `42m` sous une
 heure, puis `3h42` ; le tooltip affiche la même durée sous le libellé
-`Time since boot` et la date d'installation de la distribution, calculée une
-fois au démarrage par `install-date.sh`.
+`Time since boot`, l'âge de l'installation en jours et la date d'installation
+de la distribution. `install-date.sh` fournit la date et son horodatage une
+fois au démarrage ; l'âge est recalculé à l'ouverture du tooltip.
 
 ## Performances
 

@@ -1004,6 +1004,20 @@ BarWidget {
         return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
+    function installAgeDays() {
+        const epoch = Yassm.SystemMetrics.installEpoch;
+
+        if (!(epoch > 0)) {
+            return -1;
+        }
+
+        return Math.max(0, Math.floor((Date.now() / 1000 - epoch) / 86400));
+    }
+
+    function formatInstallAge(days) {
+        return days === 1 ? "1 day" : days + " days";
+    }
+
     function singlePressureRows(ten, sixty, threeHundred) {
         const labels = ["10s", "60s", "300s"];
         const values = [ten, sixty, threeHundred].map(function (value) {
@@ -1537,10 +1551,19 @@ BarWidget {
         }
 
         if (key === "uptime") {
-            const labels = ["Time since boot", "Installation date"];
-            const labelWidth = Math.max(labels[0].length, labels[1].length);
+            const ageDays = root.installAgeDays();
+            const bootLabel = "Time since boot";
+            const ageLabel = "Time since installation";
+            const dateLabel = "Installation date";
+            const labelWidth = Math.max(bootLabel.length, ageLabel.length, dateLabel.length);
             const installDate = metrics.installDate !== "" ? metrics.installDate : "unknown";
-            const lines = [labels[0].padEnd(labelWidth) + " : " + formatUptimeLong(metrics.uptimeSeconds), labels[1].padEnd(labelWidth) + " : " + installDate];
+            const lines = [bootLabel.padEnd(labelWidth) + " : " + formatUptimeLong(metrics.uptimeSeconds)];
+
+            if (ageDays >= 0) {
+                lines.push(ageLabel.padEnd(labelWidth) + " : " + root.formatInstallAge(ageDays));
+            }
+
+            lines.push(dateLabel.padEnd(labelWidth) + " : " + installDate);
 
             return tooltipBlock("UPTIME", lines.join("\n"));
         }

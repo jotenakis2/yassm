@@ -245,6 +245,7 @@ Singleton {
 
     readonly property string installDateScriptPath: decodeURIComponent(Qt.resolvedUrl("../install-date.sh").toString().replace("file://", ""))
     property string installDate: ""
+    property real installEpoch: 0
 
     readonly property string depsScriptPath: decodeURIComponent(Qt.resolvedUrl("../deps.sh").toString().replace("file://", ""))
     property var missingDeps: []
@@ -1231,9 +1232,14 @@ Singleton {
     }
 
     function applyInstallDate(content) {
-        // Locale-formatted by install-date.sh (e.g. "9 sept. 2026").
-        const value = String(content || "").trim();
+        // install-date.sh prints the locale-formatted date on the first line
+        // (e.g. "9 sept. 2026") and the matching Unix timestamp on the second.
+        const parts = String(content || "").split("\n");
+        const value = (parts[0] || "").trim();
+        const stamp = Number((parts[1] || "").trim());
+
         metrics.installDate = value !== "" && value.length <= 24 ? value : "";
+        metrics.installEpoch = Number.isFinite(stamp) && stamp > 0 ? stamp : 0;
     }
 
     function applyBatteryCycles(content) {
