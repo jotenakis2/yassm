@@ -1294,7 +1294,18 @@ BarWidget {
 
             lines.push("");
             lines.push(root.centeredMark + ifaceIcon + " iface");
-            lines.push(metrics.networkInterface);
+
+            let ifaceLine = metrics.networkInterface;
+
+            if (root.showExtended && metrics.ifaceIpv4 !== "") {
+                ifaceLine += " · " + metrics.ifaceIpv4;
+            }
+
+            if (root.showExtended && metrics.wanIp !== "") {
+                ifaceLine += " · " + metrics.wanIp;
+            }
+
+            lines.push(ifaceLine);
 
             if (root.showExtended && metrics.wifiNetwork) {
                 let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : "hidden SSID";
@@ -1506,6 +1517,10 @@ BarWidget {
         }
 
         root.refreshProcesses();
+
+        if (root.showExtended && hit.key.indexOf("net") === 0) {
+            Yassm.SystemMetrics.refreshNetworkDetails();
+        }
 
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
     }

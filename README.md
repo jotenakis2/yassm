@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.2
+Version 1.15.0
 
 **English** | [Français](README-fr.md)
 
@@ -187,10 +187,12 @@ Hovering a module shows a contextual tooltip:
   across interface changes), then an `iface` section with the interface name.
   Both rates are colored independently. The driver's absolute counter is not
   used because it can be bogus. Without a default route (loopback only), a red
-  crossed-network icon and `--` replace both rates. Extended data adds the
-  SSID (from NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`)
-  and the signal level (from `/proc/net/wireless`) when the active interface is
-  wireless: `MaisonDuRuet · 5500 MHz · -67 dBm`;
+  crossed-network icon and `--` replace both rates. Extended data completes
+  the `iface` line with the LAN address (`ip -4`) and the public address
+  (`wlan0 · 192.168.50.148 · 90.29.68.78`), then adds the SSID (from
+  NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`) and the
+  signal level (from `/proc/net/wireless`) when the link is wireless:
+  `MaisonDuRuet · 5500 MHz · -67 dBm`;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   Labelled sensors keep their label, unlabeled hwmon sensors show the device
@@ -348,7 +350,10 @@ process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
 The SSID comes from the NetworkManager service over D-Bus (no process, no
 poll); the signal level is read from `/proc/net/wireless` every 5 s, and
 `wifi-freq.sh` asks `iw` for the associated frequency every 30 s while the
-link is wireless only.
+link is wireless only. The LAN and public addresses are only fetched when the
+NET tooltip opens with extended data: `ip -4` costs ~3 ms, and
+<https://api.ipify.org> is queried at most every 5 minutes (one HTTPS request,
+nothing else is sent).
 
 ## Checks
 

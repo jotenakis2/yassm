@@ -142,6 +142,12 @@ Singleton {
     readonly property string wifiFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../wifi-freq.sh").toString().replace("file://", ""))
     property real wifiFreqMhz: 0
 
+    // Interface addresses are only fetched while the NET tooltip is open:
+    // the LAN address from iproute2, the public one from ipify (cached).
+    property string ifaceIpv4: ""
+    property string wanIp: ""
+    property real wanIpUpdatedAt: 0
+
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
@@ -973,6 +979,44 @@ Singleton {
         metrics.wifiLevel = level;
     }
 
+    function applyIfaceIp(content) {
+        const fields = String(content || "").trim().split(/\s+/);
+
+        for (let i = 0; i < fields.length - 1; i++) {
+            if (fields[i] === "inet") {
+                metrics.ifaceIpv4 = fields[i + 1].split("/")[0];
+                return;
+            }
+        }
+
+        metrics.ifaceIpv4 = "";
+    }
+
+    function applyWanIp(content) {
+        const value = String(content || "").trim();
+
+        // Keep the previous address on a failed lookup, drop anything that is
+        // not shaped like an IP (error pages, empty output).
+        if (/^[0-9a-fA-F:.]{3,45}$/.test(value)) {
+            metrics.wanIp = value;
+        }
+    }
+
+    function refreshNetworkDetails() {
+        if (metrics.networkInterface === "") {
+            return;
+        }
+
+        ifaceIpProcess.running = true;
+
+        const now = Date.now();
+
+        if (now - metrics.wanIpUpdatedAt > 300000) {
+            metrics.wanIpUpdatedAt = now;
+            wanIpProcess.running = true;
+        }
+    }
+
     function applyWifiFreq(content) {
         const value = Number(String(content).trim());
         metrics.wifiFreqMhz = Number.isFinite(value) && value > 0 ? value : 0;
@@ -1255,6 +1299,30 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: mountProcess.running = true
+    }
+
+    Process {
+        id: ifaceIpProcess
+
+        command: ["timeout", "3", "ip", "-4", "-o", "addr", "show", "dev", metrics.networkInterface]
+
+        stdout: StdioCollector {
+            id: ifaceIpOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyIfaceIp(ifaceIpOutput.text)
+        }
+    }
+
+    Process {
+        id: wanIpProcess
+
+        command: ["timeout", "6", "curl", "-fsS", "--max-time", "5", "https://api.ipify.org"]
+
+        stdout: StdioCollector {
+            id: wanIpOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyWanIp(wanIpOutput.text)
+        }
     }
 
     Process {

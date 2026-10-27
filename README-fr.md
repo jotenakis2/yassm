@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.2
+Version 1.15.0
 
 [English](README.md) | **Français**
 
@@ -192,10 +192,12 @@ Le survol d'un module affiche une infobulle contextuelle :
   `iface` avec le nom de l'interface. Les deux débits sont colorés
   indépendamment. Le compteur absolu du pilote n'est pas utilisé, car il peut
   être aberrant. Sans route par défaut (uniquement `lo`), une icône réseau
-  barrée rouge et `--` remplacent les deux débits. Extended data ajoute le SSID
-  (via NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
-  niveau du signal (via `/proc/net/wireless`) quand l'interface active est sans
-  fil : `MaisonDuRuet · 5500 MHz · -67 dBm` ;
+  barrée rouge et `--` remplacent les deux débits. Extended data complète la
+  ligne `iface` avec l'adresse LAN (`ip -4`) et l'adresse publique
+  (`wlan0 · 192.168.50.148 · 90.29.68.78`), puis ajoute le SSID (via
+  NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
+  niveau du signal (via `/proc/net/wireless`) quand la liaison est sans fil :
+  `MaisonDuRuet · 5500 MHz · -67 dBm` ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
@@ -356,7 +358,11 @@ La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
 chaque cœur toutes les 5 s. Le SSID vient du service NetworkManager via
 D-Bus (ni processus ni interrogation), le niveau du signal est lu dans
 `/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh` demande la fréquence
-associée à `iw` toutes les 30 s, uniquement si la liaison est sans fil.
+associée à `iw` toutes les 30 s, uniquement si la liaison est sans fil. Les
+adresses LAN et publique ne sont récupérées qu'à l'ouverture du tooltip NET en
+mode extended : `ip -4` coûte ~3 ms, et <https://api.ipify.org> n'est
+interrogé qu'une fois toutes les 5 minutes (une requête HTTPS, rien d'autre
+n'est envoyé).
 
 ## Vérifications
 
