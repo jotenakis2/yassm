@@ -1427,12 +1427,18 @@ BarWidget {
             const fans = metrics.fans || [];
 
             if (temperatures.length === 0 && fans.length === 0) {
-                return tooltipBlock("TEMPERATURE", "Unavailable");
+                return tooltipBlock("SENSORS", "Unavailable");
             }
 
-            const lines = temperatures.map(function (entry) {
-                return entry.celsius.toFixed(1).padStart(4, " ") + " °C (" + entry.sensor + ")";
-            });
+            const lines = [];
+
+            if (temperatures.length > 0) {
+                lines.push(root.centeredMark + root.iconTemp + " temperatures");
+
+                for (let i = 0; i < temperatures.length; i++) {
+                    lines.push(temperatures[i].celsius.toFixed(1).padStart(4, " ") + " °C (" + temperatures[i].sensor + ")");
+                }
+            }
 
             if (fans.length > 0) {
                 let nameWidth = 0;
@@ -1454,7 +1460,7 @@ BarWidget {
                 }
             }
 
-            return tooltipBlock("TEMPERATURE", lines.join("\n"));
+            return tooltipBlock("SENSORS", lines.join("\n"));
         }
 
         return "";

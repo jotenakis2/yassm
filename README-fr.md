@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.0
+Version 1.16.1
 
 [English](README.md) | **Français**
 
@@ -197,16 +197,17 @@ Le survol d'un module affiche une infobulle contextuelle :
   NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
   niveau du signal (via `/proc/net/wireless`) quand la liaison est sans fil :
   `MaisonDuRuet · 5500 MHz · -67 dBm` ;
-- **Temperature** : toutes les températures normales trouvées, triées de la
-  plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
-  barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
-  les capteurs hwmon sans libellé affichent seulement le nom du périphérique
+- **Temperature** : le tooltip s'intitule `SENSORS`. Une section
+  `temperatures` liste toutes les mesures normales, triées de la plus élevée à
+  la plus basse, avec le nom du capteur entre parenthèses ; la barre affiche
+  la plus élevée. Les capteurs étiquetés gardent leur libellé, les capteurs
+  hwmon sans libellé affichent seulement le nom du périphérique
   (`macsmc_battery`, `tas2764`), et les mesures qui partagent un nom sont
-  fusionnées en gardant la plus chaude. L'icône suit le niveau (seuils sur la
-  valeur arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C,
-  chaleur de 50 à 59 °C, alerte à partir de 60 °C. Une section `fans` liste
-  chaque ventilateur hwmon avec sa vitesse en rpm (`Fan 1  0 rpm`), y compris
-  les ventilateurs à l'arrêt à 0 ;
+  fusionnées en gardant la plus chaude. L'icône de la barre suit le niveau
+  (seuils sur la valeur arrondie affichée) : flocon sous 40 °C, thermomètre de
+  40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C. Une section
+  `fans` liste chaque ventilateur hwmon avec sa vitesse en rpm
+  (`Fan 1  0 rpm`), y compris les ventilateurs à l'arrêt à 0 ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge.
   Extended data ajoute la puissance instantanée quand UPower la fournit, avec
   sa direction sous forme de flèche (↓ en décharge, ↑ en charge), ainsi que la
@@ -227,12 +228,12 @@ Le survol d'un module affiche une infobulle contextuelle :
   affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
 
-Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
-(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `fans`,
-`ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de texte du tooltip ; le
-corps utilise la couleur `muted` du thème. La ligne `kernel` des tooltips CPU
-et RAM (extended data uniquement) est aussi en gras, mais conserve la couleur
-du corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.
+Les titres des tooltips (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) et les intitulés
+de section (`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`,
+`temperatures`, `fans`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de
+texte du tooltip ; le corps utilise la couleur `muted` du thème. La ligne
+`kernel` des tooltips CPU et RAM (extended data uniquement) est aussi en gras,
+mais conserve la couleur du corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.
 
 ## Couleurs de la barre
 

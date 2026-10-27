@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.0
+Version 1.16.1
 
 **English** | [Français](README-fr.md)
 
@@ -193,15 +193,16 @@ Hovering a module shows a contextual tooltip:
   NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`) and the
   signal level (from `/proc/net/wireless`) when the link is wireless:
   `MaisonDuRuet · 5500 MHz · -67 dBm`;
-- **Temperature**: all normal temperatures found, sorted from highest to
-  lowest, with the sensor name in parentheses; the bar shows the highest one.
-  Labelled sensors keep their label, unlabeled hwmon sensors show the device
-  name only (`macsmc_battery`, `tas2764`), and readings sharing a name are
-  merged, keeping the hottest;
-  The icon follows the level (thresholds on the rounded displayed value):
-  snowflake below 40 °C, thermometer from 40 to 49 °C, heat from 50 to 59 °C,
-  alert from 60 °C. A `fans` section lists every hwmon fan with its speed in
-  rpm (`Fan 1  0 rpm`), including standing fans at 0;
+- **Temperature**: the tooltip is titled `SENSORS`. A `temperatures` section
+  lists every normal reading, sorted from highest to lowest, with the sensor
+  name in parentheses; the bar shows the highest one. Labelled sensors keep
+  their label, unlabeled hwmon sensors show the device name only
+  (`macsmc_battery`, `tas2764`), and readings sharing a name are merged,
+  keeping the hottest. The bar icon follows the level (thresholds on the
+  rounded displayed value): snowflake below 40 °C, thermometer from 40 to
+  49 °C, heat from 50 to 59 °C, alert from 60 °C. A `fans` section lists every
+  hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
+  0;
 - **Battery**: percentage, state, time remaining or time to full. Extended
   data adds the instantaneous power when UPower provides it, with an arrow
   (↓ while discharging, ↑ while charging), plus battery health and charge
@@ -222,13 +223,14 @@ Hovering a module shows a contextual tooltip:
   the same duration with a space (`3h 42m`);
 - **GPU**: current percentage.
 
-Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
-`data`, `pressure`, `proc`, `usage`, `io`, `devices`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
-the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
-tooltips (extended data only) is bold too, but keeps the body color. Network, swap, disk and
-temperature tooltips launch no process. The RAM tooltip launches a `ps` when
-it opens and every 5 s by default (2–10 s) while the hover lasts; the CPU
-tooltip uses `/proc/<pid>/stat` snapshots instead.
+Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
+(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `temperatures`,
+`fans`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color; the body
+uses the theme `muted` color. The `kernel` line in the CPU and RAM tooltips
+(extended data only) is bold too, but keeps the body color. Network, swap,
+disk and temperature tooltips launch no process. The RAM tooltip launches a
+`ps` when it opens and every 5 s by default (2–10 s) while the hover lasts;
+the CPU tooltip uses `/proc/<pid>/stat` snapshots instead.
 
 ## Bar colors
 
