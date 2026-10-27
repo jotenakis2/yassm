@@ -2195,8 +2195,11 @@ BarWidget {
         BorderSurface {
             id: tooltipBubble
 
-            implicitWidth: tooltipColumn.implicitWidth + Style.space(20)
-            implicitHeight: tooltipColumn.implicitHeight + Style.space(14)
+            // Round up and keep a pixel of slack: a fractional width made the
+            // Wayland surface one pixel narrower than the bubble and clipped
+            // the right border (visible on the NET tooltip).
+            implicitWidth: Math.ceil(tooltipColumn.implicitWidth + Style.space(20)) + 2
+            implicitHeight: Math.ceil(tooltipColumn.implicitHeight + Style.space(14)) + 2
             color: ShellColor.tooltip.background
             borderSpec: Border.surfaceSpec("tooltip", "border", ShellColor.tooltip.border, 1)
             radius: Style.cornerRadius
