@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.13.0
+Version 1.13.1
 
 **English** | [Français](README-fr.md)
 
@@ -197,10 +197,10 @@ Hovering a module shows a contextual tooltip:
   The icon follows the level (thresholds on the rounded displayed value):
   snowflake below 40 °C, thermometer from 40 to 49 °C, heat from 50 to 59 °C,
   alert from 60 °C;
-- **Battery**: percentage, state, time remaining or time to full, and
-  instantaneous power when UPower provides it, with direction (`draw` while
-  discharging, `charge` while charging). Extended data adds battery health and
-  charge cycles;
+- **Battery**: percentage, state, time remaining or time to full. Extended
+  data adds the instantaneous power when UPower provides it, with its
+  direction (`draw` while discharging, `charge` while charging), plus battery
+  health and charge cycles;
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`

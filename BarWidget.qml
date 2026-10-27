@@ -1322,7 +1322,7 @@ BarWidget {
                 lines.push(formatDuration(metrics.batteryTimeToEmpty) + " remaining");
             }
 
-            if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
+            if (root.showExtended && Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
                 const direction = batteryPowerDirection();
 
                 if (direction !== "") {

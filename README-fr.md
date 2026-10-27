@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.13.0
+Version 1.13.1
 
 [English](README.md) | **Français**
 
@@ -202,9 +202,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   fusionnées en gardant la plus chaude ; L'icône suit le niveau (seuils sur la valeur
   arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C, chaleur de
   50 à 59 °C, alerte à partir de 60 °C ;
-- **Battery** : pourcentage, état, temps restant ou temps de charge, et
-  puissance instantanée quand UPower la fournit, avec la direction
-  (`draw` en décharge, `charge` en charge). Extended data ajoute la santé de
+- **Battery** : pourcentage, état, temps restant ou temps de charge.
+  Extended data ajoute la puissance instantanée quand UPower la fournit, avec
+  sa direction (`draw` en décharge, `charge` en charge), ainsi que la santé de
   la batterie et le nombre de cycles ;
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
   centré, puis le pourcentage par cœur sur deux colonnes (réparties par
