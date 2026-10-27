@@ -28,7 +28,8 @@ Singleton {
     property real memoryTotalKb: 0
     property real memoryUsedKb: 0
     property real memoryAvailableKb: 0
-    property real memoryBuffCacheKb: 0
+    property real memoryBuffersKb: 0
+    property real memoryCacheKb: 0
     property real memorySharedKb: 0
     property real kernelTotalKb: 0
 
@@ -519,9 +520,12 @@ Singleton {
         metrics.memoryUsedKb = Math.max(0, total - availableKb);
         metrics.memoryAvailableKb = availableKb;
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
-        metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
+        // Buffer and Cache are shown separately; Cache keeps SReclaimable so
+        // Buffer + Cache still matches the classic Buff/cache total.
+        metrics.memoryBuffersKb = buffers;
+        metrics.memoryCacheKb = cached + sReclaimable;
         metrics.memorySharedKb = shmem;
-        // SReclaimable is already counted in Buffer/cache: exclude it from the
+        // SReclaimable is already counted in Cache: exclude it from the
         // kernel line so the two rows do not show the same memory twice.
         metrics.kernelTotalKb = Math.max(0, slab - sReclaimable) + kernelStack + pageTables + vmallocUsed + percpu;
 

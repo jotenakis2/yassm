@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.3
+Version 1.25.4
 
 [English](README.md) | **Français**
 
@@ -239,11 +239,12 @@ Le survol d'un module affiche une infobulle contextuelle :
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
   Extended data ajoute `Shared` (`Shmem` : tmpfs et mappings partagés, déjà
-  comptés dans `Cached`), `Buffer/cache` (`Buffers` + `Cached` +
-  `SReclaimable`, comme `free`), la ligne `kernel` (Slab − SReclaimable +
-  piles + tables de pages + vmalloc + percpu ; SReclaimable est déjà dans
-  Buffer/cache, et `vmalloc` et `percpu` peuvent se recouvrir légèrement) et
-  une section `pressure` avec une ligne par fenêtre (`10s`, `60s`, `300s`) ;
+  comptés dans `Cached`), `Tampon` (`Buffers`), `Cache` (`Cached` +
+  `SReclaimable`, comme `free` ; Tampon + Cache forme le total Buff/cache
+  classique), la ligne `kernel` (Slab − SReclaimable + piles + tables de
+  pages + vmalloc + percpu ; SReclaimable est déjà dans Cache, et `vmalloc`
+  et `percpu` peuvent se recouvrir légèrement) et une section `pressure` avec
+  une ligne par fenêtre (`10s`, `60s`, `300s`) ;
 - **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `zram` (taille
@@ -258,8 +259,11 @@ Le survol d'un module affiche une infobulle contextuelle :
   le serveur est injoignable. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/`. Extended data
-  ajoute une section `io` (débits lecture/écriture) et une section `pressure`
-  (`some`/`full` pour `10s`, `60s`, `300s`) ;
+  ajoute une section `io` (débits lecture/écriture), une section `pressure`
+  (`some`/`full` pour `10s`, `60s`, `300s`) et une section `proc` avec le top
+  des processus par débit lecture/écriture (lu dans `/proc/<pid>/io` ; seuls
+  les processus de l'utilisateur sont lisibles, et la somme ne reconstitue pas
+  le débit global à cause du writeback et des démons root) ;
 - **Réseau** : une section `io` avec le débit descendant (↓), montant (↑) et
   le total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface), puis une section

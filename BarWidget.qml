@@ -14,6 +14,7 @@ BarWidget {
 
     readonly property string detectScriptPath: decodeURIComponent(Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", ""))
     readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
+    readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
 
     readonly property int gpuIntervalMs: 10000
 
@@ -80,6 +81,8 @@ BarWidget {
 
     property var processCpu: []
     property var processMemory: []
+    property var diskProcesses: []
+    property var diskIoSnapshot: null
 
     property bool hasBtop: false
 
@@ -785,6 +788,90 @@ BarWidget {
         root.processMemory = aggregateProcesses(content, root.maxProcesses);
     }
 
+    function startDiskIo() {
+        if (!diskIoProcess.running) {
+            diskIoProcess.running = true;
+        }
+    }
+
+    function applyDiskIo(content) {
+        const now = Date.now();
+        const previous = root.diskIoSnapshot;
+        const current = {};
+        const byName = {};
+        const lines = String(content || "").split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === "") {
+                continue;
+            }
+
+            const parts = lines[i].split("\t");
+
+            if (parts.length < 4) {
+                continue;
+            }
+
+            const key = parts[0];
+            const name = parts[1];
+            const read = Number(parts[2]);
+            const write = Number(parts[3]);
+
+            if (!Number.isFinite(read) || !Number.isFinite(write)) {
+                continue;
+            }
+
+            current[key] = {
+                read: read,
+                write: write
+            };
+
+            if (!previous || !previous.entries[key]) {
+                continue;
+            }
+
+            const elapsed = Math.max(0.5, (now - previous.time) / 1000);
+            const readDelta = Math.max(0, read - previous.entries[key].read);
+            const writeDelta = Math.max(0, write - previous.entries[key].write);
+
+            if (readDelta + writeDelta <= 0) {
+                continue;
+            }
+
+            const entry = byName[name] || {
+                name: name,
+                read: 0,
+                write: 0
+            };
+
+            entry.read += readDelta / elapsed;
+            entry.write += writeDelta / elapsed;
+            byName[name] = entry;
+        }
+
+        root.diskIoSnapshot = {
+            time: now,
+            entries: current
+        };
+
+        if (!previous) {
+            // First sample is only a baseline; take a second one quickly so
+            // the section does not stay empty for a whole refresh interval.
+            diskWarmupTimer.restart();
+            return;
+        }
+
+        const entries = Object.keys(byName).map(function (name) {
+            return byName[name];
+        });
+
+        entries.sort(function (left, right) {
+            return (right.read + right.write) - (left.read + left.write);
+        });
+
+        root.diskProcesses = entries.slice(0, root.maxProcesses);
+    }
+
     function startCpuSnapshot() {
         if (!procSnapshotProcess.running) {
             procSnapshotProcess.running = true;
@@ -957,6 +1044,12 @@ BarWidget {
             return Yassm.I18n.t("battery.full");
         case "Not charging":
             return Yassm.I18n.t("battery.not_charging");
+        case "Empty":
+            return Yassm.I18n.t("battery.empty");
+        case "Pending charge":
+            return Yassm.I18n.t("battery.pending_charge");
+        case "Pending discharge":
+            return Yassm.I18n.t("battery.pending_discharge");
         default:
             return status || Yassm.I18n.t("battery.unknown");
         }
@@ -1162,6 +1255,23 @@ BarWidget {
             for (let i = 0; i < pressure.length; i++) {
                 lines.push(pressure[i]);
             }
+
+            lines.push("");
+            lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
+
+            if (root.diskProcesses.length === 0) {
+                lines.push(Yassm.I18n.t("common.no_io"));
+            } else {
+                const nameWidth = 15;
+                const rateWidth = 10;
+
+                for (let i = 0; i < root.diskProcesses.length; i++) {
+                    const entry = root.diskProcesses[i];
+                    const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
+
+                    lines.push(name.padEnd(nameWidth) + "  ↓" + formatRateLong(entry.read / 1024).padStart(rateWidth) + "  ↑" + formatRateLong(entry.write / 1024).padStart(rateWidth));
+                }
+            }
         }
 
         return tooltipBlock(Yassm.I18n.t("title.disk"), lines.join("\n"));
@@ -1215,8 +1325,10 @@ BarWidget {
             if (root.showExtended) {
                 labels.push(Yassm.I18n.t("row.shared"));
                 values.push(formatKibAsGib(metrics.memorySharedKb));
-                labels.push(Yassm.I18n.t("row.buffcache"));
-                values.push(formatKibAsGib(metrics.memoryBuffCacheKb));
+                labels.push(Yassm.I18n.t("row.buffer"));
+                values.push(formatKibAsGib(metrics.memoryBuffersKb));
+                labels.push(Yassm.I18n.t("row.cache"));
+                values.push(formatKibAsGib(metrics.memoryCacheKb));
             }
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
@@ -1348,7 +1460,7 @@ BarWidget {
                 lines.push(Yassm.I18n.tf("swap.compressed", [formatKib(metrics.zswapCompressedKb), formatKib(metrics.zswapOriginalKb)]) + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 
-            return tooltipBlock("SWAP", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
         }
 
         if (key === "disk") {
@@ -1521,7 +1633,7 @@ BarWidget {
                 }
             }
 
-            return tooltipBlock("BATTERY", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.battery"), lines.join("\n"));
         }
 
         if (key === "alerts") {
@@ -1695,6 +1807,8 @@ BarWidget {
             if (!memoryTopProcess.running) {
                 memoryTopProcess.running = true;
             }
+        } else if (root.hoveredSegment === "disk" && root.showExtended) {
+            root.startDiskIo();
         }
     }
 
@@ -1728,6 +1842,9 @@ BarWidget {
             root.cpuSnapshotTime = 0;
         } else if (hit.key === "memory") {
             root.processMemory = [];
+        } else if (hit.key === "disk" && root.showExtended) {
+            root.diskProcesses = [];
+            root.diskIoSnapshot = null;
         }
 
         root.refreshProcesses();
@@ -2042,6 +2159,21 @@ BarWidget {
         }
     }
 
+    Process {
+        id: diskIoProcess
+
+        command: ["bash", root.diskIoScriptPath]
+
+        stdout: StdioCollector {
+            id: diskIoOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                root.applyDiskIo(diskIoOutput.text);
+            }
+        }
+    }
+
     // First CPU sample only gives a baseline; take a second one quickly so the
     // tooltip does not stay empty for the whole Processes interval.
     Timer {
@@ -2052,11 +2184,19 @@ BarWidget {
         onTriggered: root.startCpuSnapshot()
     }
 
+    Timer {
+        id: diskWarmupTimer
+        interval: 1000
+        repeat: false
+
+        onTriggered: root.startDiskIo()
+    }
+
     // Keep the process list live while the CPU or RAM tooltip is open.
     Timer {
         interval: root.processInterval * 1000
         repeat: true
-        running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory"
+        running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || (root.hoveredSegment === "disk" && root.showExtended)
 
         onTriggered: root.refreshProcesses()
     }

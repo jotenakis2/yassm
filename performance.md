@@ -25,6 +25,9 @@ tooltip open and the screensaver/locking disabled.
   (≈ 0.12 % of the machine), most of which is the 1 Hz bar update itself.
 - **~15 script spawns per minute** when idle (temperature, disk, alerts,
   Wi-Fi frequency), and **0** for the CPU frequency outside its tooltip.
+- **Per-process disk I/O only runs while the DISK tooltip is open**
+  (extended data): 13 ms per sample for ≈120 readable processes, every
+  Processes interval, and nothing once the tooltip closes.
 - **No battery polling**: UPower and NetworkManager are event-driven over
   D-Bus.
 

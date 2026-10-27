@@ -27,6 +27,9 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
 - **~15 lancements de scripts par minute** au repos (température, disque,
   alertes, fréquence Wi-Fi), et **0** pour la fréquence CPU hors de son
   tooltip.
+- **Les E/S par processus ne tournent que lorsque le tooltip DISK est
+  ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
+  lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.
 - **Aucun polling batterie** : UPower et NetworkManager sont événementiels via
   D-Bus.
 

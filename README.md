@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.3
+Version 1.25.4
 
 **English** | [Français](README-fr.md)
 
@@ -233,9 +233,10 @@ Hovering a module shows a contextual tooltip:
   default 10), grouped by name; the list refreshes every 5 s by default
   (2–10 s) while the tooltip stays open; kernel threads are excluded.
   Extended data adds `Shared` (`Shmem`: tmpfs and shared mappings, already
-  counted in `Cached`), `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
-  like `free`), the `kernel` line (Slab − SReclaimable + stacks + page tables
-  + vmalloc + percpu; SReclaimable is already in Buffer/cache, and vmalloc and
+  counted in `Cached`), `Buffer` (`Buffers`), `Cache` (`Cached` +
+  `SReclaimable`, like `free`; Buffer + Cache is the classic Buff/cache
+  total), the `kernel` line (Slab − SReclaimable + stacks + page tables
+  + vmalloc + percpu; SReclaimable is already in Cache, and vmalloc and
   percpu may slightly overlap) and a `pressure` section with `some`/`full`
   columns for the `10s`, `60s` and `300s` windows (`some`: at least one task
   stalled, `full`: no task making progress);
@@ -252,8 +253,11 @@ Hovering a module shows a contextual tooltip:
   their usage can block for seconds when the server is unreachable. Mount
   points that share the same device/source are deduplicated: on a btrfs root
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
-  from `/`. Extended data adds an `io` section (read/write rates) and a
-  `pressure` section (`some`/`full` for `10s`, `60s`, `300s`);
+  from `/`. Extended data adds an `io` section (read/write rates), a
+  `pressure` section (`some`/`full` for `10s`, `60s`, `300s`) and a `proc`
+  section with the top processes by read/write rate (read from
+  `/proc/<pid>/io`; only the user's processes are readable, and the sum does
+  not rebuild the global rate because of writeback and root daemons);
 - **Network**: an `io` section with download (↓) and upload (↑) rates plus
   the session total (deltas since the shell started, reset on restart and kept
   across interface changes), then an `interface` section with the interface name.
