@@ -220,6 +220,18 @@ PanelWindow {
             }
         }
 
+        Text {
+            id: gearIcon
+
+            text: String.fromCodePoint(0xF0493)
+            color: ShellColor.popups.text
+            font.family: Style.font.family
+            font.pixelSize: Style.font.title
+            x: settingsPanel.width - width - root.panelPadding
+            y: root.panelPadding - Math.round(Style.space(2) / 2)
+            z: 2
+        }
+
         Flickable {
             id: settingsFlick
 
@@ -235,25 +247,6 @@ PanelWindow {
 
                 width: settingsFlick.width - Style.space(6)
                 spacing: Style.space(4)
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(26)
-                    Layout.bottomMargin: Style.space(6)
-                    spacing: 0
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                        text: String.fromCodePoint(0xF0493)
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.title
-                    }
-                }
 
                 Rectangle {
                     id: depsWarning
@@ -799,7 +792,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value and icon turn green here.\nKept below Orange."
+                                        property string tip: "Value turns green and the icon becomes a thermometer here.\nKept below Orange."
                                     }
                                 }
 
@@ -856,7 +849,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value and icon turn orange here.\nKept between Green and Red."
+                                        property string tip: "Value turns orange and the icon becomes a heat wave here.\nKept between Green and Red."
                                     }
                                 }
 
@@ -915,7 +908,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value and icon turn red here.\nKept above Orange."
+                                        property string tip: "Value turns red and the icon becomes an alert here.\nKept above Orange."
                                     }
                                 }
 

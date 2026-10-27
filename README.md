@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.1
+Version 1.24.2
 
 **English** | [Français](README-fr.md)
 
@@ -260,9 +260,10 @@ Hovering a module shows a contextual tooltip:
   name in parentheses; the bar shows the highest one. Labelled sensors keep
   their label, unlabeled hwmon sensors show the device name only
   (`macsmc_battery`, `tas2764`), and readings sharing a name are merged,
-  keeping the hottest. The bar icon and value follow the level (thresholds on
-  the rounded displayed value); with the defaults: snowflake below 40 °C,
-  thermometer from 40 to 49 °C, heat from 50 to 59 °C, alert from 60 °C. All
+  keeping the hottest. The bar icon changes shape with the level while the
+  value takes the level colour (thresholds on the rounded displayed value);
+  with the defaults: snowflake below 40 °C, thermometer from 40 to 49 °C,
+  heat wave from 50 to 59 °C, alert from 60 °C. All
   three thresholds are configurable in Settings → Temperature. A `fans` section lists every
   hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
   0;
