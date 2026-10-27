@@ -210,7 +210,9 @@ PanelWindow {
         smooth: true
 
         x: root.panelX
-        y: root.barPosition === "bottom" ? Math.max(root.panelMargin, root.height - root.panelHeight - root.panelMargin) : (root.barPosition === "left" || root.barPosition === "right") ? Math.max(root.panelMargin, Math.round((root.height - root.panelHeight) / 2)) : root.panelMargin
+        // The top panel sits a few pixels lower than the bare margin: flush
+        // against the bar it looked cramped.
+        y: root.barPosition === "bottom" ? Math.max(root.panelMargin, root.height - root.panelHeight - root.panelMargin) : (root.barPosition === "left" || root.barPosition === "right") ? Math.max(root.panelMargin, Math.round((root.height - root.panelHeight) / 2)) : root.panelMargin + Style.space(4)
 
         MouseArea {
             anchors.fill: parent
@@ -230,6 +232,24 @@ PanelWindow {
             x: settingsPanel.width - width - root.panelPadding
             y: root.panelPadding - Math.round(Style.space(2) / 2)
             z: 2
+
+            // Keep the MODULES hint from firing under the icon and give the
+            // gear its own tooltip, right below it.
+            MouseArea {
+                id: gearArea
+
+                anchors.fill: parent
+                anchors.margins: -Style.space(4)
+                hoverEnabled: true
+            }
+
+            PanelToolTip {
+                parent: settingsPanel
+                visible: gearArea.containsMouse
+                text: "YASSM settings"
+                x: settingsPanel.width - width - root.panelPadding
+                y: gearIcon.y + gearIcon.height + Style.space(4)
+            }
         }
 
         Flickable {
