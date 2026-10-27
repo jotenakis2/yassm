@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.1
+Version 1.19.2
 
 **English** | [Français](README-fr.md)
 
@@ -319,8 +319,10 @@ thread from `/proc/<pid>/task/*/schedstat`; each state is sampled over two
 | **Overhead at 1 s** | **+0.60 points** | **+830** |
 | **Overhead at 5 s** | **+0.20 points** | **+560** |
 
-That is **0.05 % of the whole 12-core machine** at the default 1 s refresh
-(1.20 % of one core). The cost is dominated by the once-a-second update path
+The overhead is **0.05 % of the machine's total capacity** at the default 1 s
+refresh (0.60 points of one core out of 12 cores); YASSM's absolute footprint
+when enabled is 1.20 % of one core. The cost is dominated by the
+once-a-second update path
 (four `/proc` reads, binding updates, text layout), which is why the Refresh
 slider has such a visible effect.
 
@@ -374,6 +376,9 @@ associated frequency every 30 s while the link is wireless only. The LAN and
 public addresses are only fetched when the NET tooltip opens with extended
 data: `ip -4` costs ~3 ms, and <https://api.ipify.org> is queried at most
 every 5 minutes (one HTTPS request, nothing else is sent).
+
+Full methodology, raw numbers and reproduction snippets:
+[performance.md](performance.md).
 
 ## Checks
 

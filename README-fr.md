@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.1
+Version 1.19.2
 
 [English](README.md) | **Français**
 
@@ -324,8 +324,9 @@ mesuré sur deux fenêtres de 90–120 s, puis moyenné.
 | **Surcoût à 1 s** | **+0,60 point** | **+830** |
 | **Surcoût à 5 s** | **+0,20 point** | **+560** |
 
-Soit **0,05 % de la machine 12 cœurs** au refresh par défaut de 1 s (1,20 %
-d'un cœur). Le coût est dominé par la boucle d'une seconde (quatre lectures
+Le surcoût est de **0,05 % de la capacité totale** au refresh par défaut de
+1 s (0,60 point d'un cœur sur 12) ; l'empreinte absolue de YASSM activé est de
+1,20 % d'un cœur. Le coût est dominé par la boucle d'une seconde (quatre lectures
 `/proc`, mises à jour de bindings et mise en page du texte), d'où l'effet
 visible du curseur Refresh.
 
@@ -381,6 +382,9 @@ est sans fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouvertu
 du tooltip NET en mode extended : `ip -4` coûte ~3 ms, et
 <https://api.ipify.org> n'est interrogé qu'une fois toutes les 5 minutes (une
 requête HTTPS, rien d'autre n'est envoyé).
+
+Méthodologie complète, chiffres bruts et extraits reproductibles :
+[performance.md](performance.md).
 
 ## Vérifications
 
