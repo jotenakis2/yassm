@@ -1461,13 +1461,12 @@ BarWidget {
         }
 
         if (key === "uptime") {
-            let body = formatUptimeLong(metrics.uptimeSeconds);
+            const labels = ["Time since boot", "Installation date"];
+            const labelWidth = Math.max(labels[0].length, labels[1].length);
+            const installDate = metrics.installDate !== "" ? metrics.installDate : "unknown";
+            const lines = [labels[0].padEnd(labelWidth) + " : " + formatUptimeLong(metrics.uptimeSeconds), labels[1].padEnd(labelWidth) + " : " + installDate];
 
-            if (metrics.installDate !== "") {
-                body += "\ninstalled " + metrics.installDate;
-            }
-
-            return tooltipBlock("UPTIME", body);
+            return tooltipBlock("UPTIME", lines.join("\n"));
         }
 
         if (key === "temp") {
