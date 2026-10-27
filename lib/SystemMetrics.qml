@@ -234,6 +234,9 @@ Singleton {
     property var coreFreqMhz: []
     property real uptimeSeconds: 0
 
+    readonly property string installDateScriptPath: decodeURIComponent(Qt.resolvedUrl("../install-date.sh").toString().replace("file://", ""))
+    property string installDate: ""
+
     readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
     readonly property int alertsIntervalMs: 60000
     property var failedSystemUnits: []
@@ -1179,6 +1182,11 @@ Singleton {
         metrics.uptimeSeconds = Number.isFinite(value) ? value : 0;
     }
 
+    function applyInstallDate(content) {
+        const value = String(content || "").trim();
+        metrics.installDate = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) ? value : "";
+    }
+
     function applyBatteryCycles(content) {
         const value = Number(String(content).trim());
         metrics.batteryCycles = Number.isFinite(value) ? value : 0;
@@ -1467,6 +1475,18 @@ Singleton {
     }
 
     Process {
+        id: installDateProcess
+
+        command: ["timeout", "5", "bash", metrics.installDateScriptPath]
+
+        stdout: StdioCollector {
+            id: installDateOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyInstallDate(installDateOutput.text)
+        }
+    }
+
+    Process {
         id: ifaceIpProcess
 
         command: ["timeout", "3", "ip", "-4", "-o", "addr", "show", "dev", metrics.networkInterface]
@@ -1554,4 +1574,6 @@ Singleton {
 
         onTriggered: alertsProcess.running = true
     }
+
+    Component.onCompleted: installDateProcess.running = true
 }

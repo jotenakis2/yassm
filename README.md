@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.3
+Version 1.20.0
 
 **English** | [Français](README-fr.md)
 
@@ -224,7 +224,9 @@ Hovering a module shows a contextual tooltip:
   `full` line for the CPU) and each core frequency in parentheses,
   right-aligned per column, sampled while the tooltip is open;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
-  the same duration with a space (`3h 42m`);
+  the same duration with a space (`3h 42m`) and the distribution installation
+  date (`installed 2026-09-09`, taken from the first `pacman` transaction,
+  falling back to the root filesystem birth time);
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
@@ -302,7 +304,8 @@ the icon uses the normal bar color.
 
 The **Uptime** module is enabled by default and can be disabled in Settings.
 It reads `/proc/uptime` every 5 s. The bar shows `42m` below one hour, then
-`3h42`; the tooltip shows `3h 42m`.
+`3h42`; the tooltip shows `3h 42m` and the installation date of the
+distribution, computed once at startup by `install-date.sh`.
 
 ## Performance
 

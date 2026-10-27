@@ -1461,7 +1461,13 @@ BarWidget {
         }
 
         if (key === "uptime") {
-            return tooltipBlock("UPTIME", formatUptimeLong(metrics.uptimeSeconds));
+            let body = formatUptimeLong(metrics.uptimeSeconds);
+
+            if (metrics.installDate !== "") {
+                body += "\ninstalled " + metrics.installDate;
+            }
+
+            return tooltipBlock("UPTIME", body);
         }
 
         if (key === "temp") {

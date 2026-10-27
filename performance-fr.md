@@ -116,6 +116,7 @@ Aucun de ces processus ne survit entre deux exécutions.
 | `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, toutes les 5 s |
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
 | `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, au plus toutes les 5 min |
+| `install-date.sh` | 3 ms | une fois au démarrage |
 
 ## Total
 
