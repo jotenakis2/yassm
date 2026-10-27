@@ -220,14 +220,15 @@ PanelWindow {
                     text: "MODULES"
                     foreground: ShellColor.popups.text
                     fontFamily: Style.font.family
-                }
 
-                Label {
-                    Layout.fillWidth: true
-                    text: "Drag the handle to reorder."
-                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.55)
-                    font.family: Style.font.family
-                    font.pixelSize: Style.font.bodySmall
+                    HoverHandler {
+                        id: modulesHeaderHover
+                    }
+
+                    PanelToolTip {
+                        visible: modulesHeaderHover.hovered
+                        text: "Drag the handle to reorder the modules."
+                    }
                 }
 
                 ColumnLayout {

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.0
+Version 1.21.1
 
 [English](README.md) | **Français**
 
@@ -87,7 +87,8 @@ focus `btop` s'il est installé (Omarchy le rend flottant en 875×600). Si `btop
 n'est pas installé, le clic gauche ouvre le panneau à la place.
 
 Le panneau permet d'activer ou de désactiver chaque module, et de les
-réordonner en faisant glisser la poignée à gauche de chaque ligne. L'ordre est
+réordonner en faisant glisser la poignée à gauche de chaque ligne (survoler
+l'en-tête MODULES pour l'indication). L'ordre est
 appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
 
 **Modules**
