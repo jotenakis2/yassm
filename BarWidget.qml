@@ -1018,6 +1018,28 @@ BarWidget {
         return days === 1 ? "1 day" : days + " days";
     }
 
+    // Installation age and date belong to the extended data: they are static
+    // facts about the machine, not part of the live uptime reading.
+    function installRows(bootLabel) {
+        const metrics = Yassm.SystemMetrics;
+        const ageDays = root.installAgeDays();
+        const ageLabel = "Time since installation";
+        const dateLabel = "Installation date";
+        const width = Math.max(bootLabel.length, ageLabel.length, dateLabel.length);
+        const lines = [];
+
+        if (ageDays >= 0) {
+            lines.push(ageLabel.padEnd(width) + " : " + root.formatInstallAge(ageDays));
+        }
+
+        lines.push(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : "unknown"));
+
+        return {
+            width: width,
+            lines: lines
+        };
+    }
+
     function singlePressureRows(ten, sixty, threeHundred) {
         const labels = ["10s", "60s", "300s"];
         const values = [ten, sixty, threeHundred].map(function (value) {
@@ -1551,19 +1573,14 @@ BarWidget {
         }
 
         if (key === "uptime") {
-            const ageDays = root.installAgeDays();
             const bootLabel = "Time since boot";
-            const ageLabel = "Time since installation";
-            const dateLabel = "Installation date";
-            const labelWidth = Math.max(bootLabel.length, ageLabel.length, dateLabel.length);
-            const installDate = metrics.installDate !== "" ? metrics.installDate : "unknown";
-            const lines = [bootLabel.padEnd(labelWidth) + " : " + formatUptimeLong(metrics.uptimeSeconds)];
+            const install = root.showExtended ? root.installRows(bootLabel) : [];
 
-            if (ageDays >= 0) {
-                lines.push(ageLabel.padEnd(labelWidth) + " : " + root.formatInstallAge(ageDays));
+            if (install.length === 0) {
+                return tooltipBlock("UPTIME", bootLabel + " : " + formatUptimeLong(metrics.uptimeSeconds));
             }
 
-            lines.push(dateLabel.padEnd(labelWidth) + " : " + installDate);
+            const lines = [bootLabel.padEnd(install.width) + " : " + formatUptimeLong(metrics.uptimeSeconds)].concat(install.lines);
 
             return tooltipBlock("UPTIME", lines.join("\n"));
         }

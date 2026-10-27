@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.6
+Version 1.24.7
 
 **English** | [Français](README-fr.md)
 
@@ -286,10 +286,10 @@ Hovering a module shows a contextual tooltip:
   `full` line for the CPU) and each core frequency in parentheses,
   right-aligned per column, sampled while the tooltip is open;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
-  `Time since boot : 3h 42m`, `Time since installation : 49 days` and
-  `Installation date : 9 Sep 2026` (taken from the first `pacman`
-  transaction, falling back to the root filesystem birth time; the month
-  name follows the session locale);
+  `Time since boot : 3h 42m`. Extended data adds
+  `Time since installation : 49 days` and `Installation date : 9 Sep 2026`
+  (taken from the first `pacman` transaction, falling back to the root
+  filesystem birth time; the month name follows the session locale);
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
@@ -378,10 +378,10 @@ Settings has a hover tooltip explaining what the module reports.
 
 The **Uptime** module is enabled by default and can be disabled in Settings.
 It reads `/proc/uptime` every 5 s. The bar shows `42m` below one hour, then
-`3h42`; the tooltip shows the same duration labelled `Time since boot`, the
-age since installation in days and the distribution installation date.
-`install-date.sh` resolves the date and its Unix timestamp once at startup;
-the age is recomputed when the tooltip opens.
+`3h42`; the tooltip shows the same duration labelled `Time since boot`.
+Extended data adds the age since installation in days and the distribution
+installation date. `install-date.sh` resolves the date and its Unix timestamp
+once at startup; the age is recomputed when the tooltip opens.
 
 ## Performance
 
