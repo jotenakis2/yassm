@@ -115,6 +115,8 @@ Aucun de ces processus ne survit entre deux exécutions.
 | `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, toutes les 5 s |
 | `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, toutes les 5 s |
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
+| `wifi-freq.sh` | 6 ms | à chaque ouverture du tooltip NET (sans fil) |
+| `/proc/net/wireless` | < 1 ms | à chaque ouverture du tooltip NET (sans fil) |
 | `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, au plus toutes les 5 min |
 | `install-date.sh` | 3 ms | une fois au démarrage |
 | `deps.sh` | 5 ms | une fois au démarrage (avertissement Settings) |

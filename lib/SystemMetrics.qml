@@ -1154,6 +1154,14 @@ Singleton {
 
         ifaceIpProcess.running = true;
 
+        // Opening the tooltip should not show a level up to 5 s old or a
+        // frequency up to 30 s old: refresh both immediately, then let the
+        // periodic timers keep them current while the tooltip stays open.
+        if (metrics.activeWifi) {
+            procWireless.reload();
+            wifiFreqProcess.running = true;
+        }
+
         const now = Date.now();
 
         if (now - metrics.wanIpUpdatedAt > 300000) {

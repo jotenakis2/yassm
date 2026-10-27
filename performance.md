@@ -114,6 +114,8 @@ On demand only:
 | `cpu-freq.sh` | 3 ms | CPU tooltip open, every 5 s |
 | `ps -eo … rss` | ~15 ms | RAM tooltip open, every 5 s |
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
+| `wifi-freq.sh` | 6 ms | each NET tooltip open (wireless) |
+| `/proc/net/wireless` | < 1 ms | each NET tooltip open (wireless) |
 | `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, at most every 5 min |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |
 | `deps.sh` | 5 ms | once at startup (Settings warning) |

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.22.1
+Version 1.22.2
 
 [English](README.md) | **Français**
 
@@ -392,7 +392,7 @@ vivant) :
 | `temperature.sh` (températures + ventilateurs) | 14 ms | 6×/min | 85 ms |
 | `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
 | `findmnt` | 1 ms | 6×/min | 6 ms |
-| `wifi-freq.sh` | 6 ms | 2×/min (sans fil) | 12 ms |
+| `wifi-freq.sh` | 6 ms | 2×/min (sans fil) + à chaque survol NET | 12 ms |
 | Cycles batterie | <1 ms | 1×/10 min | <0,1 ms |
 | **Total (au repos)** | | | **~126 ms/min ≈ 0,21 % d'un cœur** |
 
