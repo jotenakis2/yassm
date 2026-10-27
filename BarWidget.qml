@@ -150,6 +150,9 @@ BarWidget {
     readonly property string iconFan: String.fromCodePoint(0xF0210)
     readonly property string iconProc: String.fromCodePoint(0xF018D)
     readonly property string iconCompress: String.fromCodePoint(0xF066)
+    readonly property string iconServer: String.fromCodePoint(0xF233)
+    readonly property string iconUser: String.fromCodePoint(0xF007)
+    readonly property string iconGhost: String.fromCodePoint(0xEEFE)
     readonly property string iconLoadLow: String.fromCodePoint(0xF0F86)
     readonly property string iconLoadMedium: String.fromCodePoint(0xF0F85)
     readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
@@ -1425,7 +1428,7 @@ BarWidget {
             const lines = [];
 
             if (systemUnits.length > 0) {
-                lines.push(root.centeredMark + "systemd");
+                lines.push(root.centeredMark + root.iconServer + " systemd");
                 for (let i = 0; i < systemUnits.length; i++) {
                     lines.push(systemUnits[i]);
                 }
@@ -1436,7 +1439,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + "systemd --user");
+                lines.push(root.centeredMark + root.iconUser + " systemd --user");
                 for (let i = 0; i < userUnits.length; i++) {
                     lines.push(userUnits[i]);
                 }
@@ -1447,7 +1450,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + "proc zombie");
+                lines.push(root.centeredMark + root.iconGhost + " proc zombie");
                 for (let i = 0; i < zombies.length; i++) {
                     lines.push(zombies[i].pid + " " + zombies[i].name + " (" + formatDuration(zombies[i].age) + ")");
                 }
