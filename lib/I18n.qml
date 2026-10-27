@@ -189,7 +189,7 @@ QtObject {
             "uptime.days.one": "jour",
             "uptime.days.other": "jours",
             "settings.modules": "MODULES",
-            "settings.layout": "DISPOSITION",
+            "settings.layout": "AFFICHAGE",
             "settings.thresholds": "SEUILS",
             "settings.timers": "INTERVALLES",
             "settings.gear": "Réglages YASSM",

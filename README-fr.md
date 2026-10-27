@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.2
+Version 1.25.3
 
 [English](README.md) | **Français**
 
@@ -139,7 +139,7 @@ cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
 - Batterie
 - Alertes
 
-**Disposition**
+**Affichage**
 
 - Cadres (encadrement des modules)
 - Couleurs (seuils colorés et icône batterie bleue sur secteur)

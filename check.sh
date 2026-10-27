@@ -77,20 +77,33 @@ mkdir -p "${qml_root}/qs"
 ln -s /usr/share/omarchy/shell/Commons "${qml_root}/qs/Commons"
 ln -s /usr/share/omarchy/shell/Ui "${qml_root}/qs/Ui"
 
-# These two files only use Qt and Omarchy APIs. Two warnings are expected:
-# - "pragma Singleton" is not declared in a qmldir (the directory is imported
-#   as a namespace by the plugin);
-# - UPower.devices is a dynamic list whose "values" member qmllint cannot see.
-# More than two warnings means a new real issue.
-"${QML_LINT}" -I "${qml_root}" -I /usr/lib/qt6/qml -W 2 \
-	lib/SystemMetrics.qml lib/ThemePalette.qml
+# The lib singletons only use Qt and Omarchy APIs, which are resolvable with
+# the temporary root above: they must stay completely warning-free.
+lib_log=${qml_root}/lib.log
+"${QML_LINT}" -I "${qml_root}" -I /usr/lib/qt6/qml \
+	lib/I18n.qml lib/SystemMetrics.qml lib/ThemePalette.qml >"${lib_log}" 2>&1
 
-# BarWidget and SettingsPanel depend on Quickshell/Wayland types that have no
-# qmltypes available; qmllint cannot type-check them. Keep it advisory and
-# report the warning count instead of drowning the output.
+if grep -q '^Warning:' "${lib_log}"; then
+	cat "${lib_log}" >&2
+	fail "qmllint reported warnings in lib/"
+fi
+
+# BarWidget and SettingsPanel depend on Quickshell types that have no
+# qmltypes: their nested members (Style, ShellColor) and the PopupWindow
+# anchor group cannot be type-checked. Every warning is expected to fall in
+# those categories; anything else is a real issue and fails the check.
 lint_log=${qml_root}/bar-widget.log
 "${QML_LINT}" -I "${qml_root}" -I /usr/lib/qt6/qml \
 	BarWidget.qml SettingsPanel.qml >"${lint_log}" 2>&1 || true
+
+expected='Member "[A-Za-z]+" not found on type "QObject"|Could not find property "(window|adjustment|edges|gravity)"|unknown grouped property scope rect|Type rect is used but it is not resolved|no matching signal found for handler "onAnchoring"|id declarations are only allowed in objects'
+unexpected=$(grep '^Warning:' "${lint_log}" | grep -vE "${expected}" || true)
+
+if [[ -n ${unexpected} ]]; then
+	printf '%s\n' "${unexpected}" >&2
+	fail "qmllint reported unexpected warnings"
+fi
+
 warning_count=$(grep -c '^Warning:' "${lint_log}" || true)
-printf 'qmllint: %s advisory warning(s) in BarWidget.qml/SettingsPanel.qml (expected: Quickshell/Omarchy qmltypes unavailable)\n' \
+printf 'qmllint: %s expected advisory warning(s) in BarWidget.qml/SettingsPanel.qml (Quickshell qmltypes unavailable)\n' \
 	"${warning_count}"
