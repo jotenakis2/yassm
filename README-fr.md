@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.2
+Version 1.16.3
 
 [English](README.md) | **Français**
 
@@ -171,9 +171,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   `pressure` avec une ligne par fenêtre (`10s`, `60s`, `300s`) ;
 - **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
-  et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
+  et son pourcentage sous un titre `devices`, puis une section `zram` (taille
   compressée, taille originale, ratio et RAM utilisée par périphérique) et un
-  bloc `ZSWAP` (taille compressée, taille originale, ratio) dès que zswap est
+  bloc `zswap` (taille compressée, taille originale, ratio) dès que zswap est
   activé, même si son pool est vide ;
 - **Disk** : une section `usage` avec une ligne par système de fichiers
   **local** détecté, en GiB, avec le pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
@@ -230,7 +230,7 @@ Le survol d'un module affiche une infobulle contextuelle :
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) et les intitulés
 de section (`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`,
-`temperatures`, `fans`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de
+`temperatures`, `fans`, `zram`, `zswap`) sont en **gras** et dans la couleur de
 texte du tooltip ; le corps utilise la couleur `muted` du thème. La ligne
 `kernel` des tooltips CPU et RAM (extended data uniquement) est aussi en gras,
 mais conserve la couleur du corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.

@@ -1200,7 +1200,7 @@ BarWidget {
 
             if (zramLines.length > 0) {
                 lines.push("");
-                lines.push(root.centeredMark + root.iconMemory + " ZRAM");
+                lines.push(root.centeredMark + root.iconMemory + " zram");
 
                 for (let i = 0; i < zramLines.length; i++) {
                     lines.push(zramLines[i]);
@@ -1211,7 +1211,7 @@ BarWidget {
                 const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
 
                 lines.push("");
-                lines.push(root.centeredMark + root.iconCompress + " ZSWAP");
+                lines.push(root.centeredMark + root.iconCompress + " zswap");
                 lines.push(formatKib(metrics.zswapCompressedKb) + " compressed -> " + formatKib(metrics.zswapOriginalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.2
+Version 1.16.3
 
 **English** | [Français](README-fr.md)
 
@@ -169,8 +169,8 @@ Hovering a module shows a contextual tooltip:
   window (`10s`, `60s`, `300s`);
 - **Swap**: used / total and the percentage. Extended data lists each
   swap device (zram included) with its own used / total and percentage under a
-  `devices` heading, then a `ZRAM` section (compressed size, original size,
-  ratio and RAM used per device) and a `ZSWAP` block (compressed size,
+  `devices` heading, then a `zram` section (compressed size, original size,
+  ratio and RAM used per device) and a `zswap` block (compressed size,
   original size, ratio) whenever zswap is enabled, even while its pool is
   empty;
 - **Disk**: a `usage` section with one line per detected **local** filesystem,
@@ -225,7 +225,7 @@ Hovering a module shows a contextual tooltip:
 
 Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
 (`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `temperatures`,
-`fans`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color; the body
+`fans`, `zram`, `zswap`) are **bold** and use the tooltip text color; the body
 uses the theme `muted` color. The `kernel` line in the CPU and RAM tooltips
 (extended data only) is bold too, but keeps the body color. Network, swap,
 disk and temperature tooltips launch no process. The RAM tooltip launches a
