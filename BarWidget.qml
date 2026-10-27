@@ -949,17 +949,28 @@ BarWidget {
         return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
-    function pressureRows(ten, sixty, threeHundred) {
+    function pressureRows(someTen, someSixty, someThreeHundred, fullTen, fullSixty, fullThreeHundred) {
         const labels = ["10s", "60s", "300s"];
-        const values = [ten, sixty, threeHundred].map(function (value) {
+        const some = [someTen, someSixty, someThreeHundred].map(function (value) {
             return Number(value || 0).toFixed(1) + "%";
         });
-        const labelWidth = Math.max(labels[0].length, labels[1].length, labels[2].length);
-        const valueWidth = Math.max(values[0].length, values[1].length, values[2].length);
-
-        return labels.map(function (label, index) {
-            return label.padStart(labelWidth) + "  " + values[index].padStart(valueWidth);
+        const full = [fullTen, fullSixty, fullThreeHundred].map(function (value) {
+            return Number(value || 0).toFixed(1) + "%";
         });
+        const labelWidth = 4;
+        let valueWidth = 4;
+
+        for (let i = 0; i < some.length; i++) {
+            valueWidth = Math.max(valueWidth, some[i].length, full[i].length);
+        }
+
+        const lines = ["".padEnd(labelWidth) + "  " + "some".padStart(valueWidth) + "  " + "full".padStart(valueWidth)];
+
+        for (let i = 0; i < labels.length; i++) {
+            lines.push(labels[i].padStart(labelWidth) + "  " + some[i].padStart(valueWidth) + "  " + full[i].padStart(valueWidth));
+        }
+
+        return lines;
     }
 
     function tooltipBlock(title, body) {
@@ -1039,7 +1050,7 @@ BarWidget {
             lines.push("");
             lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
 
-            const pressure = pressureRows(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300);
+            const pressure = pressureRows(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300, metrics.ioPressureFull10, metrics.ioPressureFull60, metrics.ioPressureFull300);
 
             for (let i = 0; i < pressure.length; i++) {
                 lines.push(pressure[i]);
@@ -1113,7 +1124,7 @@ BarWidget {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
 
-                const pressure = pressureRows(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300);
+                const pressure = pressureRows(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300, metrics.memoryPressureFull10, metrics.memoryPressureFull60, metrics.memoryPressureFull300);
 
                 for (let i = 0; i < pressure.length; i++) {
                     lines.push(pressure[i]);

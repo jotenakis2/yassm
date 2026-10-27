@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.17.0
+Version 1.18.0
 
 [English](README.md) | **Français**
 
@@ -185,7 +185,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/`. Extended data
   ajoute une section `io` (débits lecture/écriture) et une section `pressure`
-  (`10s`, `60s`, `300s`) ;
+  (`some`/`full` pour `10s`, `60s`, `300s`) ;
 - **Réseau** : une section `io` avec le débit descendant (↓), montant (↑) et
   le total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface), puis une section

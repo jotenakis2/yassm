@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.17.0
+Version 1.18.0
 
 **English** | [Français](README-fr.md)
 
@@ -166,8 +166,9 @@ Hovering a module shows a contextual tooltip:
   counted in `Cached`), `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
   like `free`), the `kernel` line (Slab − SReclaimable + stacks + page tables
   + vmalloc + percpu; SReclaimable is already in Buffer/cache, and vmalloc and
-  percpu may slightly overlap) and a `pressure` section with one line per
-  window (`10s`, `60s`, `300s`);
+  percpu may slightly overlap) and a `pressure` section with `some`/`full`
+  columns for the `10s`, `60s` and `300s` windows (`some`: at least one task
+  stalled, `full`: no task making progress);
 - **Swap**: used / total and the percentage. Extended data lists each
   swap device (zram included) with its own used / total and percentage under a
   `devices` heading, then a `zram` section (compressed size, original size,
@@ -182,7 +183,7 @@ Hovering a module shows a contextual tooltip:
   points that share the same device/source are deduplicated: on a btrfs root
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
   from `/`. Extended data adds an `io` section (read/write rates) and a
-  `pressure` section (`10s`, `60s`, `300s`);
+  `pressure` section (`some`/`full` for `10s`, `60s`, `300s`);
 - **Network**: an `io` section with download (↓) and upload (↑) rates plus
   the session total (deltas since the shell started, reset on restart and kept
   across interface changes), then an `iface` section with the interface name.

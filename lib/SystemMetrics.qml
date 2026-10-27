@@ -63,9 +63,15 @@ Singleton {
     property real memoryPressure10: 0
     property real memoryPressure60: 0
     property real memoryPressure300: 0
+    property real memoryPressureFull10: 0
+    property real memoryPressureFull60: 0
+    property real memoryPressureFull300: 0
     property real ioPressure10: 0
     property real ioPressure60: 0
     property real ioPressure300: 0
+    property real ioPressureFull10: 0
+    property real ioPressureFull60: 0
+    property real ioPressureFull300: 0
 
     // Reference lists: each bar instance registers while a module is enabled.
     // The expensive samplers only run while at least one instance needs them.
@@ -946,18 +952,35 @@ Singleton {
 
     function applyPressure(content) {
         const values = {
-            avg10: 0,
-            avg60: 0,
-            avg300: 0
+            some: {
+                avg10: 0,
+                avg60: 0,
+                avg300: 0
+            },
+            full: {
+                avg10: 0,
+                avg60: 0,
+                avg300: 0
+            }
         };
-        const line = content.split("\n")[0] || "";
-        const fields = line.trim().split(/\s+/);
+        const lines = String(content || "").split("\n");
 
-        for (let i = 0; i < fields.length; i++) {
-            const match = fields[i].match(/^(avg10|avg60|avg300)=([0-9.]+)$/);
+        for (let l = 0; l < lines.length; l++) {
+            const fields = lines[l].trim().split(/\s+/);
+            const kind = fields[0];
 
-            if (match) {
-                values[match[1]] = Number(match[2]) || 0;
+            // CPU pressure only exposes a "some" line; memory and I/O have
+            // both. Missing lines simply stay at zero.
+            if (kind !== "some" && kind !== "full") {
+                continue;
+            }
+
+            for (let i = 1; i < fields.length; i++) {
+                const match = fields[i].match(/^(avg10|avg60|avg300)=([0-9.]+)$/);
+
+                if (match) {
+                    values[kind][match[1]] = Number(match[2]) || 0;
+                }
             }
         }
 
@@ -967,17 +990,23 @@ Singleton {
     function applyMemoryPressure(content) {
         const values = applyPressure(content);
 
-        metrics.memoryPressure10 = values.avg10;
-        metrics.memoryPressure60 = values.avg60;
-        metrics.memoryPressure300 = values.avg300;
+        metrics.memoryPressure10 = values.some.avg10;
+        metrics.memoryPressure60 = values.some.avg60;
+        metrics.memoryPressure300 = values.some.avg300;
+        metrics.memoryPressureFull10 = values.full.avg10;
+        metrics.memoryPressureFull60 = values.full.avg60;
+        metrics.memoryPressureFull300 = values.full.avg300;
     }
 
     function applyIoPressure(content) {
         const values = applyPressure(content);
 
-        metrics.ioPressure10 = values.avg10;
-        metrics.ioPressure60 = values.avg60;
-        metrics.ioPressure300 = values.avg300;
+        metrics.ioPressure10 = values.some.avg10;
+        metrics.ioPressure60 = values.some.avg60;
+        metrics.ioPressure300 = values.some.avg300;
+        metrics.ioPressureFull10 = values.full.avg10;
+        metrics.ioPressureFull60 = values.full.avg60;
+        metrics.ioPressureFull300 = values.full.avg300;
     }
 
     function applyWireless(content) {
