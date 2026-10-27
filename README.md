@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.20.5
+Version 1.21.0
 
 **English** | [Français](README-fr.md)
 
@@ -8,6 +8,20 @@ Omarchy bar widget showing uptime, CPU, RAM, swap, system load, network,
 temperature, GPU, battery, alerts and root partition usage.
 
 Repository: <https://github.com/jotenakis2/yassm>
+
+## Screenshots
+
+![YASSM in the Omarchy bar](docs/screenshots/bar.png)
+
+| Tooltips | |
+| --- | --- |
+| ![CPU](docs/screenshots/tooltip-cpu.png) | ![Memory](docs/screenshots/tooltip-memory.png) |
+| ![Network](docs/screenshots/tooltip-net.png) | ![Sensors](docs/screenshots/tooltip-temp.png) |
+| ![Swap](docs/screenshots/tooltip-swap.png) | ![Alerts](docs/screenshots/tooltip-alerts.png) |
+
+<img src="docs/screenshots/settings.png" alt="Settings panel" width="380">
+
+More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 
 ## Modules
 
@@ -71,7 +85,9 @@ The last command places the widget in the bar's `left` section; adjust
 focuses `btop` when it is installed (Omarchy floats it at 875×600). If `btop`
 is not installed, the left click opens the panel instead.
 
-The panel lets you enable or disable:
+The panel lets you enable or disable each module, and reorder them by
+dragging the handle on the left of each row. The order is applied to the bar
+immediately and saved in `moduleOrder`.
 
 **Modules**
 
@@ -144,11 +160,18 @@ Example entry:
   "iconGap": 1,
   "refreshInterval": 1,
   "processInterval": 5,
-  "maxProcesses": 10
+  "maxProcesses": 10,
+  "moduleOrder": [
+    "uptime", "cpu", "load", "gpu", "memory", "swap",
+    "disk", "net", "temp", "battery", "alerts"
+  ]
 }
 ```
 
-All keys are optional; missing values use the defaults above.
+All keys are optional; missing values use the defaults above. `moduleOrder`
+is the list of module keys shown above (`net` covers both rate boxes); an
+unknown key is dropped and a new module missing from the list is appended, so
+an old `shell.json` never breaks the bar.
 
 ## Tooltips
 

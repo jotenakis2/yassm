@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.20.5
+Version 1.21.0
 
 [English](README.md) | **Français**
 
@@ -8,6 +8,20 @@ Widget de barre Omarchy affichant l'uptime, CPU, RAM, swap, charge système,
 réseau, température, GPU, batterie, alertes et usage de la partition racine.
 
 Dépôt : <https://github.com/jotenakis2/yassm>
+
+## Captures d'écran
+
+![YASSM dans la barre Omarchy](docs/screenshots/bar.png)
+
+| Tooltips | |
+| --- | --- |
+| ![CPU](docs/screenshots/tooltip-cpu.png) | ![Mémoire](docs/screenshots/tooltip-memory.png) |
+| ![Réseau](docs/screenshots/tooltip-net.png) | ![Capteurs](docs/screenshots/tooltip-temp.png) |
+| ![Swap](docs/screenshots/tooltip-swap.png) | ![Alertes](docs/screenshots/tooltip-alerts.png) |
+
+<img src="docs/screenshots/settings.png" alt="Panneau Settings" width="380">
+
+D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, uptime).
 
 ## Modules
 
@@ -72,7 +86,9 @@ adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 focus `btop` s'il est installé (Omarchy le rend flottant en 875×600). Si `btop`
 n'est pas installé, le clic gauche ouvre le panneau à la place.
 
-Le panneau permet d'activer ou de désactiver :
+Le panneau permet d'activer ou de désactiver chaque module, et de les
+réordonner en faisant glisser la poignée à gauche de chaque ligne. L'ordre est
+appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
 
 **Modules**
 
@@ -145,12 +161,19 @@ Exemple d'entrée :
   "iconGap": 1,
   "refreshInterval": 1,
   "processInterval": 5,
-  "maxProcesses": 10
+  "maxProcesses": 10,
+  "moduleOrder": [
+    "uptime", "cpu", "load", "gpu", "memory", "swap",
+    "disk", "net", "temp", "battery", "alerts"
+  ]
 }
 ```
 
 Toutes les clés sont optionnelles ; les valeurs absentes utilisent les défauts
-ci-dessus.
+ci-dessus. `moduleOrder` est la liste des clés de modules ci-dessus (`net`
+couvre les deux boîtes de débit) ; une clé inconnue est ignorée et un nouveau
+module absent de la liste est ajouté à la fin, donc un ancien `shell.json` ne
+casse jamais la barre.
 
 ## Tooltips
 

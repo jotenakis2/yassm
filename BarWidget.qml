@@ -328,7 +328,50 @@ BarWidget {
         return segments;
     }
 
-    readonly property var segmentOrder: ["uptime", "cpu", "load", "gpu", "memory", "swap", "disk", "netDown", "netUp", "netOffline", "temp", "battery", "alerts"]
+    // User-visible module order (Settings, drag & drop). "net" expands to the
+    // three network segment keys; unknown or missing keys are repaired here so
+    // an old config, a removed module or a future addition never breaks the bar.
+    readonly property var defaultModuleOrder: ["uptime", "cpu", "load", "gpu", "memory", "swap", "disk", "net", "temp", "battery", "alerts"]
+    readonly property var moduleOrder: {
+        const saved = setting("moduleOrder", []);
+        const defaults = root.defaultModuleOrder;
+        const order = [];
+        const seen = {};
+
+        if (Array.isArray(saved)) {
+            for (let i = 0; i < saved.length; i++) {
+                const key = saved[i];
+
+                if (typeof key === "string" && defaults.indexOf(key) >= 0 && !seen[key]) {
+                    seen[key] = true;
+                    order.push(key);
+                }
+            }
+        }
+
+        for (let i = 0; i < defaults.length; i++) {
+            if (!seen[defaults[i]]) {
+                order.push(defaults[i]);
+            }
+        }
+
+        return order;
+    }
+    readonly property var segmentOrder: {
+        const keys = [];
+
+        for (let i = 0; i < root.moduleOrder.length; i++) {
+            const key = root.moduleOrder[i];
+
+            if (key === "net") {
+                keys.push("netDown", "netUp", "netOffline");
+            } else {
+                keys.push(key);
+            }
+        }
+
+        return keys;
+    }
 
     readonly property var segmentMap: {
         const map = {};
@@ -1680,6 +1723,7 @@ BarWidget {
         entry.refreshInterval = root.refreshInterval;
         entry.processInterval = root.processInterval;
         entry.maxProcesses = root.maxProcesses;
+        entry.moduleOrder = root.moduleOrder;
         entry[name] = value;
 
         root.settings = entry;

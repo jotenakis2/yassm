@@ -15,7 +15,7 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
 | OS | Omarchy 4.0.3 |
 | Shell | Quickshell 0.3.2 |
 | Noyau | 7.1.12 |
-| YASSM | 1.19.x |
+| YASSM | 1.21.x |
 
 ## En bref
 

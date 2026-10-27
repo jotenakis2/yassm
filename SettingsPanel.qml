@@ -96,6 +96,51 @@ PanelWindow {
         }
     ]
 
+    property int dragFrom: -1
+    property int dragTo: -1
+
+    function orderKey(settingKey) {
+        return settingKey.startsWith("show") ? settingKey.charAt(4).toLowerCase() + settingKey.slice(5) : settingKey;
+    }
+
+    readonly property var orderedModules: {
+        const meta = {};
+
+        for (let i = 0; i < root.moduleSettings.length; i++) {
+            const entry = root.moduleSettings[i];
+            meta[root.orderKey(entry.key)] = entry;
+        }
+
+        const order = root.hostWidget ? root.hostWidget.moduleOrder : [];
+        const modules = [];
+
+        for (let i = 0; i < order.length; i++) {
+            const entry = meta[order[i]];
+
+            if (entry) {
+                modules.push(entry);
+            }
+        }
+
+        return modules;
+    }
+
+    function moveModule(from, to) {
+        if (!root.hostWidget || from === to) {
+            return;
+        }
+
+        const order = root.hostWidget.moduleOrder.slice();
+
+        if (from < 0 || from >= order.length || to < 0 || to >= order.length) {
+            return;
+        }
+
+        const moved = order.splice(from, 1)[0];
+        order.splice(to, 0, moved);
+        root.hostWidget.updateSetting("moduleOrder", order);
+    }
+
     visible: false
     color: "transparent"
 
@@ -177,41 +222,134 @@ PanelWindow {
                     fontFamily: Style.font.family
                 }
 
-                GridLayout {
+                Label {
                     Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: Style.space(8)
-                    rowSpacing: Style.space(4)
+                    text: "Drag the handle to reorder."
+                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.55)
+                    font.family: Style.font.family
+                    font.pixelSize: Style.font.bodySmall
+                }
+
+                ColumnLayout {
+                    id: moduleList
+
+                    Layout.fillWidth: true
+                    spacing: Style.space(2)
 
                     Repeater {
-                        model: root.moduleSettings
+                        model: root.orderedModules
 
-                        Toggle {
-                            id: control
+                        Rectangle {
+                            id: moduleRow
 
                             required property var modelData
+                            required property int index
 
                             Layout.fillWidth: true
                             Layout.preferredHeight: root.toggleRowHeight
-                            label: control.modelData.label
-                            fontFamily: Style.font.family
-                            titleSize: Style.font.body
-                            foreground: ShellColor.popups.text
-                            checked: root.hostWidget ? root.hostWidget.setting(control.modelData.key, control.modelData.defaultValue !== false) : false
+                            radius: Style.space(4)
+                            color: root.dragFrom >= 0 && root.dragTo === moduleRow.index ? Qt.rgba(ShellColor.accent.r, ShellColor.accent.g, ShellColor.accent.b, 0.12) : "transparent"
 
-                            onClicked: {
-                                if (root.hostWidget) {
-                                    root.hostWidget.updateSetting(control.modelData.key, !control.checked);
+                            RowLayout {
+                                anchors.fill: parent
+                                spacing: Style.space(6)
+
+                                Rectangle {
+                                    id: dragHandle
+
+                                    Layout.preferredWidth: Style.space(18)
+                                    Layout.fillHeight: true
+                                    radius: Style.space(4)
+                                    color: dragArea.containsMouse ? Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.08) : "transparent"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "⠿"
+                                        color: ShellColor.popups.text
+                                        opacity: 0.7
+                                        font.family: Style.font.family
+                                        font.pixelSize: Style.font.body
+                                    }
+
+                                    MouseArea {
+                                        id: dragArea
+
+                                        anchors.fill: parent
+                                        cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                                        preventStealing: true
+
+                                        property real pressY: 0
+                                        property bool moved: false
+
+                                        onPressed: function (mouse) {
+                                            root.dragFrom = moduleRow.index;
+                                            root.dragTo = moduleRow.index;
+                                            pressY = mouse.y;
+                                            moved = false;
+                                        }
+
+                                        onPositionChanged: function (mouse) {
+                                            if (!pressed) {
+                                                return;
+                                            }
+
+                                            if (Math.abs(mouse.y - pressY) > 3) {
+                                                moved = true;
+                                            }
+
+                                            if (!moved) {
+                                                return;
+                                            }
+
+                                            const point = mapToItem(moduleList, mouse.x, mouse.y);
+                                            const pitch = root.toggleRowHeight + moduleList.spacing;
+                                            const target = Math.floor((point.y + moduleList.spacing / 2) / pitch);
+
+                                            root.dragTo = Math.max(0, Math.min(root.orderedModules.length - 1, target));
+                                        }
+
+                                        onReleased: {
+                                            if (moved && root.dragFrom >= 0 && root.dragTo !== root.dragFrom) {
+                                                root.moveModule(root.dragFrom, root.dragTo);
+                                            }
+
+                                            root.dragFrom = -1;
+                                            root.dragTo = -1;
+                                        }
+
+                                        onCanceled: {
+                                            root.dragFrom = -1;
+                                            root.dragTo = -1;
+                                        }
+                                    }
                                 }
-                            }
 
-                            HoverHandler {
-                                id: moduleHover
-                            }
+                                Toggle {
+                                    id: control
 
-                            PanelToolTip {
-                                visible: moduleHover.hovered && control.modelData.tooltip !== undefined
-                                text: control.modelData.tooltip || ""
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    label: moduleRow.modelData.label
+                                    fontFamily: Style.font.family
+                                    titleSize: Style.font.body
+                                    foreground: ShellColor.popups.text
+                                    checked: root.hostWidget ? root.hostWidget.setting(moduleRow.modelData.key, moduleRow.modelData.defaultValue !== false) : false
+
+                                    onClicked: {
+                                        if (root.hostWidget) {
+                                            root.hostWidget.updateSetting(moduleRow.modelData.key, !control.checked);
+                                        }
+                                    }
+
+                                    HoverHandler {
+                                        id: moduleHover
+                                    }
+
+                                    PanelToolTip {
+                                        visible: moduleHover.hovered && moduleRow.modelData.tooltip !== undefined
+                                        text: moduleRow.modelData.tooltip || ""
+                                    }
+                                }
                             }
                         }
                     }

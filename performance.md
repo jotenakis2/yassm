@@ -14,7 +14,7 @@ tooltip open and the screensaver/locking disabled.
 | OS | Omarchy 4.0.3 |
 | Shell | Quickshell 0.3.2 |
 | Kernel | 7.1.12 |
-| YASSM | 1.19.x |
+| YASSM | 1.21.x |
 
 ## TL;DR
 
