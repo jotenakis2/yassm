@@ -1162,7 +1162,7 @@ BarWidget {
                     lines.push(row.name.padEnd(nameWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
                 }
             } else {
-                lines.push("total  " + formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
+                lines.push(formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
             }
 
             if (!root.showExtended) {

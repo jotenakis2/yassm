@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.0
+Version 1.14.1
 
 **English** | [Français](README-fr.md)
 
@@ -167,7 +167,7 @@ Hovering a module shows a contextual tooltip:
   tooltip stays open;
   kernel threads are excluded. Extended data adds a `pressure` section with
   one line per window (`10s`, `60s`, `300s`);
-- **Swap**: total used / total and the percentage. Extended data lists each
+- **Swap**: used / total and the percentage. Extended data lists each
   swap device (zram included) with its own used / total and percentage under a
   `devices` heading, then a `ZRAM` section (compressed size, original size,
   ratio and RAM used per device) and a `ZSWAP` block (compressed size,

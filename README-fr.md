@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.0
+Version 1.14.1
 
 [English](README.md) | **Français**
 
@@ -170,7 +170,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
   Extended data ajoute une section `pressure` avec une ligne par fenêtre
   (`10s`, `60s`, `300s`) ;
-- **Swap** : total utilisé / total et le pourcentage. Extended data liste
+- **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
   compressée, taille originale, ratio et RAM utilisée par périphérique) et un
