@@ -50,7 +50,7 @@ PanelWindow {
 
     readonly property int panelWidth: Math.min(Style.space(440), Math.max(Style.space(280), (root.screen ? root.screen.width : Style.space(440)) - root.panelMargin * 2))
     readonly property int panelPadding: Style.space(16)
-    readonly property int toggleRowHeight: Style.space(36)
+    readonly property int toggleRowHeight: Style.space(34)
     readonly property int panelMargin: Style.space(4)
     // Plain properties updated once hostWidget is known: binding the sliders
     // to a not-yet-initialised readonly property logged QML warnings on open.
@@ -507,7 +507,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -567,7 +567,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -627,7 +627,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -703,7 +703,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -763,7 +763,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -825,7 +825,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -901,7 +901,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -961,7 +961,7 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
+                    Layout.preferredHeight: Style.space(32)
                     spacing: Style.space(8)
 
                     WheelHandler {
