@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.2
+Version 1.21.4
 
 [English](README.md) | **Français**
 
@@ -57,12 +57,32 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
 
 ## Prérequis
 
+**Requis**
+
 - Omarchy 4.x avec son shell Quickshell.
-- `bash`, `findmnt` (util-linux), `ps` (procps-ng) et `timeout` (coreutils).
-- Une police Nerd Font pour les icônes.
-- Optionnel : `nvidia-smi` pour les GPU NVIDIA.
-- Optionnel : `btop` pour le lanceur au clic gauche.
-- Optionnel : `systemctl` (systemd) pour le module Alerts.
+- `bash` et coreutils (`date`, `head`, `readlink`, `stat`, `timeout`…).
+- `awk` (POSIX).
+- `findmnt` (util-linux) pour le module disque.
+- `ps` (procps-ng) pour la liste des processus RAM et le scan des zombies.
+- `systemctl` (systemd) lorsque le module Alerts est activé.
+- `/proc`, `/sys` et une police Nerd Font pour les icônes.
+
+**Optionnel**
+
+- `iw` — fréquence Wi-Fi dans le tooltip NET, uniquement quand la liaison
+  active est sans fil et que extended est activé. Sans lui, la fréquence est
+  simplement omise.
+- `ip` (iproute2) — adresse LAN dans le tooltip NET étendu.
+- `curl` — adresse publique dans le tooltip NET étendu (une requête HTTPS
+  vers <https://api.ipify.org> au plus toutes les 5 minutes).
+- `nvidia-smi` — usage GPU NVIDIA ; le compteur sysfs est préféré.
+- `btop` — lanceur au clic gauche ; sans lui, le clic gauche ouvre Settings.
+- UPower et NetworkManager — détails batterie et SSID via D-Bus ; sans eux
+  ces champs sont masqués.
+
+Un outil optionnel manquant ne provoque jamais d'erreur : le champ
+correspondant est omis. Seuls `btop` et la source GPU sont détectés au
+démarrage.
 
 Le widget est conçu pour une barre horizontale (haut ou bas). Il est masqué
 sur une barre verticale, où un emplacement de `barSize` de large ne peut pas
@@ -213,11 +233,12 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **Réseau** : une section `io` avec le débit descendant (↓), montant (↑) et
   le total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface), puis une section
-  `iface` avec le nom de l'interface. Les deux débits sont colorés
+  `interface` avec le nom de l'interface. Les deux débits sont colorés
   indépendamment. Le compteur absolu du pilote n'est pas utilisé, car il peut
   être aberrant. Sans route par défaut (uniquement `lo`), une icône réseau
   barrée rouge et `--` remplacent les deux débits. Extended data complète la
-  ligne `iface` avec l'adresse LAN (`ip -4`) et l'adresse publique
+  ligne `interface` avec l'adresse LAN (`ip -4`) et l'adresse publique
+  (`curl`)
   (`wlan0 · 192.168.50.148 · 90.29.68.78`), puis ajoute le SSID (via
   NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
   niveau du signal (via `/proc/net/wireless`) quand la liaison est sans fil :

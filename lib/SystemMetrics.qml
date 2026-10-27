@@ -214,6 +214,15 @@ Singleton {
     }
     readonly property string wifiSsid: wifiNetwork && wifiNetwork.name ? String(wifiNetwork.name) : ""
 
+    // The Wi-Fi helpers must follow the interface actually carrying the
+    // default route: a laptop can keep a Wi-Fi association while Ethernet is
+    // the active link, and then no Wi-Fi value should be read or shown.
+    readonly property bool activeWifi: {
+        const wifi = wifiNetwork;
+
+        return wifi !== null && wifi.device !== null && wifi.device !== undefined && wifi.device.name === networkInterface && networkInterface !== "";
+    }
+
     readonly property string wifiFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../wifi-freq.sh").toString().replace("file://", ""))
     property real wifiFreqMhz: 0
 
@@ -1349,7 +1358,7 @@ Singleton {
                 procNetRoute.reload();
                 procNetIpv6Route.reload();
 
-                if (metrics.wifiNetwork !== null) {
+                if (metrics.activeWifi) {
                     procWireless.reload();
                 }
             }
@@ -1527,7 +1536,7 @@ Singleton {
         // Roaming is the only thing that changes the frequency, so a slow
         // refresh is enough; no process runs while the link is wired.
         interval: 30000
-        running: metrics.wifiNetwork !== null
+        running: metrics.activeWifi
         repeat: true
         triggeredOnStart: true
 

@@ -1389,11 +1389,11 @@ BarWidget {
             const upSession = formatKibAsSize(metrics.networkTxSessionKb);
             const rateWidth = Math.max(downRate.length, upRate.length);
             const sessionWidth = Math.max(downSession.length, upSession.length);
-            const ifaceIcon = metrics.wifiNetwork ? root.iconWifi : root.iconEthernet;
+            const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
             const lines = [root.centeredMark + root.iconSwap + " io", "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
 
             lines.push("");
-            lines.push(root.centeredMark + ifaceIcon + " iface");
+            lines.push(root.centeredMark + ifaceIcon + " interface");
 
             let ifaceLine = metrics.networkInterface;
 
@@ -1407,7 +1407,7 @@ BarWidget {
 
             lines.push(ifaceLine);
 
-            if (root.showExtended && metrics.wifiNetwork) {
+            if (root.showExtended && metrics.activeWifi) {
                 let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : "hidden SSID";
 
                 if (metrics.wifiFreqMhz > 0) {

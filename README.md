@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.2
+Version 1.21.4
 
 **English** | [Français](README-fr.md)
 
@@ -57,12 +57,31 @@ default and configurable from 1 to 5 s in Settings.
 
 ## Requirements
 
+**Required**
+
 - Omarchy 4.x with its Quickshell shell.
-- `bash`, `findmnt` (util-linux), `ps` (procps-ng) and `timeout` (coreutils).
-- A Nerd Font for the icons.
-- Optional: `nvidia-smi` for NVIDIA GPUs.
-- Optional: `btop` for the left-click launcher.
-- Optional: `systemctl` (systemd) for the Alerts module.
+- `bash` and coreutils (`date`, `head`, `readlink`, `stat`, `timeout`…).
+- `awk` (POSIX).
+- `findmnt` (util-linux) for the disk module.
+- `ps` (procps-ng) for the RAM process list and the zombie scan.
+- `systemctl` (systemd) when the Alerts module is enabled.
+- `/proc`, `/sys` and a Nerd Font for the icons.
+
+**Optional**
+
+- `iw` — Wi-Fi frequency in the NET tooltip, only when the active link is
+  wireless and extended data is on. Without it, the frequency is simply
+  omitted.
+- `ip` (iproute2) — LAN address in the extended NET tooltip.
+- `curl` — public address in the extended NET tooltip (one HTTPS request to
+  <https://api.ipify.org> at most every 5 minutes).
+- `nvidia-smi` — NVIDIA GPU usage; the sysfs counter is preferred.
+- `btop` — left-click launcher; without it the left click opens Settings.
+- UPower and NetworkManager — battery details and SSID over D-Bus; without
+  them those fields are hidden.
+
+A missing optional tool never raises an error: the corresponding field is
+omitted. Only `btop` and the GPU source are probed at startup.
 
 The widget is designed for a horizontal bar (top or bottom). It is hidden on
 vertical bars, where a `barSize`-wide slot cannot hold the module row.
@@ -210,11 +229,12 @@ Hovering a module shows a contextual tooltip:
   `pressure` section (`some`/`full` for `10s`, `60s`, `300s`);
 - **Network**: an `io` section with download (↓) and upload (↑) rates plus
   the session total (deltas since the shell started, reset on restart and kept
-  across interface changes), then an `iface` section with the interface name.
+  across interface changes), then an `interface` section with the interface name.
   Both rates are colored independently. The driver's absolute counter is not
   used because it can be bogus. Without a default route (loopback only), a red
   crossed-network icon and `--` replace both rates. Extended data completes
-  the `iface` line with the LAN address (`ip -4`) and the public address
+  the `interface` line with the LAN address (`ip -4`) and the public address
+  (`curl`)
   (`wlan0 · 192.168.50.148 · 90.29.68.78`), then adds the SSID (from
   NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`) and the
   signal level (from `/proc/net/wireless`) when the link is wireless:
