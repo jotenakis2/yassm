@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.0
+Version 1.24.1
 
 **English** | [Français](README-fr.md)
 
@@ -142,7 +142,8 @@ immediately and saved in `moduleOrder`.
 - Red from (default 60 °C)
 
 The three limits are editable number fields: type a value or use the arrows,
-with one-degree steps; they are always kept in ascending order.
+with one-degree steps; they are always kept in ascending order. Hover the
+Green, Orange or Red label to read what that threshold changes.
 
 **Timers**
 

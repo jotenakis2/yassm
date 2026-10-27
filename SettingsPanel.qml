@@ -236,15 +236,23 @@ PanelWindow {
                 width: settingsFlick.width - Style.space(6)
                 spacing: Style.space(4)
 
-                Label {
+                RowLayout {
                     Layout.fillWidth: true
-                    text: "Settings"
-                    wrapMode: Text.NoWrap
-                    palette.windowText: ShellColor.popups.text
-                    font.family: Style.font.family
-                    font.pixelSize: Style.font.subtitle
+                    Layout.preferredHeight: Style.space(26)
+                    Layout.bottomMargin: Style.space(6)
+                    spacing: 0
 
-                    bottomPadding: Style.space(8)
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                        text: String.fromCodePoint(0xF0493)
+                        color: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.title
+                    }
                 }
 
                 Rectangle {
@@ -457,50 +465,86 @@ PanelWindow {
                     fontFamily: Style.font.family
                 }
 
-                Toggle {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.toggleRowHeight
-                    label: "Boxes"
-                    fontFamily: Style.font.family
-                    titleSize: Style.font.body
-                    foreground: ShellColor.popups.text
-                    checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
+                    spacing: Style.space(6)
 
-                    onClicked: {
-                        if (root.hostWidget) {
-                            root.hostWidget.updateSetting("showBoxes", !checked);
+                    // Spacer matching the drag handle of the module rows, so
+                    // the Layout boxes line up with the module boxes.
+                    Item {
+                        Layout.preferredWidth: Style.space(18)
+                    }
+
+                    Toggle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.toggleRowHeight
+                        label: "Boxes"
+                        fontFamily: Style.font.family
+                        titleSize: Style.font.body
+                        foreground: ShellColor.popups.text
+                        checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
+
+                        onClicked: {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("showBoxes", !checked);
+                            }
                         }
                     }
                 }
 
-                Toggle {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.toggleRowHeight
-                    label: "Colors"
-                    fontFamily: Style.font.family
-                    titleSize: Style.font.body
-                    foreground: ShellColor.popups.text
-                    checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
+                    spacing: Style.space(6)
 
-                    onClicked: {
-                        if (root.hostWidget) {
-                            root.hostWidget.updateSetting("showColors", !checked);
+                    // Spacer matching the drag handle of the module rows, so
+                    // the Layout boxes line up with the module boxes.
+                    Item {
+                        Layout.preferredWidth: Style.space(18)
+                    }
+
+                    Toggle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.toggleRowHeight
+                        label: "Colors"
+                        fontFamily: Style.font.family
+                        titleSize: Style.font.body
+                        foreground: ShellColor.popups.text
+                        checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
+
+                        onClicked: {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("showColors", !checked);
+                            }
                         }
                     }
                 }
 
-                Toggle {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.toggleRowHeight
-                    label: "Extended data in tooltips"
-                    fontFamily: Style.font.family
-                    titleSize: Style.font.body
-                    foreground: ShellColor.popups.text
-                    checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
+                    spacing: Style.space(6)
 
-                    onClicked: {
-                        if (root.hostWidget) {
-                            root.hostWidget.updateSetting("extendedTooltips", !checked);
+                    // Spacer matching the drag handle of the module rows, so
+                    // the Layout boxes line up with the module boxes.
+                    Item {
+                        Layout.preferredWidth: Style.space(18)
+                    }
+
+                    Toggle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.toggleRowHeight
+                        label: "Extended data in tooltips"
+                        fontFamily: Style.font.family
+                        titleSize: Style.font.body
+                        foreground: ShellColor.popups.text
+                        checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
+
+                        onClicked: {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("extendedTooltips", !checked);
+                            }
                         }
                     }
                 }
@@ -701,122 +745,226 @@ PanelWindow {
                     fontFamily: Style.font.family
                 }
 
-                RowLayout {
+                Item {
+                    id: tempBlock
+
+                    property string tipText: tempWarmArea.containsMouse ? tempWarmArea.tip : tempHotArea.containsMouse ? tempHotArea.tip : tempCriticalArea.containsMouse ? tempCriticalArea.tip : ""
+
                     Layout.fillWidth: true
                     Layout.preferredHeight: Style.space(50)
-                    spacing: Style.space(8)
 
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: Style.space(8)
 
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            Column {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Style.spacing.xs
+
+                                // The whole strip above the field is the hover
+                                // target: the 4-letter label is too small to
+                                // aim at, and the field itself stays tooltip-free.
+                                Item {
+                                    id: tempWarmLabelBox
+
+                                    anchors.right: parent.right
+                                    width: Style.space(64)
+                                    height: Style.space(16)
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "Green"
+                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                        font.family: Style.font.family
+                                        font.pixelSize: Style.font.bodySmall
+                                    }
+
+                                    MouseArea {
+                                        id: tempWarmArea
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.ArrowCursor
+
+                                        property string tip: "Value and icon turn green here.\nKept below Orange."
+                                    }
+                                }
+
+                                NumberField {
+                                    label: ""
+                                    from: 20
+                                    to: 80
+                                    stepSize: 1
+                                    value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
+                                    fieldWidth: Style.space(64)
+                                    foreground: ShellColor.popups.text
+                                    fontFamily: Style.font.family
+
+                                    onModified: function (value) {
+                                        if (root.hostWidget) {
+                                            root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            Column {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Style.spacing.xs
+
+                                // The whole strip above the field is the hover
+                                // target: the 4-letter label is too small to
+                                // aim at, and the field itself stays tooltip-free.
+                                Item {
+                                    id: tempHotLabelBox
+
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    width: Style.space(64)
+                                    height: Style.space(16)
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "Orange"
+                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                        font.family: Style.font.family
+                                        font.pixelSize: Style.font.bodySmall
+                                    }
+
+                                    MouseArea {
+                                        id: tempHotArea
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.ArrowCursor
+
+                                        property string tip: "Value and icon turn orange here.\nKept between Green and Red."
+                                    }
+                                }
+
+                                NumberField {
+                                    label: ""
+                                    from: 21
+                                    to: 100
+                                    stepSize: 1
+                                    value: root.hostWidget ? root.hostWidget.temperatureHot : 50
+                                    fieldWidth: Style.space(64)
+                                    foreground: ShellColor.popups.text
+                                    fontFamily: Style.font.family
+
+                                    onModified: function (value) {
+                                        if (root.hostWidget) {
+                                            const low = root.hostWidget.temperatureWarm + 1;
+                                            const high = root.hostWidget.temperatureCritical - 1;
+                                            root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            Column {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Style.spacing.xs
+
+                                // The whole strip above the field is the hover
+                                // target: the 4-letter label is too small to
+                                // aim at, and the field itself stays tooltip-free.
+                                Item {
+                                    id: tempCriticalLabelBox
+
+                                    anchors.left: parent.left
+                                    width: Style.space(64)
+                                    height: Style.space(16)
+
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: "Red"
+                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                        font.family: Style.font.family
+                                        font.pixelSize: Style.font.bodySmall
+                                    }
+
+                                    MouseArea {
+                                        id: tempCriticalArea
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.ArrowCursor
+
+                                        property string tip: "Value and icon turn red here.\nKept above Orange."
+                                    }
+                                }
+
+                                NumberField {
+                                    label: ""
+                                    from: 22
+                                    to: 120
+                                    stepSize: 1
+                                    value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
+                                    fieldWidth: Style.space(64)
+                                    foreground: ShellColor.popups.text
+                                    fontFamily: Style.font.family
+
+                                    onModified: function (value) {
+                                        if (root.hostWidget) {
+                                            root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    // In-panel tooltip: a plain rectangle so it stays inside
+                    // the window and never gets stuck like a popup bubble.
+                    Rectangle {
+                        id: tempTip
 
-                        NumberField {
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            label: "Green"
-                            from: 20
-                            to: 80
-                            stepSize: 1
-                            value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
-                            fieldWidth: Style.space(64)
-                            foreground: ShellColor.popups.text
-                            fontFamily: Style.font.family
+                        x: Style.space(4)
+                        y: -height - Style.space(2)
+                        width: tempTipText.implicitWidth + Style.space(16)
+                        height: tempTipText.implicitHeight + Style.space(10)
+                        visible: tempBlock.tipText !== ""
+                        radius: Style.cornerRadius
+                        color: ShellColor.tooltip.background
+                        border.width: 1
+                        border.color: ShellColor.tooltip.border
 
-                            onModified: function (value) {
-                                if (root.hostWidget) {
-                                    root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
-                                }
-                            }
+                        Text {
+                            id: tempTipText
 
-                            HoverHandler {
-                                id: tempWarmHover
-                            }
-
-                            PanelToolTip {
-                                visible: tempWarmHover.hovered
-                                text: "Temperature where the value and icon turn green, in °C.\nKept below the orange threshold."
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
-                        NumberField {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.verticalCenter: parent.verticalCenter
-                            label: "Orange"
-                            from: 21
-                            to: 100
-                            stepSize: 1
-                            value: root.hostWidget ? root.hostWidget.temperatureHot : 50
-                            fieldWidth: Style.space(64)
-                            foreground: ShellColor.popups.text
-                            fontFamily: Style.font.family
-
-                            onModified: function (value) {
-                                if (root.hostWidget) {
-                                    const low = root.hostWidget.temperatureWarm + 1;
-                                    const high = root.hostWidget.temperatureCritical - 1;
-                                    root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
-                                }
-                            }
-
-                            HoverHandler {
-                                id: tempHotHover
-                            }
-
-                            PanelToolTip {
-                                visible: tempHotHover.hovered
-                                text: "Temperature where the value and icon turn orange, in °C.\nKept between the green and red thresholds."
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-
-                        NumberField {
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            label: "Red"
-                            from: 22
-                            to: 120
-                            stepSize: 1
-                            value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
-                            fieldWidth: Style.space(64)
-                            foreground: ShellColor.popups.text
-                            fontFamily: Style.font.family
-
-                            onModified: function (value) {
-                                if (root.hostWidget) {
-                                    root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
-                                }
-                            }
-
-                            HoverHandler {
-                                id: tempCriticalHover
-                            }
-
-                            PanelToolTip {
-                                visible: tempCriticalHover.hovered
-                                text: "Temperature where the value and icon turn red, in °C.\nKept above the orange threshold."
-                            }
+                            anchors.centerIn: parent
+                            text: tempBlock.tipText
+                            color: ShellColor.tooltip.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.bodySmall
                         }
                     }
                 }
-
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)

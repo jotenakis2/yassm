@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.0
+Version 1.24.1
 
 [English](README.md) | **Français**
 
@@ -145,6 +145,7 @@ appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
 
 Les trois limites sont des champs numériques : saisir une valeur ou utiliser
 les flèches, par pas d'un degré ; l'ordre croissant est toujours conservé.
+Survoler l'étiquette Green, Orange ou Red rappelle ce que change ce seuil.
 
 **Timers**
 
