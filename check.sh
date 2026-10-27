@@ -92,5 +92,5 @@ lint_log=${qml_root}/bar-widget.log
 "${QML_LINT}" -I "${qml_root}" -I /usr/lib/qt6/qml \
 	BarWidget.qml SettingsPanel.qml >"${lint_log}" 2>&1 || true
 warning_count=$(grep -c '^Warning:' "${lint_log}" || true)
-printf 'qmllint: %s advisory warning(s) in BarWidget.qml/SettingsPanel.qml (Quickshell types unavailable)\n' \
+printf 'qmllint: %s advisory warning(s) in BarWidget.qml/SettingsPanel.qml (expected: Quickshell/Omarchy qmltypes unavailable)\n' \
 	"${warning_count}"
