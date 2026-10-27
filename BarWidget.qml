@@ -1387,8 +1387,10 @@ BarWidget {
             const upRate = formatRateLong(metrics.networkTxKib);
             const downSession = formatKibAsSize(metrics.networkRxSessionKb);
             const upSession = formatKibAsSize(metrics.networkTxSessionKb);
-            const rateWidth = Math.max(downRate.length, upRate.length);
-            const sessionWidth = Math.max(downSession.length, upSession.length);
+            // Fixed columns: the session values must not move when a rate
+            // crosses a unit or gains a digit.
+            const rateWidth = 12;
+            const sessionWidth = 11;
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
             const lines = [root.centeredMark + root.iconSwap + " io", "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
 

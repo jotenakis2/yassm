@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.4
+Version 1.22.0
 
 [English](README.md) | **Français**
 
@@ -81,8 +81,11 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
   ces champs sont masqués.
 
 Un outil optionnel manquant ne provoque jamais d'erreur : le champ
-correspondant est omis. Seuls `btop` et la source GPU sont détectés au
-démarrage.
+correspondant est omis. Le panneau Settings affiche une bannière d'avertissement
+dès qu'un outil requis ou optionnel manque ; son survol liste précisément les
+outils et leur usage. `btop` et `nvidia-smi` ne sont volontairement pas
+signalés : ce sont des conforts, et le détecteur GPU gère déjà l'absence de
+source.
 
 Le widget est conçu pour une barre horizontale (haut ou bas). Il est masqué
 sur une barre verticale, où un emplacement de `barSize` de large ne peut pas

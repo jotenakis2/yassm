@@ -7,12 +7,46 @@ import Quickshell
 import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
+import "lib" as Yassm
 
 PanelWindow {
     id: root
 
     property var hostWidget: null
     property real panelX: 0
+
+    readonly property var missingDeps: Yassm.SystemMetrics.missingDeps
+    readonly property var missingRequired: root.missingDeps.filter(function (dep) {
+        return dep.kind === "required";
+    })
+    readonly property var missingOptional: root.missingDeps.filter(function (dep) {
+        return dep.kind === "optional";
+    })
+
+    function depsTooltip() {
+        const lines = [];
+
+        if (root.missingRequired.length > 0) {
+            lines.push("Required: " + root.missingRequired.map(function (dep) {
+                return dep.name;
+            }).join(", "));
+        }
+
+        if (root.missingOptional.length > 0) {
+            lines.push("Optional: " + root.missingOptional.map(function (dep) {
+                return dep.name;
+            }).join(", "));
+        }
+
+        lines.push("");
+
+        for (let i = 0; i < root.missingDeps.length; i++) {
+            const dep = root.missingDeps[i];
+            lines.push(dep.name + " — " + dep.purpose);
+        }
+
+        return lines.join("\n");
+    }
 
     readonly property int panelWidth: Math.min(Style.space(440), Math.max(Style.space(280), (root.screen ? root.screen.width : Style.space(440)) - root.panelMargin * 2))
     readonly property int panelPadding: Style.space(16)
@@ -211,6 +245,57 @@ PanelWindow {
                     font.pixelSize: Style.font.subtitle
 
                     bottomPadding: Style.space(8)
+                }
+
+                Rectangle {
+                    id: depsWarning
+
+                    readonly property bool hasRequired: root.missingRequired.length > 0
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(34)
+                    visible: root.missingDeps.length > 0
+                    radius: Style.space(4)
+                    color: depsWarning.hasRequired ? Qt.rgba(Yassm.ThemePalette.red.r, Yassm.ThemePalette.red.g, Yassm.ThemePalette.red.b, 0.16) : Qt.rgba(Yassm.ThemePalette.orange.r, Yassm.ThemePalette.orange.g, Yassm.ThemePalette.orange.b, 0.16)
+                    border.width: 1
+                    border.color: depsWarning.hasRequired ? Qt.rgba(Yassm.ThemePalette.red.r, Yassm.ThemePalette.red.g, Yassm.ThemePalette.red.b, 0.55) : Qt.rgba(Yassm.ThemePalette.orange.r, Yassm.ThemePalette.orange.g, Yassm.ThemePalette.orange.b, 0.55)
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: Style.space(8)
+                        anchors.rightMargin: Style.space(8)
+                        spacing: Style.space(6)
+
+                        Text {
+                            text: "\uF071"
+                            color: depsWarning.hasRequired ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: depsWarning.hasRequired ? "Missing required tools: " + root.missingRequired.map(function (dep) {
+                                return dep.name;
+                            }).join(", ") : "Missing optional tools: " + root.missingOptional.map(function (dep) {
+                                return dep.name;
+                            }).join(", ")
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.bodySmall
+                        }
+                    }
+
+                    HoverHandler {
+                        id: depsHover
+                    }
+
+                    PanelToolTip {
+                        visible: depsHover.hovered
+                        text: root.depsTooltip()
+                    }
                 }
 
                 PanelSectionHeader {

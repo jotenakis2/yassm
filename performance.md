@@ -116,6 +116,7 @@ On demand only:
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
 | `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, at most every 5 min |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |
+| `deps.sh` | 5 ms | once at startup (Settings warning) |
 
 ## Total
 

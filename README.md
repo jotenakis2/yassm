@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.4
+Version 1.22.0
 
 **English** | [Français](README-fr.md)
 
@@ -81,7 +81,10 @@ default and configurable from 1 to 5 s in Settings.
   them those fields are hidden.
 
 A missing optional tool never raises an error: the corresponding field is
-omitted. Only `btop` and the GPU source are probed at startup.
+omitted. The Settings panel shows a warning banner as soon as a required or
+optional tool is missing; hovering it lists the exact tools and what they are
+used for. `btop` and `nvidia-smi` are deliberately not flagged: they are
+conveniences, and the GPU detector already falls back when no source exists.
 
 The widget is designed for a horizontal bar (top or bottom). It is hidden on
 vertical bars, where a `barSize`-wide slot cannot hold the module row.

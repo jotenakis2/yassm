@@ -246,6 +246,9 @@ Singleton {
     readonly property string installDateScriptPath: decodeURIComponent(Qt.resolvedUrl("../install-date.sh").toString().replace("file://", ""))
     property string installDate: ""
 
+    readonly property string depsScriptPath: decodeURIComponent(Qt.resolvedUrl("../deps.sh").toString().replace("file://", ""))
+    property var missingDeps: []
+
     readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
     readonly property int alertsIntervalMs: 60000
     property var failedSystemUnits: []
@@ -1191,6 +1194,32 @@ Singleton {
         metrics.uptimeSeconds = Number.isFinite(value) ? value : 0;
     }
 
+    function applyDeps(content) {
+        const missing = [];
+        const lines = String(content || "").split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].split("\t");
+
+            if (fields.length < 2) {
+                continue;
+            }
+
+            const kind = fields[0];
+            const name = fields[1] || "";
+
+            if ((kind === "required" || kind === "optional") && name !== "") {
+                missing.push({
+                    kind: kind,
+                    name: name,
+                    purpose: fields[2] || ""
+                });
+            }
+        }
+
+        metrics.missingDeps = missing;
+    }
+
     function applyInstallDate(content) {
         // Locale-formatted by install-date.sh (e.g. "9 sept. 2026").
         const value = String(content || "").trim();
@@ -1485,6 +1514,18 @@ Singleton {
     }
 
     Process {
+        id: depsProcess
+
+        command: ["timeout", "5", "bash", metrics.depsScriptPath]
+
+        stdout: StdioCollector {
+            id: depsOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyDeps(depsOutput.text)
+        }
+    }
+
+    Process {
         id: installDateProcess
 
         command: ["timeout", "5", "bash", metrics.installDateScriptPath]
@@ -1585,5 +1626,8 @@ Singleton {
         onTriggered: alertsProcess.running = true
     }
 
-    Component.onCompleted: installDateProcess.running = true
+    Component.onCompleted: {
+        installDateProcess.running = true;
+        depsProcess.running = true;
+    }
 }
