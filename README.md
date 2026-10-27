@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.12.0
+Version 1.13.0
 
 **English** | [Français](README-fr.md)
 
@@ -181,13 +181,14 @@ Hovering a module shows a contextual tooltip:
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
   from `/`. Extended data adds an `io` section (read/write rates) and a
   `pressure` section (`10s`, `60s`, `300s`);
-- **Network**: active interface, download (↓) and upload (↑) rates, plus the
-  session total (deltas since the shell started, reset on restart and kept
-  across interface changes). Both rates are colored independently. The
-  driver's absolute counter is not used because it can be bogus. Without a
-  default route (loopback only), a red crossed-network icon and `--` replace
-  both rates. Extended data adds Wi-Fi quality and signal level when the
-  active interface is wireless;
+- **Network**: an `io` section with download (↓) and upload (↑) rates plus
+  the session total (deltas since the shell started, reset on restart and kept
+  across interface changes), then an `iface` section with the interface name.
+  Both rates are colored independently. The driver's absolute counter is not
+  used because it can be bogus. Without a default route (loopback only), a red
+  crossed-network icon and `--` replace both rates. Extended data adds the
+  SSID (from NetworkManager) and signal level (from `/proc/net/wireless`,
+  `Maison (-60 dBm)`) when the active interface is wireless;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   Labelled sensors keep their label, unlabeled hwmon sensors show the device
@@ -341,6 +342,8 @@ only while Alerts is enabled.
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`), `/proc/diskstats`,
 `/proc/net/wireless` and `/proc/uptime` are read every 5 s without spawning a
 process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
+The SSID comes from the NetworkManager service over D-Bus (no process, no
+poll); the signal level is read from `/proc/net/wireless` every 5 s.
 
 ## Checks
 

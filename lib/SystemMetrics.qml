@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
+import Quickshell.Networking
 
 // One sampler for the whole shell. Every bar widget instance reads this
 // singleton, so multi-monitor setups don't duplicate /proc reads or findmnt
@@ -110,9 +111,30 @@ Singleton {
     property real networkTxSessionKb: 0
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
-    property real wifiQuality: 0
     property real wifiLevel: 0
-    readonly property bool hasWifi: networkInterface !== "" && wifiQuality > 0
+
+    readonly property var wifiNetwork: {
+        const devices = modelValues(Networking.devices);
+
+        for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+
+            if (!device || device.type !== DeviceType.Wifi) {
+                continue;
+            }
+
+            const networks = modelValues(device.networks);
+
+            for (let j = 0; j < networks.length; j++) {
+                if (networks[j] && networks[j].connected) {
+                    return networks[j];
+                }
+            }
+        }
+
+        return null;
+    }
+    readonly property string wifiSsid: wifiNetwork && wifiNetwork.name ? String(wifiNetwork.name) : ""
 
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     readonly property int temperatureIntervalMs: 10000
@@ -133,10 +155,10 @@ Singleton {
     readonly property bool hasZombies: zombieAlerts.length > 0
     readonly property bool hasAlerts: hasSystemFailure || hasZombies
 
-    // UPower exposes its devices as an untyped model; keep the single access
-    // here so qmllint has only one known "values" warning to tolerate.
-    function upowerDevices() {
-        return UPower.devices ? UPower.devices.values : [];
+    // Quickshell models are untyped from qmllint's point of view; keep the
+    // single "values" access here so only one known warning remains.
+    function modelValues(model) {
+        return model ? model.values : [];
     }
 
     readonly property var batteryDevice: {
@@ -146,7 +168,7 @@ Singleton {
             return display;
         }
 
-        const devices = upowerDevices();
+        const devices = modelValues(UPower.devices);
 
         for (let i = 0; i < devices.length; i++) {
             const device = devices[i];
@@ -170,7 +192,7 @@ Singleton {
     // nativePath and healthPercentage empty; the real battery device carries
     // them, so health and cycle count read from that one.
     readonly property var batteryDetailDevice: {
-        const devices = upowerDevices();
+        const devices = modelValues(UPower.devices);
 
         for (let i = 0; i < devices.length; i++) {
             const device = devices[i];
@@ -927,7 +949,6 @@ Singleton {
     function applyWireless(content) {
         const iface = metrics.networkInterface;
         const lines = content.split("\n");
-        let quality = 0;
         let level = 0;
 
         if (iface !== "") {
@@ -939,13 +960,11 @@ Singleton {
                 }
 
                 const fields = lines[i].slice(colon + 1).trim().split(/\s+/);
-                quality = Number.parseFloat(fields[1]) || 0;
                 level = Number.parseFloat(fields[2]) || 0;
                 break;
             }
         }
 
-        metrics.wifiQuality = quality;
         metrics.wifiLevel = level;
     }
 

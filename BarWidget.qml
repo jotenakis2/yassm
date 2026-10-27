@@ -141,6 +141,8 @@ BarWidget {
     readonly property string iconNetDown: String.fromCodePoint(0xF01DA)
     readonly property string iconNetUp: String.fromCodePoint(0xF0552)
     readonly property string iconNetOff: String.fromCodePoint(0xF0C9B)
+    readonly property string iconWifi: String.fromCodePoint(0xF05A9)
+    readonly property string iconEthernet: String.fromCodePoint(0xF0200)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
@@ -1099,7 +1101,7 @@ BarWidget {
 
             if (root.showExtended) {
                 lines.push("");
-                lines.push(root.centeredMark + "pressure");
+                lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
 
                 const pressure = pressureRows(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300);
 
@@ -1287,10 +1289,21 @@ BarWidget {
             const upSession = formatKibAsSize(metrics.networkTxSessionKb);
             const rateWidth = Math.max(downRate.length, upRate.length);
             const sessionWidth = Math.max(downSession.length, upSession.length);
-            const lines = [metrics.networkInterface, "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
+            const ifaceIcon = metrics.wifiNetwork ? root.iconWifi : root.iconEthernet;
+            const lines = [root.centeredMark + root.iconSwap + " io", "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
 
-            if (root.showExtended && metrics.hasWifi) {
-                lines.push("Wi-Fi " + Math.round(metrics.wifiQuality) + "/70 (" + Math.round(metrics.wifiLevel) + " dBm)");
+            lines.push("");
+            lines.push(root.centeredMark + ifaceIcon + " iface");
+            lines.push(metrics.networkInterface);
+
+            if (root.showExtended && metrics.wifiNetwork) {
+                let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : "hidden SSID";
+
+                if (metrics.wifiLevel < 0) {
+                    wifi += " (" + Math.round(metrics.wifiLevel) + " dBm)";
+                }
+
+                lines.push(wifi);
             }
 
             return tooltipBlock("NET", lines.join("\n"));

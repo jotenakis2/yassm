@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.12.0
+Version 1.13.0
 
 [English](README.md) | **Français**
 
@@ -185,14 +185,15 @@ Le survol d'un module affiche une infobulle contextuelle :
   et `/var/log` n'apparaissent donc pas séparément de `/`. Extended data
   ajoute une section `io` (débits lecture/écriture) et une section `pressure`
   (`10s`, `60s`, `300s`) ;
-- **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
-  total de la session (deltas depuis le démarrage du shell, remis à zéro au
-  redémarrage et conservés lors d'un changement d'interface). Les deux débits
-  sont colorés indépendamment. Le compteur absolu du pilote n'est pas utilisé,
-  car il peut être aberrant. Sans route par défaut (uniquement `lo`), une
-  icône réseau barrée rouge et `--` remplacent les deux débits. Extended data
-  ajoute la qualité Wi-Fi et le niveau du signal quand l'interface active est
-  sans fil ;
+- **Réseau** : une section `io` avec le débit descendant (↓), montant (↑) et
+  le total de la session (deltas depuis le démarrage du shell, remis à zéro au
+  redémarrage et conservés lors d'un changement d'interface), puis une section
+  `iface` avec le nom de l'interface. Les deux débits sont colorés
+  indépendamment. Le compteur absolu du pilote n'est pas utilisé, car il peut
+  être aberrant. Sans route par défaut (uniquement `lo`), une icône réseau
+  barrée rouge et `--` remplacent les deux débits. Extended data ajoute le SSID
+  (via NetworkManager) et le niveau du signal (via `/proc/net/wireless`,
+  `Maison (-60 dBm)`) quand l'interface active est sans fil ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
@@ -349,7 +350,9 @@ zombies), uniquement si Alerts est activé.
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
 `/proc/diskstats`, `/proc/net/wireless` et `/proc/uptime` sont lus toutes les
 5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
-chaque cœur toutes les 5 s.
+chaque cœur toutes les 5 s. Le SSID vient du service NetworkManager via
+D-Bus (ni processus ni interrogation), le niveau du signal est lu dans
+`/proc/net/wireless` toutes les 5 s.
 
 ## Vérifications
 
