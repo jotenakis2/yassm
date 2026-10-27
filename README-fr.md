@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.0
+Version 1.25.1
 
 [English](README.md) | **Français**
 
@@ -146,7 +146,7 @@ cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
 - Données étendues dans les infobulles (fréquence par cœur, PSI, E/S disque, Wi-Fi, santé batterie)
 - Entre les modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Entre l'icône et la valeur (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
-- Processus affichés (processus userland affichés, 1–20 ; 10 par défaut)
+- Processus affichés (processus espace-utilisateurs affichés, 1–20 ; 10 par défaut)
 
 **Seuils**
 
@@ -172,7 +172,8 @@ Le curseur **Rafraîchissement** pilote la boucle rapide (CPU, RAM, swap,
 charge, réseau). Les débits réseau utilisent le temps réel écoulé, donc
 changer l'intervalle ne les fausse pas. Le curseur **Processus** règle la
 fréquence de rafraîchissement des infobulles CPU et RAM ; il descend jusqu'à
-2 s. Le curseur **Processus affichés** plafonne la liste userland à 1–20
+2 s. Le curseur **Processus affichés** plafonne la liste des processus
+espace-utilisateurs à 1–20
 lignes (10 par défaut) ; la ligne `noyau` est toujours en plus. La liste CPU
 est instantanée (deltas `/proc/<pid>/stat`), la RAM utilise le RSS de `ps`.
 **Données étendues dans les infobulles** ajoute la fréquence CPU, la pression
@@ -233,7 +234,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
   `Used` et `Available`. Un titre `proc` centré introduit le top des processus
-  **userland** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),
+  **espace-utilisateurs** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
   Extended data ajoute `Shared` (`Shmem` : tmpfs et mappings partagés, déjà
@@ -292,7 +293,7 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
   centré, puis le pourcentage par cœur sur deux colonnes (réparties par
   moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un
-  titre `proc` centré introduit le top des processus **userland** par CPU
+  titre `proc` centré introduit le top des processus **espace-utilisateurs** par CPU
   (deltas instantanés depuis `/proc/<pid>/stat`, ramenés sur la capacité
   totale des CPU comme la valeur principale ; jusqu'à **Processes shown**, 10
   par défaut), regroupés par nom ; si moins de processus sont actifs, des
