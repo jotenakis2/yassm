@@ -339,19 +339,22 @@ BarWidget {
     // an old config, a removed module or a future addition never breaks the bar.
     readonly property var defaultModuleOrder: ["uptime", "cpu", "load", "gpu", "memory", "swap", "disk", "net", "temp", "battery", "alerts"]
     readonly property var moduleOrder: {
-        const saved = setting("moduleOrder", []);
+        // Values loaded from shell.json arrive as a QVariantList, for which
+        // Array.isArray() is false even though it behaves like an array;
+        // normalise it first, otherwise the saved order is ignored on every
+        // shell restart and the bar falls back to the default order.
+        const raw = setting("moduleOrder", []);
+        const saved = raw && typeof raw.length === "number" ? Array.prototype.slice.call(raw) : [];
         const defaults = root.defaultModuleOrder;
         const order = [];
         const seen = {};
 
-        if (Array.isArray(saved)) {
-            for (let i = 0; i < saved.length; i++) {
-                const key = saved[i];
+        for (let i = 0; i < saved.length; i++) {
+            const key = saved[i];
 
-                if (typeof key === "string" && defaults.indexOf(key) >= 0 && !seen[key]) {
-                    seen[key] = true;
-                    order.push(key);
-                }
+            if (typeof key === "string" && defaults.indexOf(key) >= 0 && !seen[key]) {
+                seen[key] = true;
+                order.push(key);
             }
         }
 
