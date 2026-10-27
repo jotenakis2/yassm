@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.22.0
+Version 1.22.1
 
 **English** | [Français](README-fr.md)
 
@@ -130,7 +130,7 @@ immediately and saved in `moduleOrder`.
 
 - Boxes (module frames)
 - Colors (colored thresholds and blue battery icon on mains)
-- Extended data in tooltip (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
+- Extended data in tooltips (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 - Processes shown (userland processes in tooltips, 1–20; default 10)
@@ -151,7 +151,7 @@ distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
 list at 1–20 rows (default 10); the `kernel` line (extended data) is counted
 separately. The CPU list is instantaneous (deltas from `/proc/<pid>/stat`),
-while RAM uses RSS from `ps`. **Extended data in tooltip** adds per-core
+while RAM uses RSS from `ps`. **Extended data in tooltips** adds per-core
 frequencies, PSI, disk I/O, Wi-Fi details, LAN/WAN addresses, battery power
 and health to their tooltips; it is on by default. Hovering any slider row
 shows a tooltip with the same explanation. The panel scrolls

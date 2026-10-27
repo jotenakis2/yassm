@@ -492,7 +492,7 @@ PanelWindow {
                 Toggle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.toggleRowHeight
-                    label: "Extended data in tooltip"
+                    label: "Extended data in tooltips"
                     fontFamily: Style.font.family
                     titleSize: Style.font.body
                     foreground: ShellColor.popups.text
