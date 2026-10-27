@@ -148,6 +148,8 @@ BarWidget {
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
     readonly property string iconTempHot: String.fromCodePoint(0xF0E01)
     readonly property string iconFan: String.fromCodePoint(0xF0210)
+    readonly property string iconProc: String.fromCodePoint(0xF018D)
+    readonly property string iconCompress: String.fromCodePoint(0xF066)
     readonly property string iconLoadLow: String.fromCodePoint(0xF0F86)
     readonly property string iconLoadMedium: String.fromCodePoint(0xF0F85)
     readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
@@ -1118,7 +1120,7 @@ BarWidget {
 
             if (showKernel || root.processMemory.length > 0) {
                 lines.push("");
-                lines.push(root.centeredMark + "proc");
+                lines.push(root.centeredMark + root.iconProc + " proc");
             }
 
             if (showKernel) {
@@ -1198,7 +1200,7 @@ BarWidget {
 
             if (zramLines.length > 0) {
                 lines.push("");
-                lines.push(root.sectionMark + "ZRAM");
+                lines.push(root.centeredMark + root.iconMemory + " ZRAM");
 
                 for (let i = 0; i < zramLines.length; i++) {
                     lines.push(zramLines[i]);
@@ -1209,7 +1211,7 @@ BarWidget {
                 const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
 
                 lines.push("");
-                lines.push(root.sectionMark + "ZSWAP");
+                lines.push(root.centeredMark + root.iconCompress + " ZSWAP");
                 lines.push(formatKib(metrics.zswapCompressedKb) + " compressed -> " + formatKib(metrics.zswapOriginalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 
@@ -1270,7 +1272,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + "proc");
+                lines.push(root.centeredMark + root.iconProc + " proc");
 
                 if (showKernel) {
                     lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
