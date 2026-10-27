@@ -1163,16 +1163,10 @@ BarWidget {
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
             const kernelValue = showKernel ? formatKib(metrics.kernelTotalKb) : "";
-            let nameWidth = 6;
-            let valueWidth = kernelValue.length;
-
-            for (let i = 0; i < labels.length; i++) {
-                nameWidth = Math.max(nameWidth, labels[i].length);
-                valueWidth = Math.max(valueWidth, values[i].length);
-            }
-
-            nameWidth = Math.max(nameWidth, table.nameWidth);
-            valueWidth = Math.max(valueWidth, table.valueWidth);
+            // Fixed columns: the process list refreshes every 5 s and the
+            // values must not shift when the longest name or value changes.
+            const nameWidth = 15;
+            const valueWidth = 10;
 
             const lines = [];
             lines.push(root.centeredMark + root.iconMemory + " data");
@@ -1349,8 +1343,8 @@ BarWidget {
             const table = processTable(root.processCpu, false);
             const showKernel = root.showExtended;
             const kernelValue = showKernel ? metrics.kernelPercent.toFixed(1) + "%" : "";
-            const nameWidth = Math.max(6, table.nameWidth);
-            const valueWidth = Math.max(kernelValue.length, table.valueWidth);
+            const nameWidth = 15;
+            const valueWidth = 6;
 
             if (showKernel || root.processCpu.length > 0) {
                 if (lines.length > 0) {
