@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.23.4
+Version 1.24.0
 
 [English](README.md) | **Français**
 
@@ -142,6 +142,9 @@ appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
 - Green from (défaut 40 °C)
 - Orange from (défaut 50 °C)
 - Red from (défaut 60 °C)
+
+Les trois limites sont des champs numériques : saisir une valeur ou utiliser
+les flèches, par pas d'un degré ; l'ordre croissant est toujours conservé.
 
 **Timers**
 
@@ -314,8 +317,9 @@ valeur arrondie affichée :
 | Températures (défauts) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 La valeur du disque passe au rouge à 90 % ; le module **Alertes** ne se
-déclenche qu'à 95 % (disque ou RAM). Les seuils de température sont des défauts ; les trois curseurs de Settings →
-Temperature règlent les limites verte, orange et rouge. Le LOAD n'est pas
+déclenche qu'à 95 % (disque ou RAM). Les seuils de température sont des
+défauts ; les trois champs numériques de Settings → Temperature règlent les
+limites verte, orange et rouge, au degré près. Le LOAD n'est pas
 plafonné : il peut dépasser 100 % lorsque la file d'attente
 est plus longue que le nombre de CPU. La batterie suit une logique inversée,
 plus la valeur est basse, plus la couleur est alarmante. Les débits réseau

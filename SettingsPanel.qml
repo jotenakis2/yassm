@@ -696,14 +696,14 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
-                    text: "TEMPERATURE"
+                    text: "TEMPERATURE (°C)"
                     foreground: ShellColor.popups.text
                     fontFamily: Style.font.family
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
+                    Layout.preferredHeight: Style.space(50)
                     spacing: Style.space(8)
 
                     WheelHandler {
@@ -715,169 +715,103 @@ PanelWindow {
                         }
                     }
 
-                    HoverHandler {
-                        id: tempWarmHover
-                    }
-
-                    PanelToolTip {
-                        visible: tempWarmHover.hovered
-                        text: "Temperature where the value and icon turn green, in °C.\nKept below the orange threshold."
-                    }
-
-                    Label {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Green from (°C)"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        Layout.fillHeight: true
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.temperatureWarm) : "40"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        NumberField {
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            label: "Green"
+                            from: 20
+                            to: 80
+                            stepSize: 1
+                            value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
+                            fieldWidth: Style.space(64)
+                            foreground: ShellColor.popups.text
+                            fontFamily: Style.font.family
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 20
-                        maximum: 80
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
+                            onModified: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                                }
+                            }
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                            HoverHandler {
+                                id: tempWarmHover
+                            }
+
+                            PanelToolTip {
+                                visible: tempWarmHover.hovered
+                                text: "Temperature where the value and icon turn green, in °C.\nKept below the orange threshold."
                             }
                         }
                     }
-                }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: tempHotHover
-                    }
-
-                    PanelToolTip {
-                        visible: tempHotHover.hovered
-                        text: "Temperature where the value and icon turn orange, in °C.\nKept between the green and red thresholds."
-                    }
-
-                    Label {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Orange from (°C)"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        Layout.fillHeight: true
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.temperatureHot) : "50"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        NumberField {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            label: "Orange"
+                            from: 21
+                            to: 100
+                            stepSize: 1
+                            value: root.hostWidget ? root.hostWidget.temperatureHot : 50
+                            fieldWidth: Style.space(64)
+                            foreground: ShellColor.popups.text
+                            fontFamily: Style.font.family
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 21
-                        maximum: 100
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.temperatureHot : 50
+                            onModified: function (value) {
+                                if (root.hostWidget) {
+                                    const low = root.hostWidget.temperatureWarm + 1;
+                                    const high = root.hostWidget.temperatureCritical - 1;
+                                    root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                                }
+                            }
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                const low = root.hostWidget.temperatureWarm + 1;
-                                const high = root.hostWidget.temperatureCritical - 1;
-                                root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                            HoverHandler {
+                                id: tempHotHover
+                            }
+
+                            PanelToolTip {
+                                visible: tempHotHover.hovered
+                                text: "Temperature where the value and icon turn orange, in °C.\nKept between the green and red thresholds."
                             }
                         }
                     }
-                }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(32)
-                    spacing: Style.space(8)
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: tempCriticalHover
-                    }
-
-                    PanelToolTip {
-                        visible: tempCriticalHover.hovered
-                        text: "Temperature where the value and icon turn red, in °C.\nKept above the orange threshold."
-                    }
-
-                    Label {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Red from (°C)"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        Layout.fillHeight: true
 
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.temperatureCritical) : "60"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
+                        NumberField {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            label: "Red"
+                            from: 22
+                            to: 120
+                            stepSize: 1
+                            value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
+                            fieldWidth: Style.space(64)
+                            foreground: ShellColor.popups.text
+                            fontFamily: Style.font.family
 
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 22
-                        maximum: 120
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
+                            onModified: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                                }
+                            }
 
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                            HoverHandler {
+                                id: tempCriticalHover
+                            }
+
+                            PanelToolTip {
+                                visible: tempCriticalHover.hovered
+                                text: "Temperature where the value and icon turn red, in °C.\nKept above the orange threshold."
                             }
                         }
                     }

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.23.4
+Version 1.24.0
 
 **English** | [Français](README-fr.md)
 
@@ -140,6 +140,9 @@ immediately and saved in `moduleOrder`.
 - Green from (default 40 °C)
 - Orange from (default 50 °C)
 - Red from (default 60 °C)
+
+The three limits are editable number fields: type a value or use the arrows,
+with one-degree steps; they are always kept in ascending order.
 
 **Timers**
 
@@ -320,8 +323,9 @@ threshold), the icon turns theme blue while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
 The disk value turns red at 90 %; the **Alerts** module only triggers at
-95 % (disk or RAM). The temperature thresholds are defaults; the three sliders in Settings →
-Temperature change the green, orange and red limits. The **Colors** toggle
+95 % (disk or RAM). The temperature thresholds are defaults; the three
+number fields in Settings → Temperature change the green, orange and red
+limits, to the degree. The **Colors** toggle
 disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).
