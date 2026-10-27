@@ -1457,6 +1457,10 @@ BarWidget {
                 lines.push("No alerts");
             }
 
+            lines.push("");
+            lines.push("red: systemd failed unit · orange: zombie older than 60 s");
+            lines.push("systemctl --failed · journalctl -u <unit>");
+
             return tooltipBlock("ALERTS", lines.join("\n"));
         }
 

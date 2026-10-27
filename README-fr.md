@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.20.2
+Version 1.20.3
 
 [English](README.md) | **Français**
 
@@ -302,8 +302,11 @@ Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
 Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
 compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
 en échec sous un titre `systemd` centré en minuscules, puis `systemd --user`,
-puis `proc zombie` ; une ligne vide sépare les sections. Avec **Colors**
-désactivé, l'icône reprend la couleur normale de la barre.
+puis `proc zombie` ; une ligne vide sépare les sections. Le tooltip se termine
+par une légende et les commandes d'investigation : `red: systemd failed unit ·
+orange: zombie older than 60 s`, puis `systemctl --failed · journalctl -u
+<unit>`. Avec **Colors** désactivé, l'icône reprend la couleur normale de la
+barre.
 
 ## Uptime
 
