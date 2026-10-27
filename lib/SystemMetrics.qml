@@ -153,6 +153,7 @@ Singleton {
     property bool hasTemperature: false
     property real temperatureC: 0
     property var temperatures: []
+    property var fans: []
 
     readonly property string cpuFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../cpu-freq.sh").toString().replace("file://", ""))
     property var coreFreqMhz: []
@@ -773,12 +774,27 @@ Singleton {
 
     function applyTemperatures(content) {
         const entries = [];
+        const fans = [];
         const lines = content.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
 
             if (line === "") {
+                continue;
+            }
+
+            if (line.startsWith("fan\t")) {
+                const fields = line.split("\t");
+                const rpm = Number(fields[1]);
+
+                if (Number.isFinite(rpm) && rpm >= 0) {
+                    fans.push({
+                        name: fields[2] || "fan",
+                        rpm: rpm
+                    });
+                }
+
                 continue;
             }
 
@@ -817,6 +833,7 @@ Singleton {
         }
 
         metrics.temperatures = unique;
+        metrics.fans = fans;
         metrics.hasTemperature = unique.length > 0;
         metrics.temperatureC = unique.length > 0 ? unique[0].celsius : 0;
     }

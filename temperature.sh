@@ -107,3 +107,30 @@ for path in /sys/class/thermal/thermal_zone*/temp; do
 		printf '%d\t%s\n' "$raw" "$label"
 	fi
 done
+
+# Fans travel with the same scan so no extra process is needed. A standing fan
+# legitimately reports 0 rpm, so unlike temperatures the value is not filtered.
+for path in /sys/class/hwmon/hwmon*/fan*_input; do
+	[[ -r $path ]] || continue
+
+	read -r rpm <"$path" || continue
+	[[ $rpm =~ ^[0-9]+$ ]] || continue
+
+	label_file="${path%_input}_label"
+	label=""
+	if [[ -r $label_file ]]; then
+		IFS= read -r label <"$label_file" || true
+	fi
+
+	if [[ -z $label ]]; then
+		dir=${path%/*}
+		device=""
+		if [[ -r $dir/name ]]; then
+			IFS= read -r device <"$dir/name" || true
+		fi
+		label="${device:-hwmon} ${path##*/}"
+		label=${label%_input}
+	fi
+
+	printf 'fan\t%d\t%s\n' "$rpm" "$label"
+done

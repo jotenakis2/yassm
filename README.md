@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.15.1
+Version 1.16.0
 
 **English** | [Français](README-fr.md)
 
@@ -94,12 +94,12 @@ The panel lets you enable or disable:
 - Extended data in tooltip (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
+- Processes shown (userland processes in tooltips, 1–20; default 10)
 
 **Timers**
 
 - Refresh (metrics sampling interval, 1–5 s; default 1)
 - Processes (tooltip process refresh, 2–10 s; default 5)
-- Processes shown (userland processes in tooltips, 1–20; default 10)
 
 The **Between modules** slider sets the gap between modules from 0 to 5 spaces
 (default 2). The **Between icon and value** slider sets the gap between each
@@ -110,11 +110,12 @@ The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
-list at 1–20 rows (default 10); the `kernel` line is always extra. The CPU list
-is instantaneous (deltas from `/proc/<pid>/stat`), while RAM uses RSS from
-`ps`. **Extended data in tooltip** adds per-core frequencies, PSI, disk I/O,
-Wi-Fi signal and battery health to their tooltips; it is on by default.
-Hovering any slider row shows a tooltip with the same explanation. The panel scrolls
+list at 1–20 rows (default 10); the `kernel` line (extended data) is counted
+separately. The CPU list is instantaneous (deltas from `/proc/<pid>/stat`),
+while RAM uses RSS from `ps`. **Extended data in tooltip** adds per-core
+frequencies, PSI, disk I/O, Wi-Fi details, LAN/WAN addresses, battery power
+and health to their tooltips; it is on by default. Hovering any slider row
+shows a tooltip with the same explanation. The panel scrolls
 automatically if the screen is too short; Escape closes it.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
@@ -157,15 +158,15 @@ Hovering a module shows a contextual tooltip:
   The icon tilts with the load: needle low up to 50 %, medium from 51 to 90 %,
   high above that;
 - **RAM**: the tooltip opens with a centered `data` heading, then shows
-  `Total`, `Used` and `Available`. Extended data adds `Buffer/cache`
-  (`Buffers` + `Cached` + `SReclaimable`, like `free`). A centered `proc`
-  heading introduces the `kernel` line (Slab − SReclaimable + stacks + page
-  tables + vmalloc + percpu; SReclaimable is already in Buffer/cache, and
-  vmalloc and percpu may slightly overlap) and the top **userland** processes
-  by RSS (up to the **Processes shown** value, default 10), grouped by name;
-  the list refreshes every 5 s by default (2–10 s) while the tooltip stays
-  open; kernel threads are excluded. Extended data also adds a `pressure`
-  section with one line per window (`10s`, `60s`, `300s`);
+  `Total`, `Used` and `Available`. A centered `proc` heading introduces the
+  top **userland** processes by RSS (up to the **Processes shown** value,
+  default 10), grouped by name; the list refreshes every 5 s by default
+  (2–10 s) while the tooltip stays open; kernel threads are excluded.
+  Extended data adds `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
+  like `free`), the `kernel` line (Slab − SReclaimable + stacks + page tables
+  + vmalloc + percpu; SReclaimable is already in Buffer/cache, and vmalloc and
+  percpu may slightly overlap) and a `pressure` section with one line per
+  window (`10s`, `60s`, `300s`);
 - **Swap**: used / total and the percentage. Extended data lists each
   swap device (zram included) with its own used / total and percentage under a
   `devices` heading, then a `ZRAM` section (compressed size, original size,
@@ -199,15 +200,17 @@ Hovering a module shows a contextual tooltip:
   merged, keeping the hottest;
   The icon follows the level (thresholds on the rounded displayed value):
   snowflake below 40 °C, thermometer from 40 to 49 °C, heat from 50 to 59 °C,
-  alert from 60 °C;
+  alert from 60 °C. A `fans` section lists every hwmon fan with its speed in
+  rpm (`Fan 1  0 rpm`), including standing fans at 0;
 - **Battery**: percentage, state, time remaining or time to full. Extended
-  data adds the instantaneous power when UPower provides it, with its
-  direction (`draw` while discharging, `charge` while charging), plus battery
-  health and charge cycles;
+  data adds the instantaneous power when UPower provides it, with an arrow
+  (↓ while discharging, ↑ while charging), plus battery health and charge
+  cycles;
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`
-  heading then introduces kernel CPU (`system` + `irq` + `softirq`), on the
+  heading then introduces kernel CPU when extended data is on (`system` +
+  `irq` + `softirq`), on the
   same scale as the processes, followed by the top **userland** processes by
   CPU (instantaneous deltas from `/proc/<pid>/stat`, scaled to total CPU
   capacity like the main value; up to **Processes shown**, default 10),
@@ -222,7 +225,7 @@ Hovering a module shows a contextual tooltip:
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
 `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
 the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
-tooltips is bold too, but keeps the body color. Network, swap, disk and
+tooltips (extended data only) is bold too, but keeps the body color. Network, swap, disk and
 temperature tooltips launch no process. The RAM tooltip launches a `ps` when
 it opens and every 5 s by default (2–10 s) while the hover lasts; the CPU
 tooltip uses `/proc/<pid>/stat` snapshots instead.
@@ -339,6 +342,8 @@ hover lasts, never in the background.
 
 Temperature, disk, swap/ZRAM and alerts only run while at least one bar has
 the corresponding module enabled; hiding them stops the scripts entirely.
+Fan speeds travel with the temperature scan (`temperature.sh`), so they cost
+no extra process.
 
 `alerts.sh` runs every 60 s (systemd system/user plus a `/proc` zombie scan),
 only while Alerts is enabled.

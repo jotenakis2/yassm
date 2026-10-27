@@ -147,6 +147,7 @@ BarWidget {
     readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
     readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
     readonly property string iconTempHot: String.fromCodePoint(0xF0E01)
+    readonly property string iconFan: String.fromCodePoint(0xF0210)
     readonly property string iconLoadLow: String.fromCodePoint(0xF0F86)
     readonly property string iconLoadMedium: String.fromCodePoint(0xF0F85)
     readonly property string iconLoadHigh: String.fromCodePoint(0xF04C5)
@@ -904,15 +905,15 @@ BarWidget {
         }
     }
 
-    function batteryPowerDirection() {
+    function batteryPowerArrow() {
         const status = Yassm.SystemMetrics.batteryStatus;
 
         if (status === "Discharging") {
-            return "draw";
+            return "↓";
         }
 
         if (status === "Charging") {
-            return "charge";
+            return "↑";
         }
 
         return "";
@@ -1083,9 +1084,9 @@ BarWidget {
                 labels.push("Buffer/cache");
                 values.push(formatKibAsGib(metrics.memoryBuffCacheKb));
             }
-            const hasKernel = metrics.kernelTotalKb > 0;
+            const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
-            const kernelValue = hasKernel ? formatKib(metrics.kernelTotalKb) : "";
+            const kernelValue = showKernel ? formatKib(metrics.kernelTotalKb) : "";
             let nameWidth = 6;
             let valueWidth = kernelValue.length;
 
@@ -1115,12 +1116,12 @@ BarWidget {
                 }
             }
 
-            if (hasKernel || root.processMemory.length > 0) {
+            if (showKernel || root.processMemory.length > 0) {
                 lines.push("");
                 lines.push(root.centeredMark + "proc");
             }
 
-            if (hasKernel) {
+            if (showKernel) {
                 lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
             }
 
@@ -1259,19 +1260,25 @@ BarWidget {
             }
 
             const table = processTable(root.processCpu, false);
-            const kernelValue = metrics.kernelPercent.toFixed(1) + "%";
+            const showKernel = root.showExtended;
+            const kernelValue = showKernel ? metrics.kernelPercent.toFixed(1) + "%" : "";
             const nameWidth = Math.max(6, table.nameWidth);
             const valueWidth = Math.max(kernelValue.length, table.valueWidth);
 
-            if (lines.length > 0) {
-                lines.push("");
-            }
+            if (showKernel || root.processCpu.length > 0) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
 
-            lines.push(root.centeredMark + "proc");
-            lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                lines.push(root.centeredMark + "proc");
 
-            if (root.processCpu.length > 0) {
-                appendTableRows(lines, table, nameWidth, valueWidth);
+                if (showKernel) {
+                    lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                }
+
+                if (root.processCpu.length > 0) {
+                    appendTableRows(lines, table, nameWidth, valueWidth);
+                }
             }
 
             return tooltipBlock("CPU", lines.join("\n"));
@@ -1343,10 +1350,10 @@ BarWidget {
             }
 
             if (root.showExtended && Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
-                const direction = batteryPowerDirection();
+                const arrow = batteryPowerArrow();
 
-                if (direction !== "") {
-                    lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W " + direction);
+                if (arrow !== "") {
+                    lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W " + arrow);
                 }
             }
 
@@ -1416,15 +1423,36 @@ BarWidget {
         }
 
         if (key === "temp") {
-            const temperatures = metrics.temperatures;
+            const temperatures = metrics.temperatures || [];
+            const fans = metrics.fans || [];
 
-            if (!temperatures || temperatures.length === 0) {
+            if (temperatures.length === 0 && fans.length === 0) {
                 return tooltipBlock("TEMPERATURE", "Unavailable");
             }
 
             const lines = temperatures.map(function (entry) {
                 return entry.celsius.toFixed(1).padStart(4, " ") + " °C (" + entry.sensor + ")";
             });
+
+            if (fans.length > 0) {
+                let nameWidth = 0;
+                let rpmWidth = 0;
+
+                for (let i = 0; i < fans.length; i++) {
+                    nameWidth = Math.max(nameWidth, fans[i].name.length);
+                    rpmWidth = Math.max(rpmWidth, String(Math.round(fans[i].rpm)).length);
+                }
+
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.centeredMark + root.iconFan + " fans");
+
+                for (let i = 0; i < fans.length; i++) {
+                    lines.push(fans[i].name.padEnd(nameWidth) + "  " + String(Math.round(fans[i].rpm)).padStart(rpmWidth) + " rpm");
+                }
+            }
 
             return tooltipBlock("TEMPERATURE", lines.join("\n"));
         }

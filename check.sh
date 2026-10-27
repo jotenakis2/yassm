@@ -43,8 +43,13 @@ if command -v jq >/dev/null 2>&1; then
 	' >/dev/null || fail "detect-gpu.sh did not return the expected JSON object"
 fi
 
-./temperature.sh | awk -F'\t' 'NF != 2 { exit 1 }' \
-	|| fail "temperature.sh must print exactly one tab-separated pair per line"
+./temperature.sh | awk -F'\t' '
+	$1 == "fan" {
+		if (NF != 3 || $2 !~ /^[0-9]+$/) exit 1
+		next
+	}
+	NF != 2 { exit 1 }
+' || fail "temperature.sh must print value/label pairs or fan<TAB>rpm<TAB>label"
 
 # ---------------------------------------------------------------- qmllint
 QML_LINT=/usr/lib/qt6/bin/qmllint

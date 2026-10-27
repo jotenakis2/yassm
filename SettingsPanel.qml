@@ -384,6 +384,66 @@ PanelWindow {
                     }
                 }
 
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(40)
+                    spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
+                    HoverHandler {
+                        id: maxProcessesHover
+                    }
+
+                    PanelToolTip {
+                        visible: maxProcessesHover.hovered
+                        text: "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra."
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        text: "Processes shown"
+                        palette.windowText: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    Text {
+                        Layout.preferredWidth: Style.space(28)
+                        Layout.alignment: Qt.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: root.hostWidget ? String(root.hostWidget.maxProcesses) : "10"
+                        color: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    PanelSlider {
+                        Layout.preferredWidth: Style.space(160)
+                        Layout.alignment: Qt.AlignVCenter
+                        bar: root.hostBar
+                        minimum: 1
+                        maximum: 20
+                        step: 1
+                        integer: true
+                        value: root.hostWidget ? root.hostWidget.maxProcesses : 10
+
+                        onReleased: function (value) {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("maxProcesses", Math.round(value));
+                            }
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)
@@ -515,66 +575,6 @@ PanelWindow {
                         onReleased: function (value) {
                             if (root.hostWidget) {
                                 root.hostWidget.updateSetting("processInterval", Math.round(value));
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(40)
-                    spacing: Style.space(8)
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-
-                        onWheel: function (event) {
-                            root.scrollPanel(event.angleDelta.y);
-                            event.accepted = true;
-                        }
-                    }
-
-                    HoverHandler {
-                        id: maxProcessesHover
-                    }
-
-                    PanelToolTip {
-                        visible: maxProcessesHover.hovered
-                        text: "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line is always extra."
-                    }
-
-                    Label {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Processes shown"
-                        palette.windowText: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
-
-                    Text {
-                        Layout.preferredWidth: Style.space(28)
-                        Layout.alignment: Qt.AlignVCenter
-                        horizontalAlignment: Text.AlignRight
-                        text: root.hostWidget ? String(root.hostWidget.maxProcesses) : "10"
-                        color: ShellColor.popups.text
-                        font.family: Style.font.family
-                        font.pixelSize: Style.font.body
-                    }
-
-                    PanelSlider {
-                        Layout.preferredWidth: Style.space(160)
-                        Layout.alignment: Qt.AlignVCenter
-                        bar: root.hostBar
-                        minimum: 1
-                        maximum: 20
-                        step: 1
-                        integer: true
-                        value: root.hostWidget ? root.hostWidget.maxProcesses : 10
-
-                        onReleased: function (value) {
-                            if (root.hostWidget) {
-                                root.hostWidget.updateSetting("maxProcesses", Math.round(value));
                             }
                         }
                     }

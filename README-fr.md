@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.15.1
+Version 1.16.0
 
 [English](README.md) | **Français**
 
@@ -95,12 +95,12 @@ Le panneau permet d'activer ou de désactiver :
 - Extended data in tooltip (fréquence par cœur, PSI, I/O disque, Wi-Fi, santé batterie)
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
+- Processes shown (processus userland affichés, 1–20 ; 10 par défaut)
 
 **Timers**
 
 - Refresh (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
 - Processes (rafraîchissement des processus du tooltip, 2–10 s ; 5 par défaut)
-- Processes shown (processus userland affichés, 1–20 ; 10 par défaut)
 
 Le curseur **Between modules** règle l'espacement entre les modules de 0 à 5
 espaces (2 par défaut). Le curseur **Between icon and value** règle l'espace
@@ -160,16 +160,15 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées. L'icône change d'inclinaison selon la charge : aiguille basse
   jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
-  `Used` et `Available`. Extended data ajoute `Buffer/cache` (`Buffers` +
-  `Cached` + `SReclaimable`, comme `free`). Un titre `proc` centré introduit la
-  ligne `kernel` (Slab − SReclaimable + piles + tables de pages + vmalloc +
-  percpu ; SReclaimable est déjà dans Buffer/cache, et `vmalloc` et `percpu`
-  peuvent se recouvrir légèrement) et le top des processus **userland** par
-  RSS (jusqu'à la valeur **Processes shown**, 10 par défaut), regroupés par
-  nom ; la liste est rafraîchie toutes les 5 s par défaut (2–10 s) tant que le
-  tooltip reste ouvert ; les threads noyau sont exclus. Extended data ajoute
-  aussi une section `pressure` avec une ligne par fenêtre (`10s`, `60s`,
-  `300s`) ;
+  `Used` et `Available`. Un titre `proc` centré introduit le top des processus
+  **userland** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),
+  regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
+  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
+  Extended data ajoute `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
+  comme `free`), la ligne `kernel` (Slab − SReclaimable + piles + tables de
+  pages + vmalloc + percpu ; SReclaimable est déjà dans Buffer/cache, et
+  `vmalloc` et `percpu` peuvent se recouvrir légèrement) et une section
+  `pressure` avec une ligne par fenêtre (`10s`, `60s`, `300s`) ;
 - **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
@@ -203,36 +202,37 @@ Le survol d'un module affiche une infobulle contextuelle :
   barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
   les capteurs hwmon sans libellé affichent seulement le nom du périphérique
   (`macsmc_battery`, `tas2764`), et les mesures qui partagent un nom sont
-  fusionnées en gardant la plus chaude ; L'icône suit le niveau (seuils sur la valeur
-  arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C, chaleur de
-  50 à 59 °C, alerte à partir de 60 °C ;
+  fusionnées en gardant la plus chaude. L'icône suit le niveau (seuils sur la
+  valeur arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C,
+  chaleur de 50 à 59 °C, alerte à partir de 60 °C. Une section `fans` liste
+  chaque ventilateur hwmon avec sa vitesse en rpm (`Fan 1  0 rpm`), y compris
+  les ventilateurs à l'arrêt à 0 ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge.
   Extended data ajoute la puissance instantanée quand UPower la fournit, avec
-  sa direction (`draw` en décharge, `charge` en charge), ainsi que la santé de
-  la batterie et le nombre de cycles ;
+  sa direction sous forme de flèche (↓ en décharge, ↑ en charge), ainsi que la
+  santé de la batterie et le nombre de cycles ;
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
   centré, puis le pourcentage par cœur sur deux colonnes (réparties par
   moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un
-  titre `proc` centré introduit ensuite le CPU noyau
-  (`system` + `irq` + `softirq`), sur la même échelle que les processus, puis
-  le top des processus **userland** par CPU (deltas instantanés depuis
-  `/proc/<pid>/stat`, ramenés sur la capacité totale des CPU comme la valeur
-  principale ; jusqu'à **Processes shown**, 10 par défaut), regroupés
-  par nom ; si moins de processus sont actifs, des lignes inactives à 0,0 %
-  complètent la liste ; la liste est rafraîchie toutes les 5 s par défaut
-  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
-  Extended data ajoute la fréquence de chaque cœur entre parenthèses, alignée
-  par colonne ;
+  titre `proc` centré introduit le top des processus **userland** par CPU
+  (deltas instantanés depuis `/proc/<pid>/stat`, ramenés sur la capacité
+  totale des CPU comme la valeur principale ; jusqu'à **Processes shown**, 10
+  par défaut), regroupés par nom ; si moins de processus sont actifs, des
+  lignes inactives à 0,0 % complètent la liste ; la liste est rafraîchie
+  toutes les 5 s par défaut (2–10 s) tant que le tooltip reste ouvert ; les
+  threads noyau sont exclus. Extended data ajoute le CPU noyau (`system` +
+  `irq` + `softirq`, sur la même échelle que les processus) et la fréquence de
+  chaque cœur entre parenthèses, alignée par colonne ;
 - **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
   affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
-(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `ZRAM`,
-`ZSWAP`) sont en **gras** et dans la couleur
-de texte du tooltip ; le corps utilise la couleur `muted` du thème. La ligne
-`kernel` des tooltips CPU et RAM est aussi en gras, mais conserve la couleur du
-corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.
+(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `fans`,
+`ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur de texte du tooltip ; le
+corps utilise la couleur `muted` du thème. La ligne `kernel` des tooltips CPU
+et RAM (extended data uniquement) est aussi en gras, mais conserve la couleur
+du corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.
 
 ## Couleurs de la barre
 
@@ -347,7 +347,8 @@ des deltas instantanés ; seul le tooltip RAM utilise `ps` (RSS).
 
 Température, disque, swap/ZRAM et alertes ne sont échantillonnés que si au
 moins une barre a le module correspondant activé ; les masquer arrête
-complètement les scripts.
+complètement les scripts. Les ventilateurs sont relevés par le même scan que
+les températures (`temperature.sh`), donc sans processus supplémentaire.
 
 `alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
 zombies), uniquement si Alerts est activé.
