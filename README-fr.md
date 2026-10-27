@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.22.6
+Version 1.23.0
 
 [English](README.md) | **Français**
 
@@ -35,7 +35,7 @@ D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, up
 | Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | 10 s |
 | Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
-| Alertes | unités systemd en échec + zombies de plus de 60 s | 60 s |
+| Alertes | unités systemd en échec, zombies de plus de 60 s, racine ≥ 90 % | 60 s (disque 10 s) |
 | Uptime | `/proc/uptime`, affiché en minutes ou `hMM` | 5 s |
 | Température | toutes les températures normales, triées | 10 s |
 
@@ -137,6 +137,12 @@ appliqué immédiatement à la barre et enregistré dans `moduleOrder`.
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 - Processes shown (processus userland affichés, 1–20 ; 10 par défaut)
 
+**Temperature**
+
+- Green from (défaut 40 °C)
+- Orange from (défaut 50 °C)
+- Red from (défaut 60 °C)
+
 **Timers**
 
 - Refresh (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
@@ -186,6 +192,9 @@ Exemple d'entrée :
   "refreshInterval": 1,
   "processInterval": 5,
   "maxProcesses": 10,
+  "tempWarm": 40,
+  "tempHot": 50,
+  "tempCritical": 60,
   "moduleOrder": [
     "uptime", "cpu", "load", "gpu", "memory", "swap",
     "disk", "net", "temp", "battery", "alerts"
@@ -241,20 +250,22 @@ Le survol d'un module affiche une infobulle contextuelle :
   être aberrant. Sans route par défaut (uniquement `lo`), une icône réseau
   barrée rouge et `--` remplacent les deux débits. Extended data complète la
   ligne `interface` avec l'adresse LAN (`ip -4`) et l'adresse publique
-  (`curl`)
-  (`wlan0 · 192.168.50.148 · 90.29.68.78`), puis ajoute le SSID (via
-  NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
-  niveau du signal (via `/proc/net/wireless`) quand la liaison est sans fil :
-  `MaisonDuRuet · 5500 MHz · -67 dBm` ;
+  (`curl`) : `wlan0 · 192.168.50.148 · 90.29.68.78`. Le titre n'utilise
+  l'icône Wi-Fi que si l'interface portant la route par défaut est sans fil ;
+  dans ce cas il ajoute aussi le SSID (via NetworkManager), la fréquence
+  associée (`iw`, par ex. `5500 MHz`) et le niveau du signal (via
+  `/proc/net/wireless`) : `MaisonDuRuet · 5500 MHz · -67 dBm` ;
 - **Temperature** : le tooltip s'intitule `SENSORS`. Une section
   `temperatures` liste toutes les mesures normales, triées de la plus élevée à
   la plus basse, avec le nom du capteur entre parenthèses ; la barre affiche
   la plus élevée. Les capteurs étiquetés gardent leur libellé, les capteurs
   hwmon sans libellé affichent seulement le nom du périphérique
   (`macsmc_battery`, `tas2764`), et les mesures qui partagent un nom sont
-  fusionnées en gardant la plus chaude. L'icône de la barre suit le niveau
-  (seuils sur la valeur arrondie affichée) : flocon sous 40 °C, thermomètre de
-  40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C. Une section
+  fusionnées en gardant la plus chaude. L'icône et la valeur de la barre
+  suivent le niveau (seuils sur la valeur arrondie affichée) ; avec les
+  valeurs par défaut : flocon sous 40 °C, thermomètre de 40 à 49 °C, chaleur
+  de 50 à 59 °C, alerte à partir de 60 °C. Les trois seuils sont réglables
+  dans Settings → Temperature. Une section
   `fans` liste chaque ventilateur hwmon avec sa vitesse en rpm
   (`Fan 1  0 rpm`), y compris les ventilateurs à l'arrêt à 0 ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge.
@@ -296,13 +307,15 @@ valeur arrondie affichée :
 | Module | Normale | Verte | Orange | Rouge |
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
-| Disque | < 21 % | 21–32 % | 33–65 % | ≥ 66 % |
+| Disque | < 21 % | 21–32 % | 33–89 % | ≥ 90 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Réseau | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Batterie | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
-| Températures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
+| Températures (défauts) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-Le LOAD n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente
+Les seuils de température sont des défauts ; les trois curseurs de Settings →
+Temperature règlent les limites verte, orange et rouge. Le LOAD n'est pas
+plafonné : il peut dépasser 100 % lorsque la file d'attente
 est plus longue que le nombre de CPU. La batterie suit une logique inversée,
 plus la valeur est basse, plus la couleur est alarmante. Les débits réseau
 descendant et montant sont colorés indépendamment.
@@ -345,12 +358,16 @@ Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
 
 - les unités systemd en état `failed`, côté système et utilisateur (icône
   rouge) ;
-- les zombies de plus de **60 s** (icône orange).
+- les zombies de plus de **60 s** (icône orange) ;
+- la racine à **90 % ou plus** (icône rouge), contrôlée avec le module disque
+  toutes les 10 s.
 
 Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
 compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
 en échec sous un titre `systemd` centré en minuscules (icône serveur), puis
-`systemd --user` (icône utilisateur), puis `proc zombie` (icône fantôme) ; une ligne vide sépare les sections. Avec
+`systemd --user` (icône utilisateur), puis `proc zombie` (icône fantôme) et
+`disk` (icône disque) quand la racine est ≥ 90 % ; une ligne vide sépare les
+sections. Avec
 **Colors** désactivé, l'icône reprend la couleur normale de la barre. Le
 réglage Alerts dans Settings a une infobulle au survol qui explique ce que le
 module signale.

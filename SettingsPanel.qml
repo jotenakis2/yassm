@@ -696,6 +696,204 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
+                    text: "TEMPERATURE"
+                    foreground: ShellColor.popups.text
+                    fontFamily: Style.font.family
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(40)
+                    spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
+                    HoverHandler {
+                        id: tempWarmHover
+                    }
+
+                    PanelToolTip {
+                        visible: tempWarmHover.hovered
+                        text: "Temperature where the value and icon turn green, in °C.\nKept below the orange threshold."
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        text: "Green from (°C)"
+                        palette.windowText: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    Text {
+                        Layout.preferredWidth: Style.space(28)
+                        Layout.alignment: Qt.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: root.hostWidget ? String(root.hostWidget.temperatureWarm) : "40"
+                        color: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    PanelSlider {
+                        Layout.preferredWidth: Style.space(160)
+                        Layout.alignment: Qt.AlignVCenter
+                        bar: root.hostBar
+                        minimum: 20
+                        maximum: 80
+                        step: 1
+                        integer: true
+                        value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
+
+                        onReleased: function (value) {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(40)
+                    spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
+                    HoverHandler {
+                        id: tempHotHover
+                    }
+
+                    PanelToolTip {
+                        visible: tempHotHover.hovered
+                        text: "Temperature where the value and icon turn orange, in °C.\nKept between the green and red thresholds."
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        text: "Orange from (°C)"
+                        palette.windowText: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    Text {
+                        Layout.preferredWidth: Style.space(28)
+                        Layout.alignment: Qt.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: root.hostWidget ? String(root.hostWidget.temperatureHot) : "50"
+                        color: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    PanelSlider {
+                        Layout.preferredWidth: Style.space(160)
+                        Layout.alignment: Qt.AlignVCenter
+                        bar: root.hostBar
+                        minimum: 21
+                        maximum: 100
+                        step: 1
+                        integer: true
+                        value: root.hostWidget ? root.hostWidget.temperatureHot : 50
+
+                        onReleased: function (value) {
+                            if (root.hostWidget) {
+                                const low = root.hostWidget.temperatureWarm + 1;
+                                const high = root.hostWidget.temperatureCritical - 1;
+                                root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Style.space(40)
+                    spacing: Style.space(8)
+
+                    WheelHandler {
+                        acceptedDevices: PointerDevice.Mouse
+
+                        onWheel: function (event) {
+                            root.scrollPanel(event.angleDelta.y);
+                            event.accepted = true;
+                        }
+                    }
+
+                    HoverHandler {
+                        id: tempCriticalHover
+                    }
+
+                    PanelToolTip {
+                        visible: tempCriticalHover.hovered
+                        text: "Temperature where the value and icon turn red, in °C.\nKept above the orange threshold."
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        text: "Red from (°C)"
+                        palette.windowText: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    Text {
+                        Layout.preferredWidth: Style.space(28)
+                        Layout.alignment: Qt.AlignVCenter
+                        horizontalAlignment: Text.AlignRight
+                        text: root.hostWidget ? String(root.hostWidget.temperatureCritical) : "60"
+                        color: ShellColor.popups.text
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+                    }
+
+                    PanelSlider {
+                        Layout.preferredWidth: Style.space(160)
+                        Layout.alignment: Qt.AlignVCenter
+                        bar: root.hostBar
+                        minimum: 22
+                        maximum: 120
+                        step: 1
+                        integer: true
+                        value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
+
+                        onReleased: function (value) {
+                            if (root.hostWidget) {
+                                root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Style.space(12)
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
+                }
+
+                PanelSectionHeader {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Style.space(10)
+                    Layout.bottomMargin: Style.space(2)
                     text: "TIMERS"
                     foreground: ShellColor.popups.text
                     fontFamily: Style.font.family

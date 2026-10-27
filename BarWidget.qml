@@ -122,6 +122,13 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(2, Math.min(10, value)) : 5;
     }
 
+    // Temperature thresholds are user-tunable: machines differ by tens of
+    // degrees. Values are normalised so an inconsistent shell.json cannot
+    // invert the order.
+    readonly property int temperatureWarm: Math.min(120, Math.max(0, Math.round(Number(setting("tempWarm", 40)) || 40)))
+    readonly property int temperatureHot: Math.max(temperatureWarm + 1, Math.min(130, Math.round(Number(setting("tempHot", 50)) || 50)))
+    readonly property int temperatureCritical: Math.max(temperatureHot + 1, Math.min(140, Math.round(Number(setting("tempCritical", 60)) || 60)))
+
     readonly property int maxProcesses: {
         const value = Math.round(Number(setting("maxProcesses", 10)));
         return Number.isFinite(value) ? Math.max(1, Math.min(20, value)) : 10;
@@ -403,7 +410,7 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "alerts") {
-            return metrics.hasSystemFailure ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
+            return metrics.hasSystemFailure || metrics.diskAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
 
         if (key === "netOffline") {
@@ -495,7 +502,7 @@ BarWidget {
             return Yassm.ThemePalette.green;
         }
 
-        if (value < 66) {
+        if (value < 90) {
             return Yassm.ThemePalette.orange;
         }
 
@@ -591,15 +598,15 @@ BarWidget {
             return iconTemp;
         }
 
-        if (value < 40) {
+        if (value < root.temperatureWarm) {
             return iconTempCool;
         }
 
-        if (value < 50) {
+        if (value < root.temperatureHot) {
             return iconTemp;
         }
 
-        if (value < 60) {
+        if (value < root.temperatureCritical) {
             return iconTempWarm;
         }
 
@@ -607,15 +614,15 @@ BarWidget {
     }
 
     function temperatureColor(value) {
-        if (!Number.isFinite(value) || value < 40) {
+        if (!Number.isFinite(value) || value < root.temperatureWarm) {
             return button.foreground;
         }
 
-        if (value < 50) {
+        if (value < root.temperatureHot) {
             return Yassm.ThemePalette.green;
         }
 
-        if (value < 60) {
+        if (value < root.temperatureCritical) {
             return Yassm.ThemePalette.orange;
         }
 
@@ -1501,6 +1508,15 @@ BarWidget {
                 }
             }
 
+            if (metrics.diskAlert) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.centeredMark + root.iconDisk + " disk");
+                lines.push("/ " + Math.round(metrics.diskPercent) + "%");
+            }
+
             if (lines.length === 0) {
                 lines.push("No alerts");
             }
@@ -1726,6 +1742,9 @@ BarWidget {
         entry.processInterval = root.processInterval;
         entry.maxProcesses = root.maxProcesses;
         entry.moduleOrder = root.moduleOrder;
+        entry.tempWarm = root.temperatureWarm;
+        entry.tempHot = root.temperatureHot;
+        entry.tempCritical = root.temperatureCritical;
         entry[name] = value;
 
         root.settings = entry;

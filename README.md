@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.22.6
+Version 1.23.0
 
 **English** | [Français](README-fr.md)
 
@@ -35,7 +35,7 @@ More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 | Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | 10 s |
 | Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
-| Alerts | systemd failed units + zombies older than 60 s | 60 s |
+| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 90 % | 60 s (disk 10 s) |
 | Uptime | `/proc/uptime`, shown as minutes or `hMM` | 5 s |
 | Temperature | all normal temperatures, sorted | 10 s |
 
@@ -135,6 +135,12 @@ immediately and saved in `moduleOrder`.
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 - Processes shown (userland processes in tooltips, 1–20; default 10)
 
+**Temperature**
+
+- Green from (default 40 °C)
+- Orange from (default 50 °C)
+- Red from (default 60 °C)
+
 **Timers**
 
 - Refresh (metrics sampling interval, 1–5 s; default 1)
@@ -184,6 +190,9 @@ Example entry:
   "refreshInterval": 1,
   "processInterval": 5,
   "maxProcesses": 10,
+  "tempWarm": 40,
+  "tempHot": 50,
+  "tempCritical": 60,
   "moduleOrder": [
     "uptime", "cpu", "load", "gpu", "memory", "swap",
     "disk", "net", "temp", "battery", "alerts"
@@ -237,19 +246,20 @@ Hovering a module shows a contextual tooltip:
   used because it can be bogus. Without a default route (loopback only), a red
   crossed-network icon and `--` replace both rates. Extended data completes
   the `interface` line with the LAN address (`ip -4`) and the public address
-  (`curl`)
-  (`wlan0 · 192.168.50.148 · 90.29.68.78`), then adds the SSID (from
-  NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`) and the
-  signal level (from `/proc/net/wireless`) when the link is wireless:
-  `MaisonDuRuet · 5500 MHz · -67 dBm`;
+  (`curl`): `wlan0 · 192.168.50.148 · 90.29.68.78`. The heading uses the
+  Wi-Fi icon only when the interface carrying the default route is wireless;
+  in that case it also adds the SSID (from NetworkManager), the associated
+  frequency (`iw`, e.g. `5500 MHz`) and the signal level (from
+  `/proc/net/wireless`): `MaisonDuRuet · 5500 MHz · -67 dBm`;
 - **Temperature**: the tooltip is titled `SENSORS`. A `temperatures` section
   lists every normal reading, sorted from highest to lowest, with the sensor
   name in parentheses; the bar shows the highest one. Labelled sensors keep
   their label, unlabeled hwmon sensors show the device name only
   (`macsmc_battery`, `tas2764`), and readings sharing a name are merged,
-  keeping the hottest. The bar icon follows the level (thresholds on the
-  rounded displayed value): snowflake below 40 °C, thermometer from 40 to
-  49 °C, heat from 50 to 59 °C, alert from 60 °C. A `fans` section lists every
+  keeping the hottest. The bar icon and value follow the level (thresholds on
+  the rounded displayed value); with the defaults: snowflake below 40 °C,
+  thermometer from 40 to 49 °C, heat from 50 to 59 °C, alert from 60 °C. All
+  three thresholds are configurable in Settings → Temperature. A `fans` section lists every
   hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
   0;
 - **Battery**: percentage, state, time remaining or time to full. Extended
@@ -293,11 +303,11 @@ value:
 | Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
-| Disk | < 21 % | 21–32 % | 33–65 % | ≥ 66 % |
+| Disk | < 21 % | 21–32 % | 33–89 % | ≥ 90 % |
 | Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
 | Network | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
 | Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
-| Temperatures | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
+| Temperatures (defaults) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 Load is not capped: it can exceed 100 % when the run queue is longer than the
 CPU count. Battery uses inverted logic: the lower the value, the more alarming
@@ -309,7 +319,9 @@ as soon as the machine is on mains power (charging or held at a charge
 threshold), the icon turns theme blue while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
-The **Colors** toggle disables all these colors: values and the blue
+The temperature thresholds are defaults; the three sliders in Settings →
+Temperature change the green, orange and red limits. The **Colors** toggle
+disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).
 
@@ -339,12 +351,15 @@ enabled, `alerts.sh` runs every 60 s and reports:
 
 - systemd units in the `failed` state, for the system and user managers
   (red icon);
-- zombies older than **60 s** (orange icon).
+- zombies older than **60 s** (orange icon);
+- the root filesystem at **90 % or more** (red icon), checked with the disk
+  module every 10 s.
 
 It appears at the far right, after Battery, with an icon only (no counter),
 and only while at least one alert exists. The tooltip lists the failed units
 under a centered lowercase `systemd` heading (server icon), then
-`systemd --user` (user icon), then `proc zombie` (ghost icon); a blank line separates the sections. With
+`systemd --user` (user icon), then `proc zombie` (ghost icon) and `disk`
+  (disk icon) when the root is ≥ 90 %; a blank line separates the sections. With
 **Colors** disabled the icon uses the normal bar color. The Alerts toggle in
 Settings has a hover tooltip explaining what the module reports.
 

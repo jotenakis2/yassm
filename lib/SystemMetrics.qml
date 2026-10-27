@@ -256,7 +256,8 @@ Singleton {
     property var zombieAlerts: []
     readonly property bool hasSystemFailure: failedSystemUnits.length > 0 || failedUserUnits.length > 0
     readonly property bool hasZombies: zombieAlerts.length > 0
-    readonly property bool hasAlerts: hasSystemFailure || hasZombies
+    readonly property bool diskAlert: Math.round(diskPercent) >= 90
+    readonly property bool hasAlerts: hasSystemFailure || hasZombies || diskAlert
 
     // Quickshell models are untyped from qmllint's point of view; keep the
     // single "values" access here so only one known warning remains.
