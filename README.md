@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.20.0
+Version 1.20.1
 
 **English** | [Français](README-fr.md)
 
@@ -225,8 +225,9 @@ Hovering a module shows a contextual tooltip:
   right-aligned per column, sampled while the tooltip is open;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
   the same duration with a space (`3h 42m`) and the distribution installation
-  date (`installed 2026-09-09`, taken from the first `pacman` transaction,
-  falling back to the root filesystem birth time);
+  date (`installed 9 Sep 2026`, taken from the first `pacman` transaction,
+  falling back to the root filesystem birth time; the month name follows the
+  session locale);
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings

@@ -1183,8 +1183,9 @@ Singleton {
     }
 
     function applyInstallDate(content) {
+        // Locale-formatted by install-date.sh (e.g. "9 sept. 2026").
         const value = String(content || "").trim();
-        metrics.installDate = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) ? value : "";
+        metrics.installDate = value !== "" && value.length <= 24 ? value : "";
     }
 
     function applyBatteryCycles(content) {
