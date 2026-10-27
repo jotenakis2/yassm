@@ -1514,7 +1514,7 @@ BarWidget {
                 }
 
                 lines.push(root.centeredMark + root.iconDisk + " disk");
-                lines.push("/ " + Math.round(metrics.diskPercent) + "%");
+                lines.push("Usage / : " + Math.round(metrics.diskPercent) + "%");
             }
 
             if (metrics.memoryAlert) {
@@ -1523,7 +1523,7 @@ BarWidget {
                 }
 
                 lines.push(root.centeredMark + root.iconMemory + " ram");
-                lines.push(Math.round(metrics.memoryPercent) + "% used");
+                lines.push("Usage : " + Math.round(metrics.memoryPercent) + "%");
             }
 
             if (lines.length === 0) {
