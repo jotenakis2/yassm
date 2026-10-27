@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.3
+Version 1.17.0
 
 [English](README.md) | **Français**
 
@@ -164,11 +164,12 @@ Le survol d'un module affiche une infobulle contextuelle :
   **userland** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
-  Extended data ajoute `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
-  comme `free`), la ligne `kernel` (Slab − SReclaimable + piles + tables de
-  pages + vmalloc + percpu ; SReclaimable est déjà dans Buffer/cache, et
-  `vmalloc` et `percpu` peuvent se recouvrir légèrement) et une section
-  `pressure` avec une ligne par fenêtre (`10s`, `60s`, `300s`) ;
+  Extended data ajoute `Shared` (`Shmem` : tmpfs et mappings partagés, déjà
+  comptés dans `Cached`), `Buffer/cache` (`Buffers` + `Cached` +
+  `SReclaimable`, comme `free`), la ligne `kernel` (Slab − SReclaimable +
+  piles + tables de pages + vmalloc + percpu ; SReclaimable est déjà dans
+  Buffer/cache, et `vmalloc` et `percpu` peuvent se recouvrir légèrement) et
+  une section `pressure` avec une ligne par fenêtre (`10s`, `60s`, `300s`) ;
 - **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `zram` (taille

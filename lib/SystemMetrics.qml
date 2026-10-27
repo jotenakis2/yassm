@@ -29,6 +29,7 @@ Singleton {
     property real memoryUsedKb: 0
     property real memoryAvailableKb: 0
     property real memoryBuffCacheKb: 0
+    property real memorySharedKb: 0
     property real kernelTotalKb: 0
 
     property bool hasSwap: false
@@ -343,6 +344,7 @@ Singleton {
         let zswapOriginal = 0;
         let buffers = 0;
         let cached = 0;
+        let shmem = 0;
         let slab = 0;
         let sReclaimable = 0;
         let kernelStack = 0;
@@ -369,6 +371,8 @@ Singleton {
                 buffers = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Cached:")) {
                 cached = Number(lines[i].split(/\s+/)[1]);
+            } else if (lines[i].startsWith("Shmem:")) {
+                shmem = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("Slab:")) {
                 slab = Number(lines[i].split(/\s+/)[1]);
             } else if (lines[i].startsWith("SReclaimable:")) {
@@ -400,6 +404,7 @@ Singleton {
         zswapOriginal = safe(zswapOriginal);
         buffers = safe(buffers);
         cached = safe(cached);
+        shmem = safe(shmem);
         slab = safe(slab);
         sReclaimable = safe(sReclaimable);
         kernelStack = safe(kernelStack);
@@ -423,6 +428,7 @@ Singleton {
         metrics.memoryAvailableKb = availableKb;
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));
         metrics.memoryBuffCacheKb = buffers + cached + sReclaimable;
+        metrics.memorySharedKb = shmem;
         // SReclaimable is already counted in Buffer/cache: exclude it from the
         // kernel line so the two rows do not show the same memory twice.
         metrics.kernelTotalKb = Math.max(0, slab - sReclaimable) + kernelStack + pageTables + vmallocUsed + percpu;

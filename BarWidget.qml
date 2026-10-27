@@ -1083,6 +1083,8 @@ BarWidget {
             const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb)];
 
             if (root.showExtended) {
+                labels.push("Shared");
+                values.push(formatKibAsGib(metrics.memorySharedKb));
                 labels.push("Buffer/cache");
                 values.push(formatKibAsGib(metrics.memoryBuffCacheKb));
             }

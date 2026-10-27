@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.16.3
+Version 1.17.0
 
 **English** | [Français](README-fr.md)
 
@@ -162,7 +162,8 @@ Hovering a module shows a contextual tooltip:
   top **userland** processes by RSS (up to the **Processes shown** value,
   default 10), grouped by name; the list refreshes every 5 s by default
   (2–10 s) while the tooltip stays open; kernel threads are excluded.
-  Extended data adds `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
+  Extended data adds `Shared` (`Shmem`: tmpfs and shared mappings, already
+  counted in `Cached`), `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
   like `free`), the `kernel` line (Slab − SReclaimable + stacks + page tables
   + vmalloc + percpu; SReclaimable is already in Buffer/cache, and vmalloc and
   percpu may slightly overlap) and a `pressure` section with one line per
