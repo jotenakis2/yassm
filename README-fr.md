@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.0
+Version 1.19.1
 
 [English](README.md) | **Français**
 
@@ -226,7 +226,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   `some` uniquement, le noyau ne définissant pas de ligne `full` pour le CPU),
   le CPU noyau (`system` + `irq` + `softirq`, sur la même échelle que les
   processus) et la fréquence de chaque cœur entre parenthèses, alignée par
-  colonne ;
+  colonne, relevée pendant que le tooltip est ouvert ;
 - **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
   affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
@@ -311,30 +311,45 @@ heure, puis `3h42` ; le tooltip affiche `3h 42m`.
 
 ## Performances
 
-Mesure sur deux fenêtres de 5 minutes, machine au repos, écran de veille et
-verrouillage désactivés (Apple M2 Pro, Omarchy 4.0.3, Quickshell 0.3.2) :
+Mesure sur la machine de référence (Apple M2 Pro, 12 cœurs, Omarchy 4.0.3,
+Quickshell 0.3.2), au repos, sans tooltip ouvert. Le CPU est la somme de tous
+les threads de `quickshell` (`/proc/<pid>/task/*/schedstat`) ; chaque état est
+mesuré sur deux fenêtres de 90–120 s, puis moyenné.
 
-| Scénario | CPU `quickshell` (1 cœur) | RSS moyen | Réveils / 5 min |
+| Scénario | CPU `quickshell` (1 cœur) | Réveils / min |
+| --- | --- | --- |
+| Sans YASSM | 0,60 % | ~1 120 |
+| Avec YASSM, refresh 1 s | 1,20 % | ~1 950 |
+| Avec YASSM, refresh 5 s | 0,80 % | ~1 680 |
+| **Surcoût à 1 s** | **+0,60 point** | **+830** |
+| **Surcoût à 5 s** | **+0,20 point** | **+560** |
+
+Soit **0,05 % de la machine 12 cœurs** au refresh par défaut de 1 s (1,20 %
+d'un cœur). Le coût est dominé par la boucle d'une seconde (quatre lectures
+`/proc`, mises à jour de bindings et mise en page du texte), d'où l'effet
+visible du curseur Refresh.
+
+Scripts éphémères (temps CPU par exécution, 10 exécutions ; aucun ne reste
+vivant) :
+
+| Script | CPU / exécution | Fréquence (au repos) | CPU / minute |
 | --- | --- | --- | --- |
-| Sans YASSM | 2,413 % | 736 Mio | 27 385 |
-| Avec YASSM | 2,447 % | 750 Mio | 29 575 |
-| **Surcoût** | **+0,034 point** | **+14 Mio** | **+2 190** |
+| `temperature.sh` (températures + ventilateurs) | 14 ms | 6×/min | 85 ms |
+| `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
+| `findmnt` | 1 ms | 6×/min | 6 ms |
+| `wifi-freq.sh` | 6 ms | 2×/min (sans fil) | 12 ms |
+| Cycles batterie | <1 ms | 1×/10 min | <0,1 ms |
+| **Total (au repos)** | | | **~126 ms/min ≈ 0,21 % d'un cœur** |
 
-Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
+À la demande uniquement : `cpu-freq.sh` (3 ms) tant que le tooltip CPU est
+ouvert, `proc-snapshot.sh` (11 ms) idem, `ps` (~15 ms) tant que le tooltip RAM
+est ouvert, `ip` (3 ms) à chaque ouverture du tooltip NET, et la recherche
+d'IP publique au plus une fois toutes les 5 minutes.
 
-| Script | CPU / exécution | Fréquence | CPU / minute |
-| --- | --- | --- | --- |
-| `temperature.sh` | 11,0 ms | 6×/min | 66 ms |
-| `findmnt` | 2,0 ms | 6×/min | 12 ms |
-| `alerts.sh` | ~110 ms | 1×/min | 110 ms |
-| `cpu-freq.sh` | 3,0 ms | 12×/min | 36 ms |
-| `wifi-freq.sh` | 8,0 ms | 2×/min (sans fil seulement) | 16 ms |
-| Batterie (UPower) | 0 | événementiel | 0 |
-
-**Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
-résident.** YASSM est donc très performant : pas de polling batterie (UPower
-est événementiel), une seule série de mesures partagée entre toutes les barres,
-et la plupart des tooltips ne lancent aucun processus.
+**Surcoût total au repos ≈ 0,8 % d'un cœur (≈0,07 % de la machine), aucun
+processus résident.** L'échantillonnage tient compte des modules : masquer un
+module arrête ses lectures et ses timers, et le processus de fréquence CPU
+n'existe que pendant l'ouverture de son tooltip.
 
 `findmnt` peut rester ~100 ms en attente d'I/O sur un montage réseau
 (`/media/NAS` ici) ; la commande est encadrée par `timeout 5`, donc un montage
@@ -353,21 +368,19 @@ Température, disque, swap/ZRAM et alertes ne sont échantillonnés que si au
 moins une barre a le module correspondant activé ; les masquer arrête
 complètement les scripts. Les ventilateurs sont relevés par le même scan que
 les températures (`temperature.sh`), donc sans processus supplémentaire.
-
 `alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
-zombies), uniquement si Alerts est activé.
+zombies via `ps`) et uniquement si Alerts est activé.
 
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`,
 `/proc/pressure/cpu`), `/proc/diskstats`, `/proc/net/wireless` et
-`/proc/uptime` sont lus toutes les 5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
-chaque cœur toutes les 5 s. Le SSID vient du service NetworkManager via
-D-Bus (ni processus ni interrogation), le niveau du signal est lu dans
-`/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh` demande la fréquence
-associée à `iw` toutes les 30 s, uniquement si la liaison est sans fil. Les
-adresses LAN et publique ne sont récupérées qu'à l'ouverture du tooltip NET en
-mode extended : `ip -4` coûte ~3 ms, et <https://api.ipify.org> n'est
-interrogé qu'une fois toutes les 5 minutes (une requête HTTPS, rien d'autre
-n'est envoyé).
+`/proc/uptime` sont lus toutes les 5 s sans lancer de processus. Le SSID vient
+du service NetworkManager via D-Bus (ni processus ni interrogation), le niveau
+du signal est lu dans `/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh`
+demande la fréquence associée à `iw` toutes les 30 s, uniquement si la liaison
+est sans fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouverture
+du tooltip NET en mode extended : `ip -4` coûte ~3 ms, et
+<https://api.ipify.org> n'est interrogé qu'une fois toutes les 5 minutes (une
+requête HTTPS, rien d'autre n'est envoyé).
 
 ## Vérifications
 

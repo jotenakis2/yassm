@@ -1709,11 +1709,19 @@ BarWidget {
 
     function syncMetricsSubscriptions() {
         const metrics = Yassm.SystemMetrics;
+        const extended = root.showExtended;
 
         metrics.setTemperatureUser(root, root.showTemp);
         metrics.setDiskUser(root, root.showDisk);
         metrics.setSwapUser(root, root.showSwap);
         metrics.setAlertsUser(root, root.showAlerts);
+        metrics.setCpuUser(root, root.showCpu);
+        metrics.setMemoryUser(root, root.showMemory);
+        metrics.setLoadUser(root, root.showLoad);
+        metrics.setNetworkUser(root, root.showNet);
+        metrics.setUptimeUser(root, root.showUptime);
+        metrics.setPressureUser(root, extended && (root.showCpu || root.showMemory || root.showDisk));
+        metrics.setCpuFreqUser(root, extended && root.showCpu && root.hoveredSegment === "cpu");
     }
 
     function releaseMetricsSubscriptions() {
@@ -1723,6 +1731,13 @@ BarWidget {
         metrics.setDiskUser(root, false);
         metrics.setSwapUser(root, false);
         metrics.setAlertsUser(root, false);
+        metrics.setCpuUser(root, false);
+        metrics.setMemoryUser(root, false);
+        metrics.setLoadUser(root, false);
+        metrics.setNetworkUser(root, false);
+        metrics.setUptimeUser(root, false);
+        metrics.setPressureUser(root, false);
+        metrics.setCpuFreqUser(root, false);
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -2207,8 +2222,15 @@ BarWidget {
     }
     Component.onDestruction: root.releaseMetricsSubscriptions()
     onShowGpuChanged: root.detectGpuIfNeeded()
-    onShowTempChanged: Yassm.SystemMetrics.setTemperatureUser(root, root.showTemp)
-    onShowDiskChanged: Yassm.SystemMetrics.setDiskUser(root, root.showDisk)
-    onShowSwapChanged: Yassm.SystemMetrics.setSwapUser(root, root.showSwap)
-    onShowAlertsChanged: Yassm.SystemMetrics.setAlertsUser(root, root.showAlerts)
+    onShowCpuChanged: root.syncMetricsSubscriptions()
+    onShowMemoryChanged: root.syncMetricsSubscriptions()
+    onShowSwapChanged: root.syncMetricsSubscriptions()
+    onShowLoadChanged: root.syncMetricsSubscriptions()
+    onShowNetChanged: root.syncMetricsSubscriptions()
+    onShowTempChanged: root.syncMetricsSubscriptions()
+    onShowDiskChanged: root.syncMetricsSubscriptions()
+    onShowAlertsChanged: root.syncMetricsSubscriptions()
+    onShowUptimeChanged: root.syncMetricsSubscriptions()
+    onShowExtendedChanged: root.syncMetricsSubscriptions()
+    onHoveredSegmentChanged: Yassm.SystemMetrics.setCpuFreqUser(root, root.showExtended && root.showCpu && root.hoveredSegment === "cpu")
 }

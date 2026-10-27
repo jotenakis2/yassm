@@ -64,6 +64,8 @@ normalize_raw() {
 # (for example macsmc-battery). Collect the hwmon device names first, then skip
 # thermal zones that carry the same label.
 declare -A hwmon_keys=()
+declare -A seen_links=()
+device_links=()
 
 for path in /sys/class/hwmon/hwmon*/temp*_input; do
 	[[ -r $path ]] || continue
@@ -84,13 +86,22 @@ for path in /sys/class/hwmon/hwmon*/temp*_input; do
 				hwmon_keys[${device//_/-}]=1
 			fi
 		fi
-		if device=$(readlink -f "$dir/device" 2>/dev/null); then
-			if [[ -n $device ]]; then
-				hwmon_keys[${device##*/}]=1
-			fi
+		if [[ -e $dir/device && -z ${seen_links[$dir/device]:-} ]]; then
+			seen_links[$dir/device]=1
+			device_links+=("$dir/device")
 		fi
 	fi
 done
+
+# Resolving the device symlinks one by one used to fork readlink for every
+# sensor (the bulk of this script's cost). One call handles them all.
+if ((${#device_links[@]} > 0)); then
+	mapfile -t device_targets < <(readlink -f -- "${device_links[@]}" 2>/dev/null || true)
+
+	for device in "${device_targets[@]}"; do
+		[[ -n $device ]] && hwmon_keys[${device##*/}]=1
+	done
+fi
 
 for path in /sys/class/thermal/thermal_zone*/temp; do
 	[[ -r $path ]] || continue

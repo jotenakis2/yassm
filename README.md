@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.0
+Version 1.19.1
 
 **English** | [Français](README-fr.md)
 
@@ -222,7 +222,7 @@ Hovering a module shows a contextual tooltip:
   while the tooltip stays open; kernel threads are excluded. Extended data
   adds a `pressure` section (CPU `some` only, since the kernel defines no
   `full` line for the CPU) and each core frequency in parentheses,
-  right-aligned per column;
+  right-aligned per column, sampled while the tooltip is open;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
   the same duration with a space (`3h 42m`);
 - **GPU**: current percentage.
@@ -306,30 +306,43 @@ It reads `/proc/uptime` every 5 s. The bar shows `42m` below one hour, then
 
 ## Performance
 
-Measured over two 5-minute windows, machine idle, screensaver and locking
-disabled (Apple M2 Pro, Omarchy 4.0.3, Quickshell 0.3.2):
+Measured on the reference machine (Apple M2 Pro, 12 cores, Omarchy 4.0.3,
+Quickshell 0.3.2), idle, no tooltip open. CPU is the sum of every `quickshell`
+thread from `/proc/<pid>/task/*/schedstat`; each state is sampled over two
+90–120 s windows and averaged.
 
-| Scenario | `quickshell` CPU (1 core) | Average RSS | Wakeups / 5 min |
+| Scenario | `quickshell` CPU (1 core) | Wakeups / min |
+| --- | --- | --- |
+| Without YASSM | 0.60 % | ~1,120 |
+| With YASSM, 1 s refresh | 1.20 % | ~1,950 |
+| With YASSM, 5 s refresh | 0.80 % | ~1,680 |
+| **Overhead at 1 s** | **+0.60 points** | **+830** |
+| **Overhead at 5 s** | **+0.20 points** | **+560** |
+
+That is **0.05 % of the whole 12-core machine** at the default 1 s refresh
+(1.20 % of one core). The cost is dominated by the once-a-second update path
+(four `/proc` reads, binding updates, text layout), which is why the Refresh
+slider has such a visible effect.
+
+Short-lived scripts (CPU time per run, 10 runs each; none stays alive):
+
+| Script | CPU / run | Frequency (idle) | CPU / minute |
 | --- | --- | --- | --- |
-| Without YASSM | 2.413 % | 736 MiB | 27,385 |
-| With YASSM | 2.447 % | 750 MiB | 29,575 |
-| **Overhead** | **+0.034 points** | **+14 MiB** | **+2,190** |
+| `temperature.sh` (temperatures + fans) | 14 ms | 6×/min | 85 ms |
+| `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
+| `findmnt` | 1 ms | 6×/min | 6 ms |
+| `wifi-freq.sh` | 6 ms | 2×/min (wireless only) | 12 ms |
+| Battery cycle count | <1 ms | 1×/10 min | <0.1 ms |
+| **Total (idle)** | | | **~126 ms/min ≈ 0.21 % of one core** |
 
-Plus the short-lived scripts (CPU measured over 50 runs):
+On demand only: `cpu-freq.sh` (3 ms) while the CPU tooltip is open,
+`proc-snapshot.sh` (11 ms) while it is open, `ps` (~15 ms) while the RAM
+tooltip is open, `ip` (3 ms) each time the NET tooltip opens, and the public
+IP lookup at most every 5 minutes.
 
-| Script | CPU / run | Frequency | CPU / minute |
-| --- | --- | --- | --- |
-| `temperature.sh` | 11.0 ms | 6×/min | 66 ms |
-| `findmnt` | 2.0 ms | 6×/min | 12 ms |
-| `alerts.sh` | ~110 ms | 1×/min | 110 ms |
-| `cpu-freq.sh` | 3.0 ms | 12×/min | 36 ms |
-| `wifi-freq.sh` | 8.0 ms | 2×/min (wireless only) | 16 ms |
-| Battery (UPower) | 0 | event-driven | 0 |
-
-**Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
-YASSM is therefore very performant: no battery polling (UPower is
-event-driven), a single sampling series shared by every bar, and most tooltips
-launch no process.
+**Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
+process.** Module-aware sampling stops the reads and timers of hidden modules,
+and the CPU frequency process only exists while its tooltip is open.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
 the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
@@ -349,21 +362,18 @@ hover lasts, never in the background.
 Temperature, disk, swap/ZRAM and alerts only run while at least one bar has
 the corresponding module enabled; hiding them stops the scripts entirely.
 Fan speeds travel with the temperature scan (`temperature.sh`), so they cost
-no extra process.
-
-`alerts.sh` runs every 60 s (systemd system/user plus a `/proc` zombie scan),
-only while Alerts is enabled.
+no extra process. `alerts.sh` runs every 60 s (systemd system/user plus a
+`ps` zombie scan) and only while Alerts is enabled.
 
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
 `/proc/diskstats`, `/proc/net/wireless` and `/proc/uptime` are read every 5 s
-without spawning a process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
-The SSID comes from the NetworkManager service over D-Bus (no process, no
-poll); the signal level is read from `/proc/net/wireless` every 5 s, and
-`wifi-freq.sh` asks `iw` for the associated frequency every 30 s while the
-link is wireless only. The LAN and public addresses are only fetched when the
-NET tooltip opens with extended data: `ip -4` costs ~3 ms, and
-<https://api.ipify.org> is queried at most every 5 minutes (one HTTPS request,
-nothing else is sent).
+without spawning a process. The SSID comes from the NetworkManager service
+over D-Bus (no process, no poll); the signal level is read from
+`/proc/net/wireless` every 5 s, and `wifi-freq.sh` asks `iw` for the
+associated frequency every 30 s while the link is wireless only. The LAN and
+public addresses are only fetched when the NET tooltip opens with extended
+data: `ip -4` costs ~3 ms, and <https://api.ipify.org> is queried at most
+every 5 minutes (one HTTPS request, nothing else is sent).
 
 ## Checks
 

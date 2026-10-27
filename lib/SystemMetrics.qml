@@ -82,10 +82,25 @@ Singleton {
     property var diskUsers: []
     property var swapUsers: []
     property var alertsUsers: []
+    property var cpuUsers: []
+    property var memoryUsers: []
+    property var loadUsers: []
+    property var networkUsers: []
+    property var uptimeUsers: []
+    property var pressureUsers: []
+    property var cpuFreqUsers: []
     readonly property bool temperatureEnabled: temperatureUsers.length > 0
     readonly property bool diskEnabled: diskUsers.length > 0
     readonly property bool swapEnabled: swapUsers.length > 0
     readonly property bool alertsEnabled: alertsUsers.length > 0
+    readonly property bool cpuEnabled: cpuUsers.length > 0
+    readonly property bool memoryEnabled: memoryUsers.length > 0
+    readonly property bool loadEnabled: loadUsers.length > 0
+    readonly property bool networkEnabled: networkUsers.length > 0
+    readonly property bool uptimeEnabled: uptimeUsers.length > 0
+    readonly property bool pressureEnabled: pressureUsers.length > 0
+    readonly property bool cpuFreqEnabled: cpuFreqUsers.length > 0
+    readonly property bool fastEnabled: cpuEnabled || memoryEnabled || swapEnabled || loadEnabled || networkEnabled
 
     function withUser(users, widget, enabled) {
         const next = users.filter(function (item) {
@@ -113,6 +128,56 @@ Singleton {
 
     function setAlertsUser(widget, enabled) {
         metrics.alertsUsers = withUser(metrics.alertsUsers, widget, enabled);
+    }
+
+    function setCpuUser(widget, enabled) {
+        metrics.cpuUsers = withUser(metrics.cpuUsers, widget, enabled);
+    }
+
+    function setMemoryUser(widget, enabled) {
+        metrics.memoryUsers = withUser(metrics.memoryUsers, widget, enabled);
+    }
+
+    function setLoadUser(widget, enabled) {
+        metrics.loadUsers = withUser(metrics.loadUsers, widget, enabled);
+    }
+
+    function setNetworkUser(widget, enabled) {
+        const wasEnabled = metrics.networkEnabled;
+
+        metrics.networkUsers = withUser(metrics.networkUsers, widget, enabled);
+
+        // Do not make the bar wait for the next 5 s tick when NET comes back.
+        if (enabled && !wasEnabled) {
+            procNetRoute.reload();
+            procNetIpv6Route.reload();
+        }
+    }
+
+    function setUptimeUser(widget, enabled) {
+        const wasEnabled = metrics.uptimeEnabled;
+
+        metrics.uptimeUsers = withUser(metrics.uptimeUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            procUptime.reload();
+        }
+    }
+
+    function setPressureUser(widget, enabled) {
+        const wasEnabled = metrics.pressureEnabled;
+
+        metrics.pressureUsers = withUser(metrics.pressureUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            memoryPressureFile.reload();
+            ioPressureFile.reload();
+            cpuPressureFile.reload();
+        }
+    }
+
+    function setCpuFreqUser(widget, enabled) {
+        metrics.cpuFreqUsers = withUser(metrics.cpuFreqUsers, widget, enabled);
     }
 
     property string networkInterface: ""
@@ -1266,19 +1331,33 @@ Singleton {
     // the fast loop avoids rebuilding swapDevices every second.
     Timer {
         interval: 5000
-        running: true
+        running: metrics.networkEnabled || metrics.pressureEnabled || metrics.uptimeEnabled || metrics.swapEnabled || metrics.diskEnabled
         repeat: true
         triggeredOnStart: true
 
         onTriggered: {
-            procNetRoute.reload();
-            procNetIpv6Route.reload();
-            memoryPressureFile.reload();
-            ioPressureFile.reload();
-            cpuPressureFile.reload();
-            procWireless.reload();
-            procUptime.reload();
-            zswapEnabledFile.reload();
+            if (metrics.networkEnabled) {
+                procNetRoute.reload();
+                procNetIpv6Route.reload();
+
+                if (metrics.wifiNetwork !== null) {
+                    procWireless.reload();
+                }
+            }
+
+            if (metrics.pressureEnabled) {
+                memoryPressureFile.reload();
+                ioPressureFile.reload();
+                cpuPressureFile.reload();
+            }
+
+            if (metrics.uptimeEnabled) {
+                procUptime.reload();
+            }
+
+            if (metrics.swapEnabled) {
+                zswapEnabledFile.reload();
+            }
 
             if (metrics.diskEnabled) {
                 procDiskStats.reload();
@@ -1307,16 +1386,29 @@ Singleton {
 
     Timer {
         interval: metrics.fastIntervalMs
-        running: true
+        running: metrics.fastEnabled
         repeat: true
+        triggeredOnStart: true
 
         onTriggered: {
             // Parsing happens in onLoaded, never by reading text() right
-            // after reload() (that would return stale data).
-            procStat.reload();
-            procMemInfo.reload();
-            procLoadAvg.reload();
-            procNetDev.reload();
+            // after reload() (that would return stale data). Each file is
+            // only read while a module that consumes it is visible.
+            if (metrics.cpuEnabled || metrics.loadEnabled) {
+                procStat.reload();
+            }
+
+            if (metrics.memoryEnabled || metrics.swapEnabled) {
+                procMemInfo.reload();
+            }
+
+            if (metrics.loadEnabled) {
+                procLoadAvg.reload();
+            }
+
+            if (metrics.networkEnabled) {
+                procNetDev.reload();
+            }
         }
     }
 
@@ -1435,7 +1527,7 @@ Singleton {
 
     Timer {
         interval: 5000
-        running: true
+        running: metrics.cpuFreqEnabled
         repeat: true
         triggeredOnStart: true
 
