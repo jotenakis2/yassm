@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.18.0
+Version 1.19.0
 
 [English](README.md) | **Français**
 
@@ -222,9 +222,11 @@ Le survol d'un module affiche une infobulle contextuelle :
   par défaut), regroupés par nom ; si moins de processus sont actifs, des
   lignes inactives à 0,0 % complètent la liste ; la liste est rafraîchie
   toutes les 5 s par défaut (2–10 s) tant que le tooltip reste ouvert ; les
-  threads noyau sont exclus. Extended data ajoute le CPU noyau (`system` +
-  `irq` + `softirq`, sur la même échelle que les processus) et la fréquence de
-  chaque cœur entre parenthèses, alignée par colonne ;
+  threads noyau sont exclus. Extended data ajoute une section `pressure` (CPU
+  `some` uniquement, le noyau ne définissant pas de ligne `full` pour le CPU),
+  le CPU noyau (`system` + `irq` + `softirq`, sur la même échelle que les
+  processus) et la fréquence de chaque cœur entre parenthèses, alignée par
+  colonne ;
 - **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
   affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
@@ -355,9 +357,9 @@ les températures (`temperature.sh`), donc sans processus supplémentaire.
 `alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
 zombies), uniquement si Alerts est activé.
 
-La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
-`/proc/diskstats`, `/proc/net/wireless` et `/proc/uptime` sont lus toutes les
-5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
+La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`,
+`/proc/pressure/cpu`), `/proc/diskstats`, `/proc/net/wireless` et
+`/proc/uptime` sont lus toutes les 5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
 chaque cœur toutes les 5 s. Le SSID vient du service NetworkManager via
 D-Bus (ni processus ni interrogation), le niveau du signal est lu dans
 `/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh` demande la fréquence

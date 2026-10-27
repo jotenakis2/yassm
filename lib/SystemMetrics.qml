@@ -69,6 +69,9 @@ Singleton {
     property real ioPressure10: 0
     property real ioPressure60: 0
     property real ioPressure300: 0
+    property real cpuPressure10: 0
+    property real cpuPressure60: 0
+    property real cpuPressure300: 0
     property real ioPressureFull10: 0
     property real ioPressureFull60: 0
     property real ioPressureFull300: 0
@@ -998,6 +1001,16 @@ Singleton {
         metrics.memoryPressureFull300 = values.full.avg300;
     }
 
+    function applyCpuPressure(content) {
+        const values = applyPressure(content);
+
+        // CPU pressure only has a "some" line: "full" would mean no task at
+        // all is running, which the kernel does not define.
+        metrics.cpuPressure10 = values.some.avg10;
+        metrics.cpuPressure60 = values.some.avg60;
+        metrics.cpuPressure300 = values.some.avg300;
+    }
+
     function applyIoPressure(content) {
         const values = applyPressure(content);
 
@@ -1147,6 +1160,13 @@ Singleton {
     }
 
     FileView {
+        id: cpuPressureFile
+        path: "/proc/pressure/cpu"
+        printErrors: false
+        onLoaded: metrics.applyCpuPressure(text())
+    }
+
+    FileView {
         id: procDiskStats
         path: "/proc/diskstats"
         onLoaded: metrics.applyDiskIo(text())
@@ -1255,6 +1275,7 @@ Singleton {
             procNetIpv6Route.reload();
             memoryPressureFile.reload();
             ioPressureFile.reload();
+            cpuPressureFile.reload();
             procWireless.reload();
             procUptime.reload();
             zswapEnabledFile.reload();

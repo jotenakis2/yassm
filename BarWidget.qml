@@ -949,6 +949,22 @@ BarWidget {
         return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
+    function singlePressureRows(ten, sixty, threeHundred) {
+        const labels = ["10s", "60s", "300s"];
+        const values = [ten, sixty, threeHundred].map(function (value) {
+            return Number(value || 0).toFixed(1) + "%";
+        });
+        let valueWidth = 4;
+
+        for (let i = 0; i < values.length; i++) {
+            valueWidth = Math.max(valueWidth, values[i].length);
+        }
+
+        return labels.map(function (label, index) {
+            return label.padStart(4) + "  " + values[index].padStart(valueWidth);
+        });
+    }
+
     function pressureRows(someTen, someSixty, someThreeHundred, fullTen, fullSixty, fullThreeHundred) {
         const labels = ["10s", "60s", "300s"];
         const some = [someTen, someSixty, someThreeHundred].map(function (value) {
@@ -1271,6 +1287,17 @@ BarWidget {
                     }
 
                     lines.push(cells.join("     "));
+                }
+            }
+
+            if (root.showExtended) {
+                lines.push("");
+                lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
+
+                const pressure = singlePressureRows(metrics.cpuPressure10, metrics.cpuPressure60, metrics.cpuPressure300);
+
+                for (let i = 0; i < pressure.length; i++) {
+                    lines.push(pressure[i]);
                 }
             }
 

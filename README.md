@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.18.0
+Version 1.19.0
 
 **English** | [Français](README-fr.md)
 
@@ -220,7 +220,9 @@ Hovering a module shows a contextual tooltip:
   grouped by name; when fewer processes are active, idle ones fill the
   remaining rows at 0.0%; the list refreshes every 5 s by default (2–10 s)
   while the tooltip stays open; kernel threads are excluded. Extended data
-  adds each core frequency in parentheses, right-aligned per column;
+  adds a `pressure` section (CPU `some` only, since the kernel defines no
+  `full` line for the CPU) and each core frequency in parentheses,
+  right-aligned per column;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
   the same duration with a space (`3h 42m`);
 - **GPU**: current percentage.
@@ -352,9 +354,9 @@ no extra process.
 `alerts.sh` runs every 60 s (systemd system/user plus a `/proc` zombie scan),
 only while Alerts is enabled.
 
-PSI (`/proc/pressure/memory`, `/proc/pressure/io`), `/proc/diskstats`,
-`/proc/net/wireless` and `/proc/uptime` are read every 5 s without spawning a
-process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
+PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
+`/proc/diskstats`, `/proc/net/wireless` and `/proc/uptime` are read every 5 s
+without spawning a process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
 The SSID comes from the NetworkManager service over D-Bus (no process, no
 poll); the signal level is read from `/proc/net/wireless` every 5 s, and
 `wifi-freq.sh` asks `iw` for the associated frequency every 30 s while the
