@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.1
+Version 1.25.2
 
 [English](README.md) | **Français**
 
@@ -229,9 +229,10 @@ casse jamais la barre.
 
 Le survol d'un module affiche une infobulle contextuelle :
 
-- **Load** : charge réelle non normalisée sur 1, 5 et 15 minutes, en colonnes
-  alignées. L'icône change d'inclinaison selon la charge : aiguille basse
-  jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
+- **Load** : charge réelle sur 1, 5 et 15 minutes, suivie du pourcentage
+  normalisé par CPU entre parenthèses, en colonnes fixes (`1.43 ( 12%)`).
+  L'icône change d'inclinaison selon la charge : aiguille basse jusqu'à 50 %,
+  médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
   `Used` et `Available`. Un titre `proc` centré introduit le top des processus
   **espace-utilisateurs** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),

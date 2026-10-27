@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.1
+Version 1.25.2
 
 **English** | [Français](README-fr.md)
 
@@ -223,9 +223,10 @@ an old `shell.json` never breaks the bar.
 
 Hovering a module shows a contextual tooltip:
 
-- **Load**: raw, non-normalized 1, 5 and 15 minute load, in aligned columns.
-  The icon tilts with the load: needle low up to 50 %, medium from 51 to 90 %,
-  high above that;
+- **Load**: raw 1, 5 and 15 minute load, followed by the CPU-normalised
+  percentage in parentheses, in fixed columns (`1.43 ( 12%)`). The icon tilts
+  with the load: needle low up to 50 %, medium from 51 to 90 %, high above
+  that;
 - **RAM**: the tooltip opens with a centered `data` heading, then shows
   `Total`, `Used` and `Available`. A centered `proc` heading introduces the
   top **userland** processes by RSS (up to the **Processes shown** value,

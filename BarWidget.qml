@@ -1193,7 +1193,19 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "load") {
-            return tooltipBlock(Yassm.I18n.t("title.load"), " 1 min " + formatLoad(metrics.load1) + "\n" + " 5 min " + formatLoad(metrics.load5) + "\n" + "15 min " + formatLoad(metrics.load15));
+            // Load average on the left, CPU-normalised percentage on the
+            // right. Both columns are fixed so the tooltip never jitters.
+            const loads = [metrics.load1, metrics.load5, metrics.load15];
+            const labels = [" 1 min ", " 5 min ", "15 min "];
+            const cores = Math.max(1, Number(metrics.nproc) || 1);
+            const lines = [];
+
+            for (let i = 0; i < loads.length; i++) {
+                const percent = Math.round(100 * Number(loads[i]) / cores);
+                lines.push(labels[i] + formatLoad(loads[i]) + " (" + String(percent).padStart(3, " ") + "%)");
+            }
+
+            return tooltipBlock(Yassm.I18n.t("title.load"), lines.join("\n"));
         }
 
         if (key === "memory") {

@@ -1073,32 +1073,6 @@ PanelWindow {
                             }
                         }
                     }
-
-                    // In-panel tooltip: a plain rectangle so it stays inside
-                    // the window and never gets stuck like a popup bubble.
-                    Rectangle {
-                        id: tempTip
-
-                        x: Style.space(4)
-                        y: -height - Style.space(2)
-                        width: tempTipText.implicitWidth + Style.space(16)
-                        height: tempTipText.implicitHeight + Style.space(10)
-                        visible: tempBlock.tipText !== ""
-                        radius: Style.cornerRadius
-                        color: ShellColor.tooltip.background
-                        border.width: 1
-                        border.color: ShellColor.tooltip.border
-
-                        Text {
-                            id: tempTipText
-
-                            anchors.centerIn: parent
-                            text: tempBlock.tipText
-                            color: ShellColor.tooltip.text
-                            font.family: Style.font.family
-                            font.pixelSize: Style.font.bodySmall
-                        }
-                    }
                 }
                 Rectangle {
                     Layout.fillWidth: true
@@ -1271,6 +1245,46 @@ PanelWindow {
                         }
                     }
                 }
+            }
+        }
+
+        // Threshold labels tooltip: drawn above the Flickable so the panel
+        // edge can never clip it. Full content width, text wraps if needed.
+        Rectangle {
+            id: tempTip
+
+            readonly property int anchorY: tempBlock.mapToItem(settingsPanel, 0, 0).y
+
+            x: root.panelPadding
+            width: settingsPanel.width - root.panelPadding * 2
+            height: tempTipText.implicitHeight + Style.space(10)
+            y: {
+                const above = tempTip.anchorY - tempTip.height - Style.space(2);
+
+                if (above >= root.panelPadding) {
+                    return above;
+                }
+
+                return Math.min(tempTip.anchorY + tempBlock.height + Style.space(2), settingsPanel.height - tempTip.height - root.panelPadding);
+            }
+            visible: tempBlock.tipText !== "" && tempBlock.visible
+            z: 3
+            radius: Style.cornerRadius
+            color: ShellColor.tooltip.background
+            border.width: 1
+            border.color: ShellColor.tooltip.border
+
+            Text {
+                id: tempTipText
+
+                x: Style.space(8)
+                y: Style.space(5)
+                width: parent.width - Style.space(16)
+                text: tempBlock.tipText
+                color: ShellColor.tooltip.text
+                font.family: Style.font.family
+                font.pixelSize: Style.font.bodySmall
+                wrapMode: Text.WordWrap
             }
         }
 
