@@ -950,15 +950,15 @@ BarWidget {
     function batteryStateLabel(status) {
         switch (status) {
         case "Charging":
-            return "Charging";
+            return Yassm.I18n.t("battery.charging");
         case "Discharging":
-            return "Discharging";
+            return Yassm.I18n.t("battery.discharging");
         case "Full":
-            return "Fully charged";
+            return Yassm.I18n.t("battery.full");
         case "Not charging":
-            return "Not charging";
+            return Yassm.I18n.t("battery.not_charging");
         default:
-            return status || "Unknown";
+            return status || Yassm.I18n.t("battery.unknown");
         }
     }
 
@@ -1015,7 +1015,7 @@ BarWidget {
     }
 
     function formatInstallAge(days) {
-        return days === 1 ? "1 day" : days + " days";
+        return days + " " + Yassm.I18n.plural("uptime.days", days);
     }
 
     // Installation age and date belong to the extended data: they are static
@@ -1023,8 +1023,8 @@ BarWidget {
     function installRows(bootLabel) {
         const metrics = Yassm.SystemMetrics;
         const ageDays = root.installAgeDays();
-        const ageLabel = "Time since installation";
-        const dateLabel = "Installation date";
+        const ageLabel = Yassm.I18n.t("uptime.age");
+        const dateLabel = Yassm.I18n.t("uptime.date");
         const width = Math.max(bootLabel.length, ageLabel.length, dateLabel.length);
         const lines = [];
 
@@ -1032,7 +1032,7 @@ BarWidget {
             lines.push(ageLabel.padEnd(width) + " : " + root.formatInstallAge(ageDays));
         }
 
-        lines.push(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : "unknown"));
+        lines.push(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : Yassm.I18n.t("common.unknown")));
 
         return {
             width: width,
@@ -1115,7 +1115,7 @@ BarWidget {
         const mounts = Yassm.SystemMetrics.mounts;
 
         if (!mounts || mounts.length === 0) {
-            return tooltipBlock("DISK", "Unavailable");
+            return tooltipBlock(Yassm.I18n.t("title.disk"), Yassm.I18n.t("common.unavailable"));
         }
 
         let targetWidth = 0;
@@ -1142,7 +1142,7 @@ BarWidget {
             });
         }
 
-        const lines = [root.centeredMark + root.iconDisk + " usage"];
+        const lines = [root.centeredMark + root.iconDisk + " " + Yassm.I18n.t("head.usage")];
 
         for (let i = 0; i < rows.length; i++) {
             lines.push(rows[i].target.padEnd(targetWidth) + "  " + rows[i].used.padStart(usedWidth) + " / " + rows[i].total.padStart(totalWidth) + " " + rows[i].percent.padStart(percentWidth));
@@ -1152,10 +1152,10 @@ BarWidget {
 
         if (root.showExtended) {
             lines.push("");
-            lines.push(root.centeredMark + root.iconSwap + " io");
+            lines.push(root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"));
             lines.push("↓ " + formatRateLong(metrics.diskReadKib) + "  ↑ " + formatRateLong(metrics.diskWriteKib));
             lines.push("");
-            lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
+            lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
             const pressure = pressureRows(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300, metrics.ioPressureFull10, metrics.ioPressureFull60, metrics.ioPressureFull300);
 
@@ -1164,7 +1164,7 @@ BarWidget {
             }
         }
 
-        return tooltipBlock("DISK", lines.join("\n"));
+        return tooltipBlock(Yassm.I18n.t("title.disk"), lines.join("\n"));
     }
 
     function syncTooltipModel() {
@@ -1193,17 +1193,17 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "load") {
-            return tooltipBlock("LOAD", " 1 min " + formatLoad(metrics.load1) + "\n" + " 5 min " + formatLoad(metrics.load5) + "\n" + "15 min " + formatLoad(metrics.load15));
+            return tooltipBlock(Yassm.I18n.t("title.load"), " 1 min " + formatLoad(metrics.load1) + "\n" + " 5 min " + formatLoad(metrics.load5) + "\n" + "15 min " + formatLoad(metrics.load15));
         }
 
         if (key === "memory") {
-            const labels = ["Total", "Used", "Available"];
+            const labels = [Yassm.I18n.t("row.total"), Yassm.I18n.t("row.used"), Yassm.I18n.t("row.available")];
             const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb)];
 
             if (root.showExtended) {
-                labels.push("Shared");
+                labels.push(Yassm.I18n.t("row.shared"));
                 values.push(formatKibAsGib(metrics.memorySharedKb));
-                labels.push("Buffer/cache");
+                labels.push(Yassm.I18n.t("row.buffcache"));
                 values.push(formatKibAsGib(metrics.memoryBuffCacheKb));
             }
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
@@ -1215,7 +1215,7 @@ BarWidget {
             const valueWidth = 10;
 
             const lines = [];
-            lines.push(root.centeredMark + root.iconMemory + " data");
+            lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.data"));
 
             for (let i = 0; i < labels.length; i++) {
                 lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth));
@@ -1223,7 +1223,7 @@ BarWidget {
 
             if (root.showExtended) {
                 lines.push("");
-                lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
+                lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
                 const pressure = pressureRows(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300, metrics.memoryPressureFull10, metrics.memoryPressureFull60, metrics.memoryPressureFull300);
 
@@ -1234,18 +1234,18 @@ BarWidget {
 
             if (showKernel || root.processMemory.length > 0) {
                 lines.push("");
-                lines.push(root.centeredMark + root.iconProc + " proc");
+                lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
             }
 
             if (showKernel) {
-                lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                lines.push(root.boldMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
             }
 
             if (root.processMemory.length > 0) {
                 appendTableRows(lines, table, nameWidth, valueWidth);
             }
 
-            return tooltipBlock("RAM", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.ram"), lines.join("\n"));
         }
 
         if (key === "swap") {
@@ -1276,7 +1276,7 @@ BarWidget {
                     });
                 }
 
-                lines.push(root.centeredMark + root.iconSwap + " devices");
+                lines.push(root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.devices"));
 
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
@@ -1288,7 +1288,7 @@ BarWidget {
             }
 
             if (!root.showExtended) {
-                return tooltipBlock("SWAP", lines.join("\n"));
+                return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
             }
 
             const zramEntries = [];
@@ -1311,13 +1311,13 @@ BarWidget {
 
                 zramEntries.push({
                     name: base,
-                    text: formatKib(stats.compressedKb) + " compressed -> " + formatKib(stats.originalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + ", " + formatKib(stats.memKb) + " RAM"
+                    text: Yassm.I18n.tf("swap.compressed", [formatKib(stats.compressedKb), formatKib(stats.originalKb)]) + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)])
                 });
             }
 
             if (zramEntries.length > 0) {
                 lines.push("");
-                lines.push(root.centeredMark + root.iconMemory + " zram");
+                lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.zram"));
 
                 for (let i = 0; i < zramEntries.length; i++) {
                     // With a single zram the name adds nothing; keep it only
@@ -1332,8 +1332,8 @@ BarWidget {
                 const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
 
                 lines.push("");
-                lines.push(root.centeredMark + root.iconCompress + " zswap");
-                lines.push(formatKib(metrics.zswapCompressedKb) + " compressed -> " + formatKib(metrics.zswapOriginalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
+                lines.push(root.centeredMark + root.iconCompress + " " + Yassm.I18n.t("head.zswap"));
+                lines.push(Yassm.I18n.tf("swap.compressed", [formatKib(metrics.zswapCompressedKb), formatKib(metrics.zswapOriginalKb)]) + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 
             return tooltipBlock("SWAP", lines.join("\n"));
@@ -1348,7 +1348,7 @@ BarWidget {
             const lines = [];
 
             if (cores.length > 0) {
-                lines.push(root.centeredMark + root.iconCpu + " cores");
+                lines.push(root.centeredMark + root.iconCpu + " " + Yassm.I18n.t("head.cores"));
 
                 const frequencies = root.showExtended ? (metrics.coreFreqMhz || []) : [];
                 let frequencyWidth = 0;
@@ -1384,7 +1384,7 @@ BarWidget {
 
             if (root.showExtended) {
                 lines.push("");
-                lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
+                lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
                 const pressure = singlePressureRows(metrics.cpuPressure10, metrics.cpuPressure60, metrics.cpuPressure300);
 
@@ -1404,10 +1404,10 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconProc + " proc");
+                lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
 
                 if (showKernel) {
-                    lines.push(root.boldMark + "kernel".padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                    lines.push(root.boldMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
                 }
 
                 if (root.processCpu.length > 0) {
@@ -1415,18 +1415,18 @@ BarWidget {
                 }
             }
 
-            return tooltipBlock("CPU", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.cpu"), lines.join("\n"));
         }
 
         if (key === "gpu") {
-            return tooltipBlock("GPU", gpu === null ? "Unavailable" : Math.round(gpu) + "%");
+            return tooltipBlock(Yassm.I18n.t("title.gpu"), gpu === null ? Yassm.I18n.t("common.unavailable") : Math.round(gpu) + "%");
         }
 
         if (key === "net" || key === "netDown" || key === "netUp" || key === "netOffline") {
             const metrics = Yassm.SystemMetrics;
 
             if (!metrics.hasNetwork) {
-                return tooltipBlock("NET", "Unavailable");
+                return tooltipBlock(Yassm.I18n.t("title.net"), Yassm.I18n.t("common.unavailable"));
             }
 
             const downRate = formatRateLong(metrics.networkRxKib);
@@ -1438,10 +1438,10 @@ BarWidget {
             const rateWidth = 12;
             const sessionWidth = 11;
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
-            const lines = [root.centeredMark + root.iconSwap + " io", "↓ " + downRate.padEnd(rateWidth) + "  (session " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (session " + upSession.padStart(sessionWidth) + ")"];
+            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + downRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + upSession.padStart(sessionWidth) + ")"];
 
             lines.push("");
-            lines.push(root.centeredMark + ifaceIcon + " interface");
+            lines.push(root.centeredMark + ifaceIcon + " " + Yassm.I18n.t("head.interface"));
 
             let ifaceLine = metrics.networkInterface;
 
@@ -1456,7 +1456,7 @@ BarWidget {
             lines.push(ifaceLine);
 
             if (root.showExtended && metrics.activeWifi) {
-                let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : "hidden SSID";
+                let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : Yassm.I18n.t("common.hidden_ssid");
 
                 if (metrics.wifiFreqMhz > 0) {
                     wifi += " · " + Math.round(metrics.wifiFreqMhz) + " MHz";
@@ -1469,20 +1469,20 @@ BarWidget {
                 lines.push(wifi);
             }
 
-            return tooltipBlock("NET", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.net"), lines.join("\n"));
         }
 
         if (key === "battery") {
             if (!metrics.hasBattery) {
-                return tooltipBlock("BATTERY", "Unavailable");
+                return tooltipBlock(Yassm.I18n.t("title.battery"), Yassm.I18n.t("common.unavailable"));
             }
 
             const lines = [Math.round(metrics.batteryPercent) + "% (" + batteryStateLabel(metrics.batteryStatus) + ")"];
 
             if (metrics.batteryStatus === "Charging" && metrics.batteryTimeToFull > 0) {
-                lines.push(formatDuration(metrics.batteryTimeToFull) + " to full");
+                lines.push(Yassm.I18n.tf("battery.to_full", [formatDuration(metrics.batteryTimeToFull)]));
             } else if (metrics.batteryTimeToEmpty > 0) {
-                lines.push(formatDuration(metrics.batteryTimeToEmpty) + " remaining");
+                lines.push(Yassm.I18n.tf("battery.remaining", [formatDuration(metrics.batteryTimeToEmpty)]));
             }
 
             if (root.showExtended && Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
@@ -1501,11 +1501,11 @@ BarWidget {
                 }
 
                 if (metrics.batteryCycles > 0) {
-                    health.push(metrics.batteryCycles + " cycles");
+                    health.push(metrics.batteryCycles + " " + Yassm.I18n.t("battery.cycles"));
                 }
 
                 if (health.length > 0) {
-                    lines.push("health " + health.join(" (") + (health.length > 1 ? ")" : ""));
+                    lines.push(Yassm.I18n.t("battery.health") + " " + health.join(" (") + (health.length > 1 ? ")" : ""));
                 }
             }
 
@@ -1519,7 +1519,7 @@ BarWidget {
             const lines = [];
 
             if (systemUnits.length > 0) {
-                lines.push(root.centeredMark + root.iconServer + " systemd");
+                lines.push(root.centeredMark + root.iconServer + " " + Yassm.I18n.t("head.systemd"));
                 for (let i = 0; i < systemUnits.length; i++) {
                     lines.push(systemUnits[i]);
                 }
@@ -1530,7 +1530,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconUser + " systemd --user");
+                lines.push(root.centeredMark + root.iconUser + " " + Yassm.I18n.t("head.systemd_user"));
                 for (let i = 0; i < userUnits.length; i++) {
                     lines.push(userUnits[i]);
                 }
@@ -1541,7 +1541,7 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconGhost + " proc zombie");
+                lines.push(root.centeredMark + root.iconGhost + " " + Yassm.I18n.t("head.zombie"));
                 for (let i = 0; i < zombies.length; i++) {
                     lines.push(zombies[i].pid + " " + zombies[i].name + " (" + formatDuration(zombies[i].age) + ")");
                 }
@@ -1552,8 +1552,8 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconDisk + " disk");
-                lines.push("Usage / : " + Math.round(metrics.diskPercent) + "%");
+                lines.push(root.centeredMark + root.iconDisk + " " + Yassm.I18n.t("head.disk"));
+                lines.push(Yassm.I18n.tf("alerts.disk_usage", [Math.round(metrics.diskPercent)]));
             }
 
             if (metrics.memoryAlert) {
@@ -1561,28 +1561,28 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconMemory + " ram");
-                lines.push("Usage : " + Math.round(metrics.memoryPercent) + "%");
+                lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.ram"));
+                lines.push(Yassm.I18n.tf("alerts.ram_usage", [Math.round(metrics.memoryPercent)]));
             }
 
             if (lines.length === 0) {
-                lines.push("No alerts");
+                lines.push(Yassm.I18n.t("common.no_alerts"));
             }
 
-            return tooltipBlock("ALERTS", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.alerts"), lines.join("\n"));
         }
 
         if (key === "uptime") {
-            const bootLabel = "Time since boot";
+            const bootLabel = Yassm.I18n.t("uptime.boot");
             const install = root.showExtended ? root.installRows(bootLabel) : [];
 
             if (install.length === 0) {
-                return tooltipBlock("UPTIME", bootLabel + " : " + formatUptimeLong(metrics.uptimeSeconds));
+                return tooltipBlock(Yassm.I18n.t("title.uptime"), bootLabel + " : " + formatUptimeLong(metrics.uptimeSeconds));
             }
 
             const lines = [bootLabel.padEnd(install.width) + " : " + formatUptimeLong(metrics.uptimeSeconds)].concat(install.lines);
 
-            return tooltipBlock("UPTIME", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.uptime"), lines.join("\n"));
         }
 
         if (key === "temp") {
@@ -1590,13 +1590,13 @@ BarWidget {
             const fans = metrics.fans || [];
 
             if (temperatures.length === 0 && fans.length === 0) {
-                return tooltipBlock("SENSORS", "Unavailable");
+                return tooltipBlock(Yassm.I18n.t("title.sensors"), Yassm.I18n.t("common.unavailable"));
             }
 
             const lines = [];
 
             if (temperatures.length > 0) {
-                lines.push(root.centeredMark + root.iconTemp + " temperatures");
+                lines.push(root.centeredMark + root.iconTemp + " " + Yassm.I18n.t("head.temperatures"));
 
                 for (let i = 0; i < temperatures.length; i++) {
                     lines.push(temperatures[i].celsius.toFixed(1).padStart(4, " ") + " °C (" + temperatures[i].sensor + ")");
@@ -1616,14 +1616,14 @@ BarWidget {
                     lines.push("");
                 }
 
-                lines.push(root.centeredMark + root.iconFan + " fans");
+                lines.push(root.centeredMark + root.iconFan + " " + Yassm.I18n.t("head.fans"));
 
                 for (let i = 0; i < fans.length; i++) {
                     lines.push(fans[i].name.padEnd(nameWidth) + "  " + String(Math.round(fans[i].rpm)).padStart(rpmWidth) + " rpm");
                 }
             }
 
-            return tooltipBlock("SENSORS", lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.sensors"), lines.join("\n"));
         }
 
         return "";
@@ -2184,7 +2184,7 @@ BarWidget {
 
             anchors.centerIn: parent
             visible: root.segmentCache.length === 0
-            text: "No module enabled"
+            text: Yassm.I18n.t("bar.empty")
             color: button.foreground
             font.family: button.fontFamily
             font.pixelSize: button.fontSize

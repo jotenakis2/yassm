@@ -27,22 +27,22 @@ PanelWindow {
         const lines = [];
 
         if (root.missingRequired.length > 0) {
-            lines.push("Required: " + root.missingRequired.map(function (dep) {
-                return dep.name;
-            }).join(", "));
+            lines.push(Yassm.I18n.tf("settings.deps_required_head", [root.missingRequired.map(function (dep) {
+                    return dep.name;
+                }).join(", ")]));
         }
 
         if (root.missingOptional.length > 0) {
-            lines.push("Optional: " + root.missingOptional.map(function (dep) {
-                return dep.name;
-            }).join(", "));
+            lines.push(Yassm.I18n.tf("settings.deps_optional_head", [root.missingOptional.map(function (dep) {
+                    return dep.name;
+                }).join(", ")]));
         }
 
         lines.push("");
 
         for (let i = 0; i < root.missingDeps.length; i++) {
             const dep = root.missingDeps[i];
-            lines.push(dep.name + " — " + dep.purpose);
+            lines.push(dep.name + " — " + Yassm.I18n.t("dep." + dep.name, dep.purpose));
         }
 
         return lines.join("\n");
@@ -91,50 +91,50 @@ PanelWindow {
     readonly property var moduleSettings: [
         {
             key: "showUptime",
-            label: "Uptime",
+            label: Yassm.I18n.t("module.uptime"),
             defaultValue: true
         },
         {
             key: "showCpu",
-            label: "CPU"
+            label: Yassm.I18n.t("module.cpu")
         },
         {
             key: "showLoad",
-            label: "Load"
+            label: Yassm.I18n.t("module.load")
         },
         {
             key: "showGpu",
-            label: "GPU"
+            label: Yassm.I18n.t("module.gpu")
         },
         {
             key: "showMemory",
-            label: "Memory"
+            label: Yassm.I18n.t("module.memory")
         },
         {
             key: "showSwap",
-            label: "Swap"
+            label: Yassm.I18n.t("module.swap")
         },
         {
             key: "showDisk",
-            label: "Disk"
+            label: Yassm.I18n.t("module.disk")
         },
         {
             key: "showNet",
-            label: "Network"
+            label: Yassm.I18n.t("module.net")
         },
         {
             key: "showTemp",
-            label: "Temperature"
+            label: Yassm.I18n.t("module.temp")
         },
         {
             key: "showBattery",
-            label: "Battery"
+            label: Yassm.I18n.t("module.battery")
         },
         {
             key: "showAlerts",
-            label: "Alerts",
+            label: Yassm.I18n.t("module.alerts"),
             defaultValue: true,
-            tooltip: "Alerts on systemd failed units, zombies older than 60 s, a root disk at 95 % or more and RAM at 95 % or more.\nRed icon: systemd, disk or RAM; orange icon: zombies only. Refreshed every 60 s."
+            tooltip: Yassm.I18n.t("settings.alerts_tip")
         }
     ]
 
@@ -260,7 +260,7 @@ PanelWindow {
             PanelToolTip {
                 parent: settingsPanel
                 visible: gearArea.containsMouse
-                text: "YASSM settings"
+                text: Yassm.I18n.t("settings.gear")
                 x: settingsPanel.width - width - root.panelPadding
                 y: gearIcon.y + gearIcon.height + Style.space(4)
             }
@@ -313,11 +313,11 @@ PanelWindow {
 
                         Label {
                             Layout.fillWidth: true
-                            text: depsWarning.hasRequired ? "Missing required tools: " + root.missingRequired.map(function (dep) {
-                                return dep.name;
-                            }).join(", ") : "Missing optional tools: " + root.missingOptional.map(function (dep) {
-                                return dep.name;
-                            }).join(", ")
+                            text: depsWarning.hasRequired ? Yassm.I18n.tf("settings.deps_required", [root.missingRequired.map(function (dep) {
+                                    return dep.name;
+                                }).join(", ")]) : Yassm.I18n.tf("settings.deps_optional", [root.missingOptional.map(function (dep) {
+                                    return dep.name;
+                                }).join(", ")])
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
                             palette.windowText: ShellColor.popups.text
@@ -365,7 +365,7 @@ PanelWindow {
                     }
 
                     PanelSectionHeader {
-                        text: "MODULES"
+                        text: Yassm.I18n.t("settings.modules")
                         foreground: ShellColor.popups.text
                         fontFamily: Style.font.family
 
@@ -375,7 +375,7 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: modulesHeaderHover.hovered
-                            text: "Drag the handle to reorder the modules."
+                            text: Yassm.I18n.t("settings.drag_hint")
                         }
                     }
 
@@ -546,7 +546,7 @@ PanelWindow {
                     }
 
                     PanelSectionHeader {
-                        text: "LAYOUT"
+                        text: Yassm.I18n.t("settings.layout")
                         foreground: ShellColor.popups.text
                         fontFamily: Style.font.family
                     }
@@ -575,7 +575,7 @@ PanelWindow {
                         Toggle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: root.toggleRowHeight
-                            label: "Boxes"
+                            label: Yassm.I18n.t("settings.boxes")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
                             foreground: ShellColor.popups.text
@@ -603,7 +603,7 @@ PanelWindow {
                         Toggle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: root.toggleRowHeight
-                            label: "Colors"
+                            label: Yassm.I18n.t("settings.colors")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
                             foreground: ShellColor.popups.text
@@ -631,7 +631,7 @@ PanelWindow {
                         Toggle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: root.toggleRowHeight
-                            label: "Extended data in tooltips"
+                            label: Yassm.I18n.t("settings.extended")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
                             foreground: ShellColor.popups.text
@@ -665,13 +665,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: modulesGapHover.hovered
-                            text: "Gap between module boxes, in character cells.\n0–5 cells, with a 2 px minimum at 0."
+                            text: Yassm.I18n.t("settings.modules_gap_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: "Between modules"
+                            text: Yassm.I18n.t("settings.modules_gap")
                             palette.windowText: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
@@ -725,13 +725,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: iconGapHover.hovered
-                            text: "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0."
+                            text: Yassm.I18n.t("settings.icon_gap_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: "Between icon and value"
+                            text: Yassm.I18n.t("settings.icon_gap")
                             palette.windowText: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
@@ -785,13 +785,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: maxProcessesHover.hovered
-                            text: "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra."
+                            text: Yassm.I18n.t("settings.processes_shown_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: "Processes shown"
+                            text: Yassm.I18n.t("settings.processes_shown")
                             palette.windowText: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
@@ -862,7 +862,7 @@ PanelWindow {
                     }
 
                     PanelSectionHeader {
-                        text: "TEMPERATURE (°C)"
+                        text: Yassm.I18n.t("settings.thresholds")
                         foreground: ShellColor.popups.text
                         fontFamily: Style.font.family
                     }
@@ -916,7 +916,7 @@ PanelWindow {
                                     height: Style.space(16)
                                     Label {
                                         anchors.centerIn: parent
-                                        text: "Green"
+                                        text: Yassm.I18n.t("settings.green")
                                         palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
                                         font.family: Style.font.family
                                         font.pixelSize: Style.font.bodySmall
@@ -929,7 +929,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value turns green and the icon becomes a thermometer here.\nKept below Orange."
+                                        property string tip: Yassm.I18n.t("settings.green_tip")
                                     }
                                 }
 
@@ -975,7 +975,7 @@ PanelWindow {
 
                                     Label {
                                         anchors.centerIn: parent
-                                        text: "Orange"
+                                        text: Yassm.I18n.t("settings.orange")
                                         palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
                                         font.family: Style.font.family
                                         font.pixelSize: Style.font.bodySmall
@@ -988,7 +988,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value turns orange and the icon becomes a heat wave here.\nKept between Green and Red."
+                                        property string tip: Yassm.I18n.t("settings.orange_tip")
                                     }
                                 }
 
@@ -1036,7 +1036,7 @@ PanelWindow {
 
                                     Label {
                                         anchors.centerIn: parent
-                                        text: "Red"
+                                        text: Yassm.I18n.t("settings.red")
                                         palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
                                         font.family: Style.font.family
                                         font.pixelSize: Style.font.bodySmall
@@ -1049,7 +1049,7 @@ PanelWindow {
                                         hoverEnabled: true
                                         cursorShape: Qt.ArrowCursor
 
-                                        property string tip: "Value turns red and the icon becomes an alert here.\nKept above Orange."
+                                        property string tip: Yassm.I18n.t("settings.red_tip")
                                     }
                                 }
 
@@ -1136,7 +1136,7 @@ PanelWindow {
                     }
 
                     PanelSectionHeader {
-                        text: "TIMERS"
+                        text: Yassm.I18n.t("settings.timers")
                         foreground: ShellColor.popups.text
                         fontFamily: Style.font.family
                     }
@@ -1171,13 +1171,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: refreshHover.hovered
-                            text: "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead."
+                            text: Yassm.I18n.t("settings.refresh_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: "Refresh"
+                            text: Yassm.I18n.t("settings.refresh")
                             palette.windowText: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
@@ -1231,13 +1231,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: processesHover.hovered
-                            text: "Top processes refresh while a CPU/RAM tooltip is open.\nOne ps per tick; 2 s minimum."
+                            text: Yassm.I18n.t("settings.processes_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: "Processes"
+                            text: Yassm.I18n.t("settings.processes")
                             palette.windowText: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body

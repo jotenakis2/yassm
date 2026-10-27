@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.8
+Version 1.25.0
 
 [English](README.md) | **Français**
 
@@ -119,60 +119,67 @@ déplier cette section indépendamment. Seul **Modules** est déplié par défau
 l'état n'est conservé que pendant la session et n'est pas écrit dans
 `shell.json`.
 
+**Langue** : les infobulles et le panneau suivent la locale de la session —
+français si elle commence par `fr`, anglais sinon. Les intitulés techniques
+cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
+`temperatures`, `fans`, `usage`…) ; l'interface française affiche `RÉSEAU`,
+`CAPTEURS`, `températures`, `ventilateurs`, `utilisation`, etc.
+
 **Modules**
 
 - Uptime
 - CPU
-- Load
+- Charge
 - GPU
-- Memory
+- Mémoire
 - Swap
-- Disk (`/`)
-- Network
-- Temperature
-- Battery
-- Alerts
+- Disque (`/`)
+- Réseau
+- Température
+- Batterie
+- Alertes
 
-**Layout**
+**Disposition**
 
-- Boxes (encadrement des modules)
-- Colors (seuils colorés et icône batterie bleue sur secteur)
-- Extended data in tooltips (fréquence par cœur, PSI, I/O disque, Wi-Fi, santé batterie)
-- Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
-- Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
-- Processes shown (processus userland affichés, 1–20 ; 10 par défaut)
+- Cadres (encadrement des modules)
+- Couleurs (seuils colorés et icône batterie bleue sur secteur)
+- Données étendues dans les infobulles (fréquence par cœur, PSI, E/S disque, Wi-Fi, santé batterie)
+- Entre les modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
+- Entre l'icône et la valeur (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
+- Processus affichés (processus userland affichés, 1–20 ; 10 par défaut)
 
-**Temperature**
+**Seuils**
 
-- Green from (défaut 40 °C)
-- Orange from (défaut 50 °C)
-- Red from (défaut 60 °C)
+- Vert (défaut 40 °C)
+- Orange (défaut 50 °C)
+- Rouge (défaut 60 °C)
 
 Les trois limites sont des champs numériques : saisir une valeur ou utiliser
 les flèches, par pas d'un degré ; l'ordre croissant est toujours conservé.
-Survoler l'étiquette Green, Orange ou Red rappelle ce que change ce seuil.
+Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
 
-**Timers**
+**Intervalles**
 
-- Refresh (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
-- Processes (rafraîchissement des processus du tooltip, 2–10 s ; 5 par défaut)
+- Rafraîchissement (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
+- Processus (rafraîchissement des processus de l'infobulle, 2–10 s ; 5 par défaut)
 
-Le curseur **Between modules** règle l'espacement entre les modules de 0 à 5
-espaces (2 par défaut). Le curseur **Between icon and value** règle l'espace
+Le curseur **Entre les modules** règle l'espacement entre les modules de 0 à 5
+espaces (2 par défaut). Le curseur **Entre l'icône et la valeur** règle l'espace
 entre l'icône et la valeur de chaque module de 0 à 3 espaces (1 par défaut,
 soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
 
-Le curseur **Refresh** pilote la boucle rapide (CPU, RAM, swap, load, réseau).
-Les débits réseau utilisent le temps réel écoulé, donc changer l'intervalle ne
-les fausse pas. Le curseur **Processes** règle la fréquence de rafraîchissement
-des tooltips CPU et RAM ; il descend jusqu'à 2 s. Le curseur **Processes shown**
-plafonne la liste userland à 1–20 lignes (10 par défaut) ; la ligne `kernel`
-est toujours en plus. La liste CPU est instantanée (deltas `/proc/<pid>/stat`),
-la RAM utilise le RSS de `ps`. **Extended data in tooltips** ajoute la fréquence
-CPU, la pression PSI, les I/O disque, le signal Wi-Fi et la santé de la
-batterie à leurs tooltips ; l'option est active par défaut. Survoler
-n'importe quelle ligne de curseur affiche une infobulle avec ces explications.
-Le panneau défile automatiquement si l'écran est trop court ; Échap le ferme.
+Le curseur **Rafraîchissement** pilote la boucle rapide (CPU, RAM, swap,
+charge, réseau). Les débits réseau utilisent le temps réel écoulé, donc
+changer l'intervalle ne les fausse pas. Le curseur **Processus** règle la
+fréquence de rafraîchissement des infobulles CPU et RAM ; il descend jusqu'à
+2 s. Le curseur **Processus affichés** plafonne la liste userland à 1–20
+lignes (10 par défaut) ; la ligne `noyau` est toujours en plus. La liste CPU
+est instantanée (deltas `/proc/<pid>/stat`), la RAM utilise le RSS de `ps`.
+**Données étendues dans les infobulles** ajoute la fréquence CPU, la pression
+PSI, les E/S disque, le signal Wi-Fi et la santé de la batterie à leurs
+infobulles ; l'option est active par défaut. Survoler n'importe quelle ligne
+de curseur affiche une infobulle avec ces explications. Le panneau défile
+automatiquement si l'écran est trop court ; Échap le ferme.
 
 Les préférences sont enregistrées dans `~/.config/omarchy/shell.json`, dans
 l'entrée de barre du widget. Il n'y a pas de fichier de configuration séparé.
@@ -275,7 +282,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   valeur arrondie affichée) ; avec les valeurs par défaut : flocon sous 40 °C,
   thermomètre de 40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C.
   Les trois seuils sont réglables
-  dans Settings → Temperature. Une section
+  dans Settings → Seuils. Une section
   `fans` liste chaque ventilateur hwmon avec sa vitesse en rpm
   (`Fan 1  0 rpm`), y compris les ventilateurs à l'arrêt à 0 ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge.
@@ -326,7 +333,7 @@ valeur arrondie affichée :
 
 La valeur du disque passe au rouge à 90 % ; le module **Alertes** ne se
 déclenche qu'à 95 % (disque ou RAM). Les seuils de température sont des
-défauts ; les trois champs numériques de Settings → Temperature règlent les
+défauts ; les trois champs numériques de Settings → Seuils règlent les
 limites verte, orange et rouge, au degré près. Le LOAD n'est pas
 plafonné : il peut dépasser 100 % lorsque la file d'attente
 est plus longue que le nombre de CPU. La batterie suit une logique inversée,

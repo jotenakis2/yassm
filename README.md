@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.24.8
+Version 1.25.0
 
 **English** | [Français](README-fr.md)
 
@@ -116,6 +116,12 @@ Each section header carries a chevron: click it to collapse or expand that
 section independently. Only **Modules** is expanded by default; the state is
 kept for the session and is not written to `shell.json`.
 
+**Language**: the tooltips and the settings panel follow the session locale —
+French when it starts with `fr`, English for everything else. The labels
+quoted in this page are the English ones; the French interface uses
+`CAPTEURS`, `RÉSEAU`, `DÉMARRAGE`, `utilisation`, `cœurs`, `noyau`,
+`ventilateurs`, and so on.
+
 **Modules**
 
 - Uptime
@@ -139,7 +145,7 @@ kept for the session and is not written to `shell.json`.
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 - Processes shown (userland processes in tooltips, 1–20; default 10)
 
-**Temperature**
+**Thresholds**
 
 - Green from (default 40 °C)
 - Orange from (default 50 °C)
@@ -268,7 +274,7 @@ Hovering a module shows a contextual tooltip:
   value takes the level colour (thresholds on the rounded displayed value);
   with the defaults: snowflake below 40 °C, thermometer from 40 to 49 °C,
   heat wave from 50 to 59 °C, alert from 60 °C. All
-  three thresholds are configurable in Settings → Temperature. A `fans` section lists every
+  three thresholds are configurable in Settings → Thresholds. A `fans` section lists every
   hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
   0;
 - **Battery**: percentage, state, time remaining or time to full. Extended
@@ -331,7 +337,7 @@ color. On battery, the value follows the thresholds above.
 
 The disk value turns red at 90 %; the **Alerts** module only triggers at
 95 % (disk or RAM). The temperature thresholds are defaults; the three
-number fields in Settings → Temperature change the green, orange and red
+number fields in Settings → Thresholds change the green, orange and red
 limits, to the degree. The **Colors** toggle
 disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in

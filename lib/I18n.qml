@@ -1,0 +1,283 @@
+pragma Singleton
+
+import QtQuick
+
+// Tiny runtime translator: French when the session locale starts with "fr",
+// English for everything else. Keys missing from a table fall back to English
+// so a new string never renders as an empty label.
+QtObject {
+    id: root
+
+    readonly property string language: String(Qt.locale().name || "").split("_")[0].toLowerCase()
+    readonly property bool french: root.language === "fr"
+
+    readonly property var stringsEn: ({
+            "bar.empty": "No module enabled",
+            "battery.charging": "Charging",
+            "battery.discharging": "Discharging",
+            "battery.full": "Fully charged",
+            "battery.not_charging": "Not charging",
+            "battery.unknown": "Unknown",
+            "battery.to_full": "%1 to full",
+            "battery.remaining": "%1 remaining",
+            "battery.health": "health",
+            "battery.cycles": "cycles",
+            "title.cpu": "CPU",
+            "title.ram": "RAM",
+            "title.gpu": "GPU",
+            "title.load": "Load",
+            "title.swap": "Swap",
+            "title.disk": "Disk",
+            "title.net": "Net",
+            "title.battery": "Battery",
+            "title.alerts": "Alerts",
+            "title.uptime": "Uptime",
+            "title.sensors": "Sensors",
+            "head.usage": "usage",
+            "head.io": "io",
+            "head.pressure": "pressure",
+            "head.cores": "cores",
+            "head.proc": "proc",
+            "head.data": "data",
+            "head.temperatures": "temperatures",
+            "head.fans": "fans",
+            "head.devices": "devices",
+            "head.interface": "interface",
+            "head.disk": "disk",
+            "head.ram": "ram",
+            "head.zombie": "proc zombie",
+            "head.systemd": "systemd",
+            "head.systemd_user": "systemd --user",
+            "head.zram": "zram",
+            "head.zswap": "zswap",
+            "row.total": "Total",
+            "row.used": "Used",
+            "row.available": "Available",
+            "row.shared": "Shared",
+            "row.buffcache": "Buffer/cache",
+            "row.kernel": "kernel",
+            "common.unavailable": "Unavailable",
+            "common.unknown": "unknown",
+            "common.session": "session",
+            "common.usage": "Usage",
+            "common.hidden_ssid": "hidden SSID",
+            "common.unknown_sensor": "unknown sensor",
+            "common.no_alerts": "No alerts",
+            "swap.compressed": "%1 compressed -> %2 original",
+            "swap.mem": ", %1 RAM",
+            "alerts.disk_usage": "Usage / : %1%",
+            "alerts.ram_usage": "Usage : %1%",
+            "uptime.boot": "Time since boot",
+            "uptime.age": "Time since installation",
+            "uptime.date": "Installation date",
+            "uptime.days.one": "day",
+            "uptime.days.other": "days",
+            "settings.modules": "MODULES",
+            "settings.layout": "LAYOUT",
+            "settings.thresholds": "THRESHOLDS",
+            "settings.timers": "TIMERS",
+            "settings.gear": "YASSM settings",
+            "settings.drag_hint": "Drag the handle to reorder the modules.",
+            "settings.boxes": "Boxes",
+            "settings.colors": "Colors",
+            "settings.extended": "Extended data in tooltips",
+            "settings.modules_gap": "Between modules",
+            "settings.modules_gap_tip": "Gap between module boxes, in character cells.\n0–5 cells, with a 2 px minimum at 0.",
+            "settings.icon_gap": "Between icon and value",
+            "settings.icon_gap_tip": "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0.",
+            "settings.processes_shown": "Processes shown",
+            "settings.processes_shown_tip": "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra.",
+            "settings.refresh": "Refresh",
+            "settings.refresh_tip": "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead.",
+            "settings.processes": "Processes",
+            "settings.processes_tip": "Top processes refresh while a CPU/RAM tooltip is open.\nOne ps per tick; 2 s minimum.",
+            "settings.green": "Green",
+            "settings.orange": "Orange",
+            "settings.red": "Red",
+            "settings.green_tip": "Value turns green and the icon becomes a thermometer here.\nKept below Orange.",
+            "settings.orange_tip": "Value turns orange and the icon becomes a heat wave here.\nKept between Green and Red.",
+            "settings.red_tip": "Value turns red and the icon becomes an alert here.\nKept above Orange.",
+            "settings.alerts_tip": "Alerts on systemd failed units, zombies older than 60 s, a root disk at 95 % or more and RAM at 95 % or more.\nRed icon: systemd, disk or RAM; orange icon: zombies only. Refreshed every 60 s.",
+            "settings.deps_required": "Missing required tools: %1",
+            "settings.deps_optional": "Missing optional tools: %1",
+            "settings.deps_required_head": "Required: %1",
+            "settings.deps_optional_head": "Optional: %1",
+            "module.uptime": "Uptime",
+            "module.cpu": "CPU",
+            "module.load": "Load",
+            "module.gpu": "GPU",
+            "module.memory": "Memory",
+            "module.swap": "Swap",
+            "module.disk": "Disk",
+            "module.net": "Network",
+            "module.temp": "Temperature",
+            "module.battery": "Battery",
+            "module.alerts": "Alerts",
+            "dep.awk": "alerts and Wi-Fi frequency scripts",
+            "dep.date": "installation date",
+            "dep.findmnt": "disk module",
+            "dep.head": "installation date",
+            "dep.ps": "RAM process list and zombie scan",
+            "dep.readlink": "temperature sensor names",
+            "dep.stat": "installation date",
+            "dep.systemctl": "Alerts module",
+            "dep.timeout": "command guards",
+            "dep.curl": "public address in the NET tooltip",
+            "dep.ip": "LAN address in the NET tooltip",
+            "dep.iw": "Wi-Fi frequency in the NET tooltip"
+        })
+
+    readonly property var stringsFr: ({
+            "bar.empty": "Aucun module activé",
+            "battery.charging": "En charge",
+            "battery.discharging": "Sur batterie",
+            "battery.full": "Chargée",
+            "battery.not_charging": "En attente",
+            "battery.unknown": "Inconnue",
+            "battery.to_full": "%1 avant pleine charge",
+            "battery.remaining": "%1 restants",
+            "battery.health": "santé",
+            "battery.cycles": "cycles",
+            "title.cpu": "CPU",
+            "title.ram": "RAM",
+            "title.gpu": "GPU",
+            "title.load": "Charge",
+            "title.swap": "Swap",
+            "title.disk": "Disque",
+            "title.net": "Réseau",
+            "title.battery": "Batterie",
+            "title.alerts": "Alertes",
+            "title.uptime": "Démarrage",
+            "title.sensors": "Capteurs",
+            "head.usage": "utilisation",
+            "head.io": "e/s",
+            "head.pressure": "pression",
+            "head.cores": "cœurs",
+            "head.proc": "processus",
+            "head.data": "données",
+            "head.temperatures": "températures",
+            "head.fans": "ventilateurs",
+            "head.devices": "périphériques",
+            "head.interface": "interface",
+            "head.disk": "disque",
+            "head.ram": "ram",
+            "head.zombie": "processus zombie",
+            "head.systemd": "systemd",
+            "head.systemd_user": "systemd --user",
+            "head.zram": "zram",
+            "head.zswap": "zswap",
+            "row.total": "Total",
+            "row.used": "Utilisé",
+            "row.available": "Disponible",
+            "row.shared": "Partagé",
+            "row.buffcache": "Tampon/cache",
+            "row.kernel": "noyau",
+            "common.unavailable": "Indisponible",
+            "common.unknown": "inconnue",
+            "common.session": "session",
+            "common.usage": "Utilisation",
+            "common.hidden_ssid": "SSID masqué",
+            "common.unknown_sensor": "capteur inconnu",
+            "common.no_alerts": "Aucune alerte",
+            "swap.compressed": "%1 compressés → %2 d'origine",
+            "swap.mem": ", %1 de RAM",
+            "alerts.disk_usage": "Utilisation / : %1%",
+            "alerts.ram_usage": "Utilisation : %1%",
+            "uptime.boot": "Démarré depuis",
+            "uptime.age": "Installé depuis",
+            "uptime.date": "Date d'installation",
+            "uptime.days.one": "jour",
+            "uptime.days.other": "jours",
+            "settings.modules": "MODULES",
+            "settings.layout": "DISPOSITION",
+            "settings.thresholds": "SEUILS",
+            "settings.timers": "INTERVALLES",
+            "settings.gear": "Réglages YASSM",
+            "settings.drag_hint": "Faites glisser la poignée pour réordonner les modules.",
+            "settings.boxes": "Cadres",
+            "settings.colors": "Couleurs",
+            "settings.extended": "Données étendues dans les infobulles",
+            "settings.modules_gap": "Entre les modules",
+            "settings.modules_gap_tip": "Espace entre les cadres des modules, en cellules de caractère.\n0 à 5 cellules, minimum 2 px à 0.",
+            "settings.icon_gap": "Entre l'icône et la valeur",
+            "settings.icon_gap_tip": "Espace entre chaque icône et sa valeur, en cellules.\n0 à 3 cellules, minimum 2 px à 0.",
+            "settings.processes_shown": "Processus affichés",
+            "settings.processes_shown_tip": "Nombre maximal de processus userland listés dans les infobulles CPU et RAM.\nLa ligne noyau (données étendues) est en plus.",
+            "settings.refresh": "Rafraîchissement",
+            "settings.refresh_tip": "Échantillonnage rapide : CPU, RAM, swap, charge et réseau.\nLe disque, la température, le GPU et zram restent à 10 s\npour limiter la charge CPU.",
+            "settings.processes": "Processus",
+            "settings.processes_tip": "Rafraîchissement des processus pendant qu'une infobulle CPU/RAM est ouverte.\nUn ps par cycle ; 2 s minimum.",
+            "settings.green": "Vert",
+            "settings.orange": "Orange",
+            "settings.red": "Rouge",
+            "settings.green_tip": "La valeur passe au vert et l'icône devient un thermomètre à partir d'ici.\nMaintenu sous Orange.",
+            "settings.orange_tip": "La valeur passe à l'orange et l'icône devient une vague de chaleur à partir d'ici.\nMaintenu entre Vert et Rouge.",
+            "settings.red_tip": "La valeur passe au rouge et l'icône devient une alerte à partir d'ici.\nMaintenu au-dessus d'Orange.",
+            "settings.alerts_tip": "Alertes sur les unités systemd en échec, les zombies de plus de 60 s, une racine à 95 % ou plus et la RAM à 95 % ou plus.\nIcône rouge : systemd, disque ou RAM ; icône orange : zombies uniquement. Rafraîchi toutes les 60 s.",
+            "settings.deps_required": "Outils requis manquants : %1",
+            "settings.deps_optional": "Outils optionnels manquants : %1",
+            "settings.deps_required_head": "Requis : %1",
+            "settings.deps_optional_head": "Optionnels : %1",
+            "module.uptime": "Uptime",
+            "module.cpu": "CPU",
+            "module.load": "Charge",
+            "module.gpu": "GPU",
+            "module.memory": "Mémoire",
+            "module.swap": "Swap",
+            "module.disk": "Disque",
+            "module.net": "Réseau",
+            "module.temp": "Température",
+            "module.battery": "Batterie",
+            "module.alerts": "Alertes",
+            "dep.awk": "scripts alertes et fréquence Wi-Fi",
+            "dep.date": "date d'installation",
+            "dep.findmnt": "module disque",
+            "dep.head": "date d'installation",
+            "dep.ps": "liste des processus RAM et détection des zombies",
+            "dep.readlink": "noms des capteurs de température",
+            "dep.stat": "date d'installation",
+            "dep.systemctl": "module Alertes",
+            "dep.timeout": "garde-fous des commandes",
+            "dep.curl": "adresse publique dans l'infobulle NET",
+            "dep.ip": "adresse LAN dans l'infobulle NET",
+            "dep.iw": "fréquence Wi-Fi dans l'infobulle NET"
+        })
+
+    function table() {
+        return root.french ? root.stringsFr : root.stringsEn;
+    }
+
+    function t(key, fallback) {
+        const value = root.table()[key];
+
+        if (value !== undefined) {
+            return value;
+        }
+
+        const english = root.stringsEn[key];
+
+        if (english !== undefined) {
+            return english;
+        }
+
+        return fallback !== undefined ? fallback : key;
+    }
+
+    // "%1", "%2"… substitution.
+    function tf(key, values, fallback) {
+        let text = root.t(key, fallback);
+
+        for (let i = 0; i < values.length; i++) {
+            text = text.replace(new RegExp("%" + (i + 1), "g"), String(values[i]));
+        }
+
+        return text;
+    }
+
+    // French treats 0 and 1 as singular, English only 1.
+    function plural(key, count) {
+        const singular = root.french ? count <= 1 : count === 1;
+
+        return root.t(key + (singular ? ".one" : ".other"));
+    }
+}

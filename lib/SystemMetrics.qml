@@ -906,7 +906,7 @@ Singleton {
             const sensor = tab >= 0 ? line.slice(tab + 1).trim() : "";
             entries.push({
                 celsius: raw / 1000,
-                sensor: sensor || "unknown sensor"
+                sensor: sensor || I18n.t("common.unknown_sensor")
             });
         }
 
