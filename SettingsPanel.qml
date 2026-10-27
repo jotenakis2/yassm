@@ -18,14 +18,21 @@ PanelWindow {
     readonly property int panelPadding: Style.space(16)
     readonly property int toggleRowHeight: Style.space(36)
     readonly property int panelMargin: Style.space(4)
-    readonly property var hostBar: {
+    // Plain properties updated once hostWidget is known: binding the sliders
+    // to a not-yet-initialised readonly property logged QML warnings on open.
+    property QtObject hostBar: null
+    property string barPosition: "top"
+
+    function refreshHostBar() {
         const widget = root.hostWidget;
-        return widget && widget.bar ? widget.bar : null;
+        const bar = widget && widget.bar ? widget.bar : null;
+
+        root.hostBar = bar;
+        root.barPosition = bar && bar.position ? String(bar.position) : "top";
     }
-    readonly property string barPosition: {
-        const bar = root.hostBar;
-        return bar && bar.position ? String(bar.position) : "top";
-    }
+
+    onHostWidgetChanged: root.refreshHostBar()
+    Component.onCompleted: root.refreshHostBar()
     readonly property int maxPanelHeight: Math.max(Style.space(160), root.height - root.panelMargin * 2)
     readonly property int panelHeight: Math.min(settingsColumn.implicitHeight + root.panelPadding * 2, root.maxPanelHeight)
 
@@ -84,7 +91,8 @@ PanelWindow {
         {
             key: "showAlerts",
             label: "Alerts",
-            defaultValue: true
+            defaultValue: true,
+            tooltip: "Alerts on systemd failed units and on zombies older than 60 s.\nRed icon: systemd, orange icon: zombie. Refreshed every 60 s."
         }
     ]
 
@@ -195,6 +203,15 @@ PanelWindow {
                                 if (root.hostWidget) {
                                     root.hostWidget.updateSetting(control.modelData.key, !control.checked);
                                 }
+                            }
+
+                            HoverHandler {
+                                id: moduleHover
+                            }
+
+                            PanelToolTip {
+                                visible: moduleHover.hovered && control.modelData.tooltip !== undefined
+                                text: control.modelData.tooltip || ""
                             }
                         }
                     }
