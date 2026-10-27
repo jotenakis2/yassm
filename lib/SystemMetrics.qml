@@ -36,7 +36,10 @@ Singleton {
     property real swapTotalKb: 0
     property real swapUsedKb: 0
 
-    property bool hasZswap: false
+    // zswap can be enabled while its pool is empty (after the reclaimed pages
+    // were swapped back in); keep the section visible whenever it is active.
+    property bool zswapEnabled: false
+    property bool hasZswap: zswapEnabled || zswapCompressedKb > 0 || zswapOriginalKb > 0
     property real zswapCompressedKb: 0
     property real zswapOriginalKb: 0
 
@@ -431,7 +434,6 @@ Singleton {
 
         metrics.zswapCompressedKb = zswapCompressed;
         metrics.zswapOriginalKb = zswapOriginal;
-        metrics.hasZswap = zswapCompressed > 0 || zswapOriginal > 0;
     }
 
     function applySwapDevices(content) {
@@ -1021,6 +1023,14 @@ Singleton {
     }
 
     FileView {
+        id: zswapEnabledFile
+        path: "/sys/module/zswap/parameters/enabled"
+        printErrors: false
+        onLoaded: metrics.zswapEnabled = String(text()).trim() === "Y"
+        onLoadFailed: metrics.zswapEnabled = false
+    }
+
+    FileView {
         id: procLoadAvg
         path: "/proc/loadavg"
         onLoaded: metrics.applyLoad(text())
@@ -1151,6 +1161,7 @@ Singleton {
             ioPressureFile.reload();
             procWireless.reload();
             procUptime.reload();
+            zswapEnabledFile.reload();
 
             if (metrics.diskEnabled) {
                 procDiskStats.reload();

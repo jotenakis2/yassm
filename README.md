@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.1
+Version 1.14.2
 
 **English** | [Français](README-fr.md)
 
@@ -171,7 +171,8 @@ Hovering a module shows a contextual tooltip:
   swap device (zram included) with its own used / total and percentage under a
   `devices` heading, then a `ZRAM` section (compressed size, original size,
   ratio and RAM used per device) and a `ZSWAP` block (compressed size,
-  original size, ratio) when it is in use;
+  original size, ratio) whenever zswap is enabled, even while its pool is
+  empty;
 - **Disk**: a `usage` section with one line per detected **local** filesystem,
   in GiB, with the percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
   are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and

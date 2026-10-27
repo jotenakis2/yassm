@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.14.1
+Version 1.14.2
 
 [English](README.md) | **Français**
 
@@ -174,7 +174,8 @@ Le survol d'un module affiche une infobulle contextuelle :
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
   compressée, taille originale, ratio et RAM utilisée par périphérique) et un
-  bloc `ZSWAP` (taille compressée, taille originale, ratio) s'il est utilisé ;
+  bloc `ZSWAP` (taille compressée, taille originale, ratio) dès que zswap est
+  activé, même si son pool est vide ;
 - **Disk** : une section `usage` avec une ligne par système de fichiers
   **local** détecté, en GiB, avec le pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
   etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
