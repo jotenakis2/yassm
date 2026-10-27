@@ -1245,7 +1245,7 @@ BarWidget {
                 return tooltipBlock("SWAP", lines.join("\n"));
             }
 
-            const zramLines = [];
+            const zramEntries = [];
 
             for (let i = 0; i < devices.length; i++) {
                 const device = devices[i];
@@ -1263,15 +1263,22 @@ BarWidget {
 
                 const ratio = stats.compressedKb > 0 ? stats.originalKb / stats.compressedKb : 0;
 
-                zramLines.push(base + ": " + formatKib(stats.compressedKb) + " compressed -> " + formatKib(stats.originalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + ", " + formatKib(stats.memKb) + " RAM");
+                zramEntries.push({
+                    name: base,
+                    text: formatKib(stats.compressedKb) + " compressed -> " + formatKib(stats.originalKb) + " original" + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + ", " + formatKib(stats.memKb) + " RAM"
+                });
             }
 
-            if (zramLines.length > 0) {
+            if (zramEntries.length > 0) {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconMemory + " zram");
 
-                for (let i = 0; i < zramLines.length; i++) {
-                    lines.push(zramLines[i]);
+                for (let i = 0; i < zramEntries.length; i++) {
+                    // With a single zram the name adds nothing; keep it only
+                    // when several devices need to be told apart.
+                    const prefix = zramEntries.length > 1 ? zramEntries[i].name + ": " : "";
+
+                    lines.push(prefix + zramEntries[i].text);
                 }
             }
 
