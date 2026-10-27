@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.23.2
+Version 1.23.3
 
 [English](README.md) | **Français**
 
@@ -35,7 +35,7 @@ D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, up
 | Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | 10 s |
 | Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
 | Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
-| Alertes | unités systemd en échec, zombies de plus de 60 s, racine ≥ 90 % | 60 s (disque 10 s) |
+| Alertes | unités systemd en échec, zombies de plus de 60 s, racine ≥ 95 %, RAM ≥ 95 % | 60 s (disque 10 s, RAM 1 s) |
 | Uptime | `/proc/uptime`, affiché en minutes ou `hMM` | 5 s |
 | Température | toutes les températures normales, triées | 10 s |
 
@@ -313,7 +313,8 @@ valeur arrondie affichée :
 | Batterie | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Températures (défauts) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-Les seuils de température sont des défauts ; les trois curseurs de Settings →
+La valeur du disque passe au rouge à 90 % ; le module **Alertes** ne se
+déclenche qu'à 95 % (disque ou RAM). Les seuils de température sont des défauts ; les trois curseurs de Settings →
 Temperature règlent les limites verte, orange et rouge. Le LOAD n'est pas
 plafonné : il peut dépasser 100 % lorsque la file d'attente
 est plus longue que le nombre de CPU. La batterie suit une logique inversée,
@@ -359,15 +360,17 @@ Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
 - les unités systemd en état `failed`, côté système et utilisateur (icône
   rouge) ;
 - les zombies de plus de **60 s** (icône orange) ;
-- la racine à **90 % ou plus** (icône rouge), contrôlée avec le module disque
-  toutes les 10 s.
+- la racine à **95 % ou plus** (icône rouge), contrôlée avec le module disque
+  toutes les 10 s ;
+- la RAM à **95 % ou plus** (icône rouge), contrôlée avec le module mémoire
+  chaque seconde.
 
 Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
 compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités
 en échec sous un titre `systemd` centré en minuscules (icône serveur), puis
-`systemd --user` (icône utilisateur), puis `proc zombie` (icône fantôme) et
-`disk` (icône disque) quand la racine est ≥ 90 % ; une ligne vide sépare les
-sections. Avec
+`systemd --user` (icône utilisateur), puis `proc zombie` (icône fantôme),
+`disk` (icône disque) quand la racine est ≥ 95 %, et `ram` (icône mémoire)
+quand la RAM est ≥ 95 % ; une ligne vide sépare les sections. Avec
 **Colors** désactivé, l'icône reprend la couleur normale de la barre. Le
 réglage Alerts dans Settings a une infobulle au survol qui explique ce que le
 module signale.

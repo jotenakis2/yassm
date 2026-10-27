@@ -410,7 +410,7 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "alerts") {
-            return metrics.hasSystemFailure || metrics.diskAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
+            return metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
 
         if (key === "netOffline") {
@@ -1515,6 +1515,15 @@ BarWidget {
 
                 lines.push(root.centeredMark + root.iconDisk + " disk");
                 lines.push("/ " + Math.round(metrics.diskPercent) + "%");
+            }
+
+            if (metrics.memoryAlert) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.centeredMark + root.iconMemory + " ram");
+                lines.push(Math.round(metrics.memoryPercent) + "% used");
             }
 
             if (lines.length === 0) {

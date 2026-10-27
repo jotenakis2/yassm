@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.23.2
+Version 1.23.3
 
 **English** | [Français](README-fr.md)
 
@@ -35,7 +35,7 @@ More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 | Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | 10 s |
 | Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
 | Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
-| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 90 % | 60 s (disk 10 s) |
+| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 95 %, RAM ≥ 95 % | 60 s (disk 10 s, RAM 1 s) |
 | Uptime | `/proc/uptime`, shown as minutes or `hMM` | 5 s |
 | Temperature | all normal temperatures, sorted | 10 s |
 
@@ -319,7 +319,8 @@ as soon as the machine is on mains power (charging or held at a charge
 threshold), the icon turns theme blue while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
-The temperature thresholds are defaults; the three sliders in Settings →
+The disk value turns red at 90 %; the **Alerts** module only triggers at
+95 % (disk or RAM). The temperature thresholds are defaults; the three sliders in Settings →
 Temperature change the green, orange and red limits. The **Colors** toggle
 disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in
@@ -352,14 +353,17 @@ enabled, `alerts.sh` runs every 60 s and reports:
 - systemd units in the `failed` state, for the system and user managers
   (red icon);
 - zombies older than **60 s** (orange icon);
-- the root filesystem at **90 % or more** (red icon), checked with the disk
-  module every 10 s.
+- the root filesystem at **95 % or more** (red icon), checked with the disk
+  module every 10 s;
+- RAM at **95 % or more** (red icon), checked with the memory module every
+  second.
 
 It appears at the far right, after Battery, with an icon only (no counter),
 and only while at least one alert exists. The tooltip lists the failed units
 under a centered lowercase `systemd` heading (server icon), then
-`systemd --user` (user icon), then `proc zombie` (ghost icon) and `disk`
-  (disk icon) when the root is ≥ 90 %; a blank line separates the sections. With
+`systemd --user` (user icon), then `proc zombie` (ghost icon), `disk` (disk
+  icon) when the root is ≥ 95 %, and `ram` (memory icon) when RAM is ≥ 95 %; a
+  blank line separates the sections. With
 **Colors** disabled the icon uses the normal bar color. The Alerts toggle in
 Settings has a hover tooltip explaining what the module reports.
 

@@ -126,7 +126,7 @@ PanelWindow {
             key: "showAlerts",
             label: "Alerts",
             defaultValue: true,
-            tooltip: "Alerts on systemd failed units and on zombies older than 60 s.\nRed icon: systemd, orange icon: zombie. Refreshed every 60 s."
+            tooltip: "Alerts on systemd failed units, zombies older than 60 s, a root disk at 95 % or more and RAM at 95 % or more.\nRed icon: systemd, disk or RAM; orange icon: zombies only. Refreshed every 60 s."
         }
     ]
 
