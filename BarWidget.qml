@@ -1299,8 +1299,12 @@ BarWidget {
             if (root.showExtended && metrics.wifiNetwork) {
                 let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : "hidden SSID";
 
+                if (metrics.wifiFreqMhz > 0) {
+                    wifi += " · " + Math.round(metrics.wifiFreqMhz) + " MHz";
+                }
+
                 if (metrics.wifiLevel < 0) {
-                    wifi += " (" + Math.round(metrics.wifiLevel) + " dBm)";
+                    wifi += " · " + Math.round(metrics.wifiLevel) + " dBm";
                 }
 
                 lines.push(wifi);

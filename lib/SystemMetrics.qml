@@ -136,6 +136,9 @@ Singleton {
     }
     readonly property string wifiSsid: wifiNetwork && wifiNetwork.name ? String(wifiNetwork.name) : ""
 
+    readonly property string wifiFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../wifi-freq.sh").toString().replace("file://", ""))
+    property real wifiFreqMhz: 0
+
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
@@ -968,6 +971,11 @@ Singleton {
         metrics.wifiLevel = level;
     }
 
+    function applyWifiFreq(content) {
+        const value = Number(String(content).trim());
+        metrics.wifiFreqMhz = Number.isFinite(value) && value > 0 ? value : 0;
+    }
+
     function applyCpuFreq(content) {
         const lines = String(content || "").split("\n");
         const frequencies = [];
@@ -1236,6 +1244,29 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: mountProcess.running = true
+    }
+
+    Process {
+        id: wifiFreqProcess
+
+        command: ["timeout", "5", "bash", metrics.wifiFreqScriptPath, metrics.networkInterface]
+
+        stdout: StdioCollector {
+            id: wifiFreqOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyWifiFreq(wifiFreqOutput.text)
+        }
+    }
+
+    Timer {
+        // Roaming is the only thing that changes the frequency, so a slow
+        // refresh is enough; no process runs while the link is wired.
+        interval: 30000
+        running: metrics.wifiNetwork !== null
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: wifiFreqProcess.running = true
     }
 
     Process {

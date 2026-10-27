@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.13.1
+Version 1.14.0
 
 [English](README.md) | **Français**
 
@@ -192,8 +192,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   indépendamment. Le compteur absolu du pilote n'est pas utilisé, car il peut
   être aberrant. Sans route par défaut (uniquement `lo`), une icône réseau
   barrée rouge et `--` remplacent les deux débits. Extended data ajoute le SSID
-  (via NetworkManager) et le niveau du signal (via `/proc/net/wireless`,
-  `Maison (-60 dBm)`) quand l'interface active est sans fil ;
+  (via NetworkManager), la fréquence associée (`iw`, par ex. `5500 MHz`) et le
+  niveau du signal (via `/proc/net/wireless`) quand l'interface active est sans
+  fil : `MaisonDuRuet · 5500 MHz · -67 dBm` ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
   barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
@@ -320,6 +321,7 @@ Auxquels s'ajoutent les scripts éphémères (CPU mesuré sur 50 exécutions) :
 | `findmnt` | 2,0 ms | 6×/min | 12 ms |
 | `alerts.sh` | ~110 ms | 1×/min | 110 ms |
 | `cpu-freq.sh` | 3,0 ms | 12×/min | 36 ms |
+| `wifi-freq.sh` | 8,0 ms | 2×/min (sans fil seulement) | 16 ms |
 | Batterie (UPower) | 0 | événementiel | 0 |
 
 **Surcoût total ≈ 0,16 % d'un cœur, ~14 Mio de RSS, aucun processus
@@ -352,7 +354,8 @@ La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
 5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
 chaque cœur toutes les 5 s. Le SSID vient du service NetworkManager via
 D-Bus (ni processus ni interrogation), le niveau du signal est lu dans
-`/proc/net/wireless` toutes les 5 s.
+`/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh` demande la fréquence
+associée à `iw` toutes les 30 s, uniquement si la liaison est sans fil.
 
 ## Vérifications
 

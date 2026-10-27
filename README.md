@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.13.1
+Version 1.14.0
 
 **English** | [Français](README-fr.md)
 
@@ -187,8 +187,9 @@ Hovering a module shows a contextual tooltip:
   Both rates are colored independently. The driver's absolute counter is not
   used because it can be bogus. Without a default route (loopback only), a red
   crossed-network icon and `--` replace both rates. Extended data adds the
-  SSID (from NetworkManager) and signal level (from `/proc/net/wireless`,
-  `Maison (-60 dBm)`) when the active interface is wireless;
+  SSID (from NetworkManager), the associated frequency (`iw`, e.g. `5500 MHz`)
+  and the signal level (from `/proc/net/wireless`) when the active interface is
+  wireless: `MaisonDuRuet · 5500 MHz · -67 dBm`;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
   Labelled sensors keep their label, unlabeled hwmon sensors show the device
@@ -311,6 +312,7 @@ Plus the short-lived scripts (CPU measured over 50 runs):
 | `findmnt` | 2.0 ms | 6×/min | 12 ms |
 | `alerts.sh` | ~110 ms | 1×/min | 110 ms |
 | `cpu-freq.sh` | 3.0 ms | 12×/min | 36 ms |
+| `wifi-freq.sh` | 8.0 ms | 2×/min (wireless only) | 16 ms |
 | Battery (UPower) | 0 | event-driven | 0 |
 
 **Total overhead ≈ 0.16 % of one core, ~14 MiB RSS, no resident process.**
@@ -343,7 +345,9 @@ PSI (`/proc/pressure/memory`, `/proc/pressure/io`), `/proc/diskstats`,
 `/proc/net/wireless` and `/proc/uptime` are read every 5 s without spawning a
 process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
 The SSID comes from the NetworkManager service over D-Bus (no process, no
-poll); the signal level is read from `/proc/net/wireless` every 5 s.
+poll); the signal level is read from `/proc/net/wireless` every 5 s, and
+`wifi-freq.sh` asks `iw` for the associated frequency every 30 s while the
+link is wireless only.
 
 ## Checks
 
