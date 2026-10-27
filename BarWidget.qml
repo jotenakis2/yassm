@@ -1076,8 +1076,13 @@ BarWidget {
         }
 
         if (key === "memory") {
-            const labels = ["Total", "Used", "Available", "Buffer/cache"];
-            const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb), formatKibAsGib(metrics.memoryBuffCacheKb)];
+            const labels = ["Total", "Used", "Available"];
+            const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb)];
+
+            if (root.showExtended) {
+                labels.push("Buffer/cache");
+                values.push(formatKibAsGib(metrics.memoryBuffCacheKb));
+            }
             const hasKernel = metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
             const kernelValue = hasKernel ? formatKib(metrics.kernelTotalKb) : "";

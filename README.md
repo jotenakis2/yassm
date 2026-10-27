@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.15.0
+Version 1.15.1
 
 **English** | [Français](README-fr.md)
 
@@ -157,16 +157,15 @@ Hovering a module shows a contextual tooltip:
   The icon tilts with the load: needle low up to 50 %, medium from 51 to 90 %,
   high above that;
 - **RAM**: the tooltip opens with a centered `data` heading, then shows
-  `Total`, `Used`, `Available` and `Buffer/cache` (`Buffers` + `Cached` +
-  `SReclaimable`, like `free`). A centered `proc` heading introduces the
-  `kernel` line (Slab − SReclaimable + stacks + page tables + vmalloc +
-  percpu; SReclaimable is already in Buffer/cache, and vmalloc and percpu may
-  slightly overlap) and the top **userland** processes by RSS (up to the
-  **Processes shown** value, default 10),
-  grouped by name; the list refreshes every 5 s by default (2–10 s) while the
-  tooltip stays open;
-  kernel threads are excluded. Extended data adds a `pressure` section with
-  one line per window (`10s`, `60s`, `300s`);
+  `Total`, `Used` and `Available`. Extended data adds `Buffer/cache`
+  (`Buffers` + `Cached` + `SReclaimable`, like `free`). A centered `proc`
+  heading introduces the `kernel` line (Slab − SReclaimable + stacks + page
+  tables + vmalloc + percpu; SReclaimable is already in Buffer/cache, and
+  vmalloc and percpu may slightly overlap) and the top **userland** processes
+  by RSS (up to the **Processes shown** value, default 10), grouped by name;
+  the list refreshes every 5 s by default (2–10 s) while the tooltip stays
+  open; kernel threads are excluded. Extended data also adds a `pressure`
+  section with one line per window (`10s`, `60s`, `300s`);
 - **Swap**: used / total and the percentage. Extended data lists each
   swap device (zram included) with its own used / total and percentage under a
   `devices` heading, then a `ZRAM` section (compressed size, original size,

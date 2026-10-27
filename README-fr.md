@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.15.0
+Version 1.15.1
 
 [English](README.md) | **Français**
 
@@ -160,16 +160,16 @@ Le survol d'un module affiche une infobulle contextuelle :
   alignées. L'icône change d'inclinaison selon la charge : aiguille basse
   jusqu'à 50 %, médium de 51 à 90 %, haute au-delà ;
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
-  `Used`, `Available` et `Buffer/cache` (`Buffers` + `Cached` + `SReclaimable`,
-  comme `free`). Un titre `proc` centré introduit la ligne `kernel` (Slab −
-  SReclaimable + piles + tables de pages + vmalloc + percpu ; SReclaimable est
-  déjà dans Buffer/cache, et `vmalloc` et `percpu` peuvent se recouvrir
-  légèrement) et le top des processus **userland** par RSS (jusqu'à la valeur
-  **Processes shown**, 10 par défaut),
-  regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
-  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
-  Extended data ajoute une section `pressure` avec une ligne par fenêtre
-  (`10s`, `60s`, `300s`) ;
+  `Used` et `Available`. Extended data ajoute `Buffer/cache` (`Buffers` +
+  `Cached` + `SReclaimable`, comme `free`). Un titre `proc` centré introduit la
+  ligne `kernel` (Slab − SReclaimable + piles + tables de pages + vmalloc +
+  percpu ; SReclaimable est déjà dans Buffer/cache, et `vmalloc` et `percpu`
+  peuvent se recouvrir légèrement) et le top des processus **userland** par
+  RSS (jusqu'à la valeur **Processes shown**, 10 par défaut), regroupés par
+  nom ; la liste est rafraîchie toutes les 5 s par défaut (2–10 s) tant que le
+  tooltip reste ouvert ; les threads noyau sont exclus. Extended data ajoute
+  aussi une section `pressure` avec une ligne par fenêtre (`10s`, `60s`,
+  `300s`) ;
 - **Swap** : utilisé / total et le pourcentage. Extended data liste
   chaque périphérique de swap (zram compris) avec son propre utilisé / total
   et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
