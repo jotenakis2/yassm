@@ -17,15 +17,15 @@ system_units=$(failed_units)
 user_units=$(failed_units --user)
 
 while IFS= read -r unit; do
-	[[ -n $unit ]] && printf 'system\t%s\n' "$unit"
-done <<<"$system_units"
+	[[ -n ${unit} ]] && printf 'system\t%s\n' "${unit}"
+done <<<"${system_units}"
 
 while IFS= read -r unit; do
-	[[ -n $unit ]] && printf 'user\t%s\n' "$unit"
-done <<<"$user_units"
+	[[ -n ${unit} ]] && printf 'user\t%s\n' "${unit}"
+done <<<"${user_units}"
 
 # ps walks /proc in C; doing the same loop in bash cost ~70 ms per run.
-ps -eo pid=,stat=,etimes=,comm= | awk -v min_age="$min_zombie_age" '
+ps -eo pid=,stat=,etimes=,comm= | awk -v min_age="${min_zombie_age}" '
 	$2 ~ /^Z/ && $3 >= min_age {
 		comm = $4
 		for (i = 5; i <= NF; i++) comm = comm " " $i

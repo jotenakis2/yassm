@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.21.1
+Version 1.21.2
 
 **English** | [Français](README-fr.md)
 
@@ -416,9 +416,9 @@ Full methodology, raw numbers and reproduction snippets:
 ```
 
 The script validates the manifest, checks shell script syntax and version
-consistency, verifies the JSON/thermal output contracts, runs `shellcheck`
-when available and `qmllint` (Qt 6) with a proper `qs.Commons`/`qs.Ui` import
-root.
+consistency, verifies the JSON/thermal output contracts, runs
+`shellcheck --enable=all` on every script, and `qmllint` (Qt 6) with a proper
+`qs.Commons`/`qs.Ui` import root.
 
 ## GPU
 

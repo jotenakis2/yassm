@@ -13,8 +13,8 @@ find_busy_percent() {
 	# so use the glob (which resolves symlinks) instead of `find -L`, whose
 	# traversal of the sysfs symlink graph can block for a very long time.
 	for file in /sys/class/drm/card*/device/gpu_busy_percent; do
-		if [[ -r $file ]]; then
-			emit "sysfs" "$file" ""
+		if [[ -r ${file} ]]; then
+			emit "sysfs" "${file}" ""
 			return 0
 		fi
 	done
@@ -25,6 +25,9 @@ find_busy_percent() {
 # Prefer the DRM sysfs counter: it is free and does not wake a runtime-
 # suspended NVIDIA GPU. nvidia-smi remains the fallback when sysfs has no
 # gpu_busy_percent (NVIDIA proprietary driver).
+# The function signals "no counter" with its exit status; being in a
+# condition is exactly the intent, so set -e must not apply to it.
+# shellcheck disable=SC2310
 if find_busy_percent; then
 	exit 0
 fi
