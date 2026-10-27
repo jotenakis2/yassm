@@ -1,5 +1,7 @@
 # YASSM — Performance
 
+**English** | [Français](performance-fr.md)
+
 YASSM is a bar widget: it must stay invisible in `top` as much as on screen.
 This page records how it was measured, what it costs, and why.
 

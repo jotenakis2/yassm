@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.19.2
+Version 1.19.3
 
 [English](README.md) | **Français**
 
@@ -384,7 +384,7 @@ du tooltip NET en mode extended : `ip -4` coûte ~3 ms, et
 requête HTTPS, rien d'autre n'est envoyé).
 
 Méthodologie complète, chiffres bruts et extraits reproductibles :
-[performance.md](performance.md).
+[performance-fr.md](performance-fr.md).
 
 ## Vérifications
 
