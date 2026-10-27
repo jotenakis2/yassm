@@ -121,7 +121,7 @@ Singleton {
     property var temperatures: []
 
     readonly property string cpuFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../cpu-freq.sh").toString().replace("file://", ""))
-    property real cpuFreqMhz: 0
+    property var coreFreqMhz: []
     property real uptimeSeconds: 0
 
     readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
@@ -767,9 +767,25 @@ Singleton {
             return right.celsius - left.celsius;
         });
 
-        metrics.temperatures = entries;
-        metrics.hasTemperature = entries.length > 0;
-        metrics.temperatureC = entries.length > 0 ? entries[0].celsius : 0;
+        // Several unlabeled sensors can share one device name; keep the
+        // hottest reading per name so the tooltip shows each device once.
+        const seen = {};
+        const unique = [];
+
+        for (let i = 0; i < entries.length; i++) {
+            const sensor = entries[i].sensor;
+
+            if (seen[sensor]) {
+                continue;
+            }
+
+            seen[sensor] = true;
+            unique.push(entries[i]);
+        }
+
+        metrics.temperatures = unique;
+        metrics.hasTemperature = unique.length > 0;
+        metrics.temperatureC = unique.length > 0 ? unique[0].celsius : 0;
     }
 
     function applyAlerts(content) {
@@ -934,8 +950,25 @@ Singleton {
     }
 
     function applyCpuFreq(content) {
-        const value = Number(String(content).trim());
-        metrics.cpuFreqMhz = Number.isFinite(value) ? value : 0;
+        const lines = String(content || "").split("\n");
+        const frequencies = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length < 2) {
+                continue;
+            }
+
+            const index = Number(fields[0]);
+            const mhz = Number(fields[1]);
+
+            if (Number.isInteger(index) && index >= 0 && index < 1024 && Number.isFinite(mhz) && mhz > 0) {
+                frequencies[index] = mhz;
+            }
+        }
+
+        metrics.coreFreqMhz = frequencies;
     }
 
     function applyUptime(content) {

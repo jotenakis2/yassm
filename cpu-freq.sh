@@ -4,20 +4,16 @@ set -euo pipefail
 
 shopt -s nullglob
 
-sum=0
-count=0
-
+# One "cpu-index MHz" pair per core, in sysfs order. Kernels without cpufreq
+# (most ARM servers, VMs) expose no file at all, so nothing is printed.
 for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq; do
 	[[ -r $file ]] || continue
+
 	read -r value <"$file" || continue
 	[[ $value =~ ^[0-9]+$ ]] || continue
 
-	sum=$((sum + value))
-	count=$((count + 1))
-done
+	index=${file#/sys/devices/system/cpu/cpu}
+	index=${index%%/*}
 
-if ((count == 0)); then
-	printf '0\n'
-else
-	printf '%d\n' "$((sum / count / 1000))"
-fi
+	printf '%s %d\n' "$index" "$((value / 1000))"
+done

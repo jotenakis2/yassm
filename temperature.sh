@@ -26,7 +26,8 @@ sensor_label() {
 		if [[ -r $dir/name ]]; then
 			IFS= read -r device <"$dir/name" || true
 		fi
-		printf '%s/%s/%s\n' "${device:-hwmon}" "${dir##*/}" "${path##*/}"
+		# hwmon paths are unreadable noise; keep the device name only.
+		printf '%s\n' "${device:-hwmon}"
 		;;
 	/sys/class/thermal/thermal_zone*/temp)
 		label_file="${path%/temp}/type"
@@ -37,7 +38,8 @@ sensor_label() {
 				return
 			fi
 		fi
-		printf '%s\n' "${path%/temp}"
+		zone=${path%/temp}
+		printf '%s\n' "${zone##*/}"
 		;;
 	*)
 		printf '%s\n' "$path"

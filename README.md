@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.11.0
+Version 1.12.0
 
 **English** | [Français](README-fr.md)
 
@@ -91,7 +91,7 @@ The panel lets you enable or disable:
 
 - Boxes (module frames)
 - Colors (colored thresholds and blue battery icon on mains)
-- Extended data in tooltip (CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
+- Extended data in tooltip (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)
 
@@ -112,9 +112,9 @@ distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
 list at 1–20 rows (default 10); the `kernel` line is always extra. The CPU list
 is instantaneous (deltas from `/proc/<pid>/stat`), while RAM uses RSS from
-`ps`. **Extended data in tooltip** adds CPU frequency, PSI, disk I/O, Wi-Fi
-signal and battery health to their tooltips; it is on by default. Hovering any
-slider row shows a tooltip with the same explanation. The panel scrolls
+`ps`. **Extended data in tooltip** adds per-core frequencies, PSI, disk I/O,
+Wi-Fi signal and battery health to their tooltips; it is on by default.
+Hovering any slider row shows a tooltip with the same explanation. The panel scrolls
 automatically if the screen is too short; Escape closes it.
 
 Preferences are stored in `~/.config/omarchy/shell.json`, in the widget's bar
@@ -165,21 +165,22 @@ Hovering a module shows a contextual tooltip:
   **Processes shown** value, default 10),
   grouped by name; the list refreshes every 5 s by default (2–10 s) while the
   tooltip stays open;
-  kernel threads are excluded. Extended data adds a memory-pressure line
-  (`10s`, `60s`, `300s`);
-- **Swap**: each swap device is listed with used / total and its percentage,
-  including zram. A `ZRAM` section shows, for each zram device, the compressed
-  size, original size, ratio and RAM used. When ZSWAP is in use, a `ZSWAP`
-  block shows the compressed size, the original size and the compression
-  ratio;
-- **Disk**: one line per detected **local** filesystem, in GiB, with the
-  percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
+  kernel threads are excluded. Extended data adds a `pressure` section with
+  one line per window (`10s`, `60s`, `300s`);
+- **Swap**: total used / total and the percentage. Extended data lists each
+  swap device (zram included) with its own used / total and percentage under a
+  `devices` heading, then a `ZRAM` section (compressed size, original size,
+  ratio and RAM used per device) and a `ZSWAP` block (compressed size,
+  original size, ratio) when it is in use;
+- **Disk**: a `usage` section with one line per detected **local** filesystem,
+  in GiB, with the percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
   are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
   `/run/user`. Network filesystems (NFS, CIFS, SSHFS…) are skipped: querying
   their usage can block for seconds when the server is unreachable. Mount
   points that share the same device/source are deduplicated: on a btrfs root
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
-  from `/`. Extended data adds disk read/write rates and I/O pressure;
+  from `/`. Extended data adds an `io` section (read/write rates) and a
+  `pressure` section (`10s`, `60s`, `300s`);
 - **Network**: active interface, download (↓) and upload (↑) rates, plus the
   session total (deltas since the shell started, reset on restart and kept
   across interface changes). Both rates are colored independently. The
@@ -189,6 +190,9 @@ Hovering a module shows a contextual tooltip:
   active interface is wireless;
 - **Temperature**: all normal temperatures found, sorted from highest to
   lowest, with the sensor name in parentheses; the bar shows the highest one.
+  Labelled sensors keep their label, unlabeled hwmon sensors show the device
+  name only (`macsmc_battery`, `tas2764`), and readings sharing a name are
+  merged, keeping the hottest;
   The icon follows the level (thresholds on the rounded displayed value):
   snowflake below 40 °C, thermometer from 40 to 49 °C, heat from 50 to 59 °C,
   alert from 60 °C;
@@ -206,13 +210,13 @@ Hovering a module shows a contextual tooltip:
   grouped by name; when fewer processes are active, idle ones fill the
   remaining rows at 0.0%; the list refreshes every 5 s by default (2–10 s)
   while the tooltip stays open; kernel threads are excluded. Extended data
-  adds the average CPU frequency;
+  adds each core frequency in parentheses, right-aligned per column;
 - **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
   the same duration with a space (`3h 42m`);
 - **GPU**: current percentage.
 
 Tooltip titles (`CPU`, `RAM`, `NET`, etc.) and section headings (`cores`,
-`data`, `proc`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
+`data`, `pressure`, `proc`, `usage`, `io`, `devices`, `ZRAM`, `ZSWAP`) are **bold** and use the tooltip text color;
 the body uses the theme `muted` color. The `kernel` line in the CPU and RAM
 tooltips is bold too, but keeps the body color. Network, swap, disk and
 temperature tooltips launch no process. The RAM tooltip launches a `ps` when
@@ -336,7 +340,7 @@ only while Alerts is enabled.
 
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`), `/proc/diskstats`,
 `/proc/net/wireless` and `/proc/uptime` are read every 5 s without spawning a
-process. The CPU frequency is averaged by `cpu-freq.sh` every 5 s.
+process. `cpu-freq.sh` reports every core's `scaling_cur_freq` every 5 s.
 
 ## Checks
 

@@ -873,9 +873,18 @@ BarWidget {
         }
     }
 
-    function coreEntry(label, value, labelWidth) {
+    function coreEntry(label, value, labelWidth, frequency, frequencyWidth) {
         const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
-        return String(label).padStart(labelWidth || 2, " ") + " " + String(percent).padStart(3, " ") + "%";
+        let entry = String(label).padStart(labelWidth || 2, " ") + " " + String(percent).padStart(3, " ") + "%";
+
+        if (frequencyWidth > 0) {
+            const mhz = Number(frequency);
+            const text = Number.isFinite(mhz) && mhz > 0 ? String(Math.round(mhz)).padStart(frequencyWidth) : "--".padStart(frequencyWidth);
+
+            entry += " (" + text + "MHz)";
+        }
+
+        return entry;
     }
 
     function batteryStateLabel(status) {
@@ -935,18 +944,17 @@ BarWidget {
         return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
-    function formatFrequency(mhz) {
-        const value = Number(mhz);
+    function pressureRows(ten, sixty, threeHundred) {
+        const labels = ["10s", "60s", "300s"];
+        const values = [ten, sixty, threeHundred].map(function (value) {
+            return Number(value || 0).toFixed(1) + "%";
+        });
+        const labelWidth = Math.max(labels[0].length, labels[1].length, labels[2].length);
+        const valueWidth = Math.max(values[0].length, values[1].length, values[2].length);
 
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0 MHz";
-        }
-
-        return value >= 1000 ? (value / 1000).toFixed(2) + " GHz" : Math.round(value) + " MHz";
-    }
-
-    function formatPsi(ten, sixty, threeHundred) {
-        return "10s " + Number(ten || 0).toFixed(1) + "%" + "  60s " + Number(sixty || 0).toFixed(1) + "%" + "  300s " + Number(threeHundred || 0).toFixed(1) + "%";
+        return labels.map(function (label, index) {
+            return label.padStart(labelWidth) + "  " + values[index].padStart(valueWidth);
+        });
     }
 
     function tooltipBlock(title, body) {
@@ -1011,16 +1019,26 @@ BarWidget {
             });
         }
 
-        const lines = rows.map(function (row) {
-            return row.target.padEnd(targetWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " " + row.percent.padStart(percentWidth);
-        });
+        const lines = [root.centeredMark + root.iconDisk + " usage"];
+
+        for (let i = 0; i < rows.length; i++) {
+            lines.push(rows[i].target.padEnd(targetWidth) + "  " + rows[i].used.padStart(usedWidth) + " / " + rows[i].total.padStart(totalWidth) + " " + rows[i].percent.padStart(percentWidth));
+        }
 
         const metrics = Yassm.SystemMetrics;
 
         if (root.showExtended) {
             lines.push("");
-            lines.push("I/O  ↓ " + formatRateLong(metrics.diskReadKib) + "  ↑ " + formatRateLong(metrics.diskWriteKib));
-            lines.push("pressure " + formatPsi(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300));
+            lines.push(root.centeredMark + root.iconSwap + " io");
+            lines.push("↓ " + formatRateLong(metrics.diskReadKib) + "  ↑ " + formatRateLong(metrics.diskWriteKib));
+            lines.push("");
+            lines.push(root.centeredMark + root.iconLoadHigh + " pressure");
+
+            const pressure = pressureRows(metrics.ioPressure10, metrics.ioPressure60, metrics.ioPressure300);
+
+            for (let i = 0; i < pressure.length; i++) {
+                lines.push(pressure[i]);
+            }
         }
 
         return tooltipBlock("DISK", lines.join("\n"));
@@ -1081,7 +1099,13 @@ BarWidget {
 
             if (root.showExtended) {
                 lines.push("");
-                lines.push("pressure " + formatPsi(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300));
+                lines.push(root.centeredMark + "pressure");
+
+                const pressure = pressureRows(metrics.memoryPressure10, metrics.memoryPressure60, metrics.memoryPressure300);
+
+                for (let i = 0; i < pressure.length; i++) {
+                    lines.push(pressure[i]);
+                }
             }
 
             if (hasKernel || root.processMemory.length > 0) {
@@ -1102,9 +1126,10 @@ BarWidget {
 
         if (key === "swap") {
             const devices = metrics.swapDevices || [];
+            const totalPercent = metrics.swapTotalKb > 0 ? Math.round(100 * metrics.swapUsedKb / metrics.swapTotalKb) : 0;
             const lines = [];
 
-            if (devices.length > 0) {
+            if (root.showExtended && devices.length > 0) {
                 let nameWidth = 0;
                 let usedWidth = 0;
                 let totalWidth = 0;
@@ -1127,15 +1152,19 @@ BarWidget {
                     });
                 }
 
+                lines.push(root.centeredMark + root.iconSwap + " devices");
+
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
 
                     lines.push(row.name.padEnd(nameWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
                 }
             } else {
-                const percent = metrics.swapTotalKb > 0 ? Math.round(100 * metrics.swapUsedKb / metrics.swapTotalKb) : 0;
+                lines.push("total  " + formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
+            }
 
-                lines.push(formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + percent + "%)");
+            if (!root.showExtended) {
+                return tooltipBlock("SWAP", lines.join("\n"));
             }
 
             const zramLines = [];
@@ -1190,6 +1219,17 @@ BarWidget {
             if (cores.length > 0) {
                 lines.push(root.centeredMark + root.iconCpu + " cores");
 
+                const frequencies = root.showExtended ? (metrics.coreFreqMhz || []) : [];
+                let frequencyWidth = 0;
+
+                for (let i = 0; i < frequencies.length; i++) {
+                    const mhz = Number(frequencies[i]);
+
+                    if (Number.isFinite(mhz) && mhz > 0) {
+                        frequencyWidth = Math.max(frequencyWidth, String(Math.round(mhz)).length);
+                    }
+                }
+
                 // Two columns fit up to 20 cores; beyond that, add columns so
                 // the tooltip never grows past 10 rows.
                 const columns = Math.max(2, Math.ceil(cores.length / 10));
@@ -1203,16 +1243,12 @@ BarWidget {
                         const index = column * rows + row;
 
                         if (index < cores.length) {
-                            cells.push(coreEntry(String(index + 1), cores[index], labelWidth));
+                            cells.push(coreEntry(String(index + 1), cores[index], labelWidth, frequencies[index], frequencyWidth));
                         }
                     }
 
                     lines.push(cells.join("     "));
                 }
-            }
-
-            if (root.showExtended && metrics.cpuFreqMhz > 0) {
-                lines.push("freq " + formatFrequency(metrics.cpuFreqMhz));
             }
 
             const table = processTable(root.processCpu, false);

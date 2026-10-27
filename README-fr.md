@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.11.0
+Version 1.12.0
 
 [English](README.md) | **Français**
 
@@ -92,7 +92,7 @@ Le panneau permet d'activer ou de désactiver :
 
 - Boxes (encadrement des modules)
 - Colors (seuils colorés et icône batterie bleue sur secteur)
-- Extended data in tooltip (fréquence CPU, PSI, I/O disque, Wi-Fi, santé batterie)
+- Extended data in tooltip (fréquence par cœur, PSI, I/O disque, Wi-Fi, santé batterie)
 - Between modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Between icon and value (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
 
@@ -168,21 +168,23 @@ Le survol d'un module affiche une infobulle contextuelle :
   **Processes shown**, 10 par défaut),
   regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
-  Extended data ajoute une ligne de pression mémoire (`10s`, `60s`, `300s`) ;
-- **Swap** : chaque périphérique de swap est listé avec utilisé / total et son
-  pourcentage, zram compris. Une section `ZRAM` affiche, pour chaque zram, la
-  taille compressée, la taille originale, le ratio et la RAM utilisée. Si
-  ZSWAP est utilisé, un bloc `ZSWAP` affiche la taille compressée, la taille
-  originale et le ratio de compression ;
-- **Disk** : une ligne par système de fichiers **local** détecté, en GiB, avec
-  le pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
+  Extended data ajoute une section `pressure` avec une ligne par fenêtre
+  (`10s`, `60s`, `300s`) ;
+- **Swap** : total utilisé / total et le pourcentage. Extended data liste
+  chaque périphérique de swap (zram compris) avec son propre utilisé / total
+  et son pourcentage sous un titre `devices`, puis une section `ZRAM` (taille
+  compressée, taille originale, ratio et RAM utilisée par périphérique) et un
+  bloc `ZSWAP` (taille compressée, taille originale, ratio) s'il est utilisé ;
+- **Disk** : une section `usage` avec une ligne par système de fichiers
+  **local** détecté, en GiB, avec le pourcentage. Les pseudo-filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`,
   etc.) sont ignorés, ainsi que les montages éphémères sous `/tmp` (AppImage,
   FUSE) et `/run/user`. Les systèmes de fichiers réseau (NFS, CIFS, SSHFS…)
   sont ignorés : interroger leur usage peut bloquer plusieurs secondes quand
   le serveur est injoignable. Les points de montage qui partagent le même
   device/source sont dédupliqués : sur un root btrfs avec subvolumes, `/home`
   et `/var/log` n'apparaissent donc pas séparément de `/`. Extended data
-  ajoute les débits lecture/écriture disque et la pression I/O ;
+  ajoute une section `io` (débits lecture/écriture) et une section `pressure`
+  (`10s`, `60s`, `300s`) ;
 - **Réseau** : interface active, débit descendant (↓) et montant (↑), plus le
   total de la session (deltas depuis le démarrage du shell, remis à zéro au
   redémarrage et conservés lors d'un changement d'interface). Les deux débits
@@ -193,7 +195,10 @@ Le survol d'un module affiche une infobulle contextuelle :
   sans fil ;
 - **Temperature** : toutes les températures normales trouvées, triées de la
   plus élevée à la plus basse, avec le nom du capteur entre parenthèses ; la
-  barre affiche la plus élevée. L'icône suit le niveau (seuils sur la valeur
+  barre affiche la plus élevée. Les capteurs étiquetés gardent leur libellé,
+  les capteurs hwmon sans libellé affichent seulement le nom du périphérique
+  (`macsmc_battery`, `tas2764`), et les mesures qui partagent un nom sont
+  fusionnées en gardant la plus chaude ; L'icône suit le niveau (seuils sur la valeur
   arrondie affichée) : flocon sous 40 °C, thermomètre de 40 à 49 °C, chaleur de
   50 à 59 °C, alerte à partir de 60 °C ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge, et
@@ -211,13 +216,15 @@ Le survol d'un module affiche une infobulle contextuelle :
   par nom ; si moins de processus sont actifs, des lignes inactives à 0,0 %
   complètent la liste ; la liste est rafraîchie toutes les 5 s par défaut
   (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
-  Extended data ajoute la fréquence CPU moyenne ;
+  Extended data ajoute la fréquence de chaque cœur entre parenthèses, alignée
+  par colonne ;
 - **Uptime** : minutes sous une heure (`42m`), puis `3h42` ; le tooltip
   affiche la même durée avec un espace (`3h 42m`) ;
 - **GPU** : pourcentage courant.
 
 Les titres des tooltips (`CPU`, `RAM`, `NET`, etc.) et les intitulés de section
-(`cores`, `data`, `proc`, `ZRAM`, `ZSWAP`) sont en **gras** et dans la couleur
+(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `ZRAM`,
+`ZSWAP`) sont en **gras** et dans la couleur
 de texte du tooltip ; le corps utilise la couleur `muted` du thème. La ligne
 `kernel` des tooltips CPU et RAM est aussi en gras, mais conserve la couleur du
 corps. Les valeurs sont formatées à la demande, uniquement pendant le survol.
@@ -341,8 +348,8 @@ zombies), uniquement si Alerts est activé.
 
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`),
 `/proc/diskstats`, `/proc/net/wireless` et `/proc/uptime` sont lus toutes les
-5 s sans lancer de processus. La fréquence CPU est moyennée par `cpu-freq.sh`
-toutes les 5 s.
+5 s sans lancer de processus. `cpu-freq.sh` relève le `scaling_cur_freq` de
+chaque cœur toutes les 5 s.
 
 ## Vérifications
 
