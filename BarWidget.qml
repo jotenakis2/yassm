@@ -1246,7 +1246,7 @@ BarWidget {
         if (root.showExtended) {
             lines.push("");
             lines.push(root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"));
-            lines.push("↓ " + formatRateLong(metrics.diskReadKib) + "  ↑ " + formatRateLong(metrics.diskWriteKib));
+            lines.push("R " + formatRateLong(metrics.diskReadKib) + "  W " + formatRateLong(metrics.diskWriteKib));
             lines.push("");
             lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
@@ -1269,7 +1269,7 @@ BarWidget {
                     const entry = root.diskProcesses[i];
                     const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
 
-                    lines.push(name.padEnd(nameWidth) + "  ↓" + formatRateLong(entry.read / 1024).padStart(rateWidth) + "  ↑" + formatRateLong(entry.write / 1024).padStart(rateWidth));
+                    lines.push(name.padEnd(nameWidth) + "  R" + formatRateLong(entry.read / 1024).padStart(rateWidth) + "  W" + formatRateLong(entry.write / 1024).padStart(rateWidth));
                 }
             }
         }

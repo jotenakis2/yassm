@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.4
+Version 1.25.5
 
 **English** | [Français](README-fr.md)
 
@@ -253,9 +253,9 @@ Hovering a module shows a contextual tooltip:
   their usage can block for seconds when the server is unreachable. Mount
   points that share the same device/source are deduplicated: on a btrfs root
   with subvolumes, `/home` and `/var/log` therefore do not appear separately
-  from `/`. Extended data adds an `io` section (read/write rates), a
-  `pressure` section (`some`/`full` for `10s`, `60s`, `300s`) and a `proc`
-  section with the top processes by read/write rate (read from
+  from `/`. Extended data adds an `io` section (`R` read / `W` write rates),
+  a `pressure` section (`some`/`full` for `10s`, `60s`, `300s`) and a `proc`
+  section with the top processes by read/write rate (`R`/`W`, read from
   `/proc/<pid>/io`; only the user's processes are readable, and the sum does
   not rebuild the global rate because of writeback and root daemons);
 - **Network**: an `io` section with download (↓) and upload (↑) rates plus
