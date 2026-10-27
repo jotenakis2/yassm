@@ -764,6 +764,7 @@ PanelWindow {
                             Layout.fillHeight: true
 
                             Column {
+                                width: Style.space(64)
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: Style.spacing.xs
@@ -774,8 +775,8 @@ PanelWindow {
                                 Item {
                                     id: tempWarmLabelBox
 
-                                    anchors.right: parent.right
                                     width: Style.space(64)
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     height: Style.space(16)
                                     Label {
                                         anchors.centerIn: parent
@@ -797,6 +798,7 @@ PanelWindow {
                                 }
 
                                 NumberField {
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     label: ""
                                     from: 20
                                     to: 80
@@ -820,6 +822,7 @@ PanelWindow {
                             Layout.fillHeight: true
 
                             Column {
+                                width: Style.space(64)
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: Style.spacing.xs
@@ -830,8 +833,8 @@ PanelWindow {
                                 Item {
                                     id: tempHotLabelBox
 
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     width: Style.space(64)
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     height: Style.space(16)
 
                                     Label {
@@ -854,6 +857,7 @@ PanelWindow {
                                 }
 
                                 NumberField {
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     label: ""
                                     from: 21
                                     to: 100
@@ -879,6 +883,7 @@ PanelWindow {
                             Layout.fillHeight: true
 
                             Column {
+                                width: Style.space(64)
                                 anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: Style.spacing.xs
@@ -889,8 +894,8 @@ PanelWindow {
                                 Item {
                                     id: tempCriticalLabelBox
 
-                                    anchors.left: parent.left
                                     width: Style.space(64)
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     height: Style.space(16)
 
                                     Label {
@@ -913,6 +918,7 @@ PanelWindow {
                                 }
 
                                 NumberField {
+                                    anchors.horizontalCenter: parent.horizontalCenter
                                     label: ""
                                     from: 22
                                     to: 120
