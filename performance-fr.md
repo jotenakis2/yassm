@@ -32,7 +32,7 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
   lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.
 - **Aucun polling batterie** : UPower et NetworkManager sont événementiels via
-  D-Bus.
+  D-Bus ; seul le nombre de cycles est relu une fois par heure.
 
 ## Comment c'est mesuré
 

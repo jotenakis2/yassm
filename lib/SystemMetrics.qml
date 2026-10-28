@@ -1433,9 +1433,9 @@ Singleton {
     }
 
     Timer {
-        // Cycle count only changes when a full cycle completes, so a rare
-        // refresh is enough; the FileView already loads once the path exists.
-        interval: 600000
+        // Cycle count only changes when a full cycle completes, so an hourly
+        // refresh is plenty; the FileView already loads once the path exists.
+        interval: 3600000
         running: metrics.batteryCyclePath !== ""
         repeat: true
 

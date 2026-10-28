@@ -31,7 +31,7 @@ tooltip open and the screensaver/locking disabled.
   (extended data): 13 ms per sample for ≈120 readable processes, every
   Processes interval, and nothing once the tooltip closes.
 - **No battery polling**: UPower and NetworkManager are event-driven over
-  D-Bus.
+  D-Bus; only the cycle count is re-read once an hour.
 
 ## How it was measured
 
