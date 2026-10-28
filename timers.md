@@ -19,7 +19,6 @@ Only two things are fixed: **alerts** (60 s) and **battery cycles** (1 h).
 | Network rates, default route and interface | always |
 | CPU frequency | CPU tooltip open |
 | Disk I/O rates | DISK tooltip open |
-| Swap devices, zram, zswap | SWAP tooltip open |
 | Wi-Fi frequency and signal | NET tooltip open |
 
 ## Slow
@@ -31,6 +30,7 @@ Only two things are fixed: **alerts** (60 s) and **battery cycles** (1 h).
 | Uptime | always |
 | GPU utilization | always |
 | PSI `some`/`full` | RAM, CPU or DISK tooltip open |
+| Swap devices, zram, zswap | SWAP tooltip open |
 | Processes (CPU/RAM) | their tooltip open |
 | Disk I/O per process | DISK tooltip open |
 

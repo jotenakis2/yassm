@@ -1432,7 +1432,7 @@ Singleton {
             }
 
             Timer {
-                interval: metrics.fastIntervalMs
+                interval: metrics.slowIntervalMs
                 running: metrics.swapDetailEnabled
                 repeat: true
                 triggeredOnStart: true
@@ -1442,12 +1442,13 @@ Singleton {
         }
     }
 
-    // Slow background loop: what the bar itself displays beyond the fast
-    // values (disk usage, temperature and uptime). Alerts keep their own
-    // 60 s timer and battery cycles their hourly one.
+    // Slow loop: the bar values beyond the fast ones (disk usage, temperature,
+    // uptime) plus the tooltip details that do not need Fast (PSI, swap
+    // devices, zram/zswap). Alerts keep their own 60 s timer and battery
+    // cycles their hourly one.
     Timer {
         interval: metrics.slowIntervalMs
-        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled || metrics.pressureEnabled
+        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled || metrics.pressureEnabled || metrics.swapDetailEnabled
         repeat: true
         triggeredOnStart: true
 
@@ -1462,6 +1463,11 @@ Singleton {
                 cpuPressureFile.reload();
             }
 
+            if (metrics.swapDetailEnabled) {
+                procSwaps.reload();
+                zswapEnabledFile.reload();
+            }
+
             if (metrics.temperatureEnabled) {
                 temperatureProcess.running = true;
             }
@@ -1472,22 +1478,17 @@ Singleton {
         }
     }
 
-    // Tooltip-only data (PSI, disk I/O rates, swap devices, zram, Wi-Fi
-    // signal): read only while the matching tooltip is open.
+    // Tooltip-only fast data (disk I/O rates, Wi-Fi signal): read only while
+    // the matching tooltip is open.
     Timer {
         interval: metrics.fastIntervalMs
-        running: metrics.diskIoEnabled || metrics.swapDetailEnabled || metrics.wifiDetailEnabled
+        running: metrics.diskIoEnabled || metrics.wifiDetailEnabled
         repeat: true
         triggeredOnStart: true
 
         onTriggered: {
             if (metrics.diskIoEnabled) {
                 procDiskStats.reload();
-            }
-
-            if (metrics.swapDetailEnabled) {
-                procSwaps.reload();
-                zswapEnabledFile.reload();
             }
 
             if (metrics.wifiDetailEnabled && metrics.activeWifi) {

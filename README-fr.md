@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.4
+Version 1.27.5
 
 [English](README.md) | **Français**
 
@@ -29,7 +29,7 @@ D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, up
 | --- | --- | --- |
 | CPU | `/proc/stat` | Fast |
 | RAM | `/proc/meminfo` (`MemAvailable`) | Fast |
-| Swap | `/proc/meminfo` (barre), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast |
+| Swap | `/proc/meminfo` (barre), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast (barre) / Slow (infobulle) |
 | Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | Fast |
 | GPU | `gpu_busy_percent` sysfs, ou `nvidia-smi` | Slow |
 | Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | Slow |
@@ -468,8 +468,8 @@ mort ne peut pas figer le module disque.
 Le module réseau lit `/proc/net/dev` à chaque tick rapide ; `/proc/net/route`
 et `/proc/net/ipv6_route` sont relus au même tick rapide, sans processus.
 
-Les périphériques de swap, `mm_stat` par zram et l'état zswap ne sont lus que
-pendant l'ouverture du tooltip SWAP, sans processus.
+Les périphériques de swap, `mm_stat` par zram et l'état zswap ne sont lus
+qu'au tick Slow pendant l'ouverture du tooltip SWAP, sans processus.
 
 Le tooltip CPU lit des snapshots de `/proc/<pid>/stat` (aucun processus) pour
 des deltas instantanés ; les deux listes suivent l'échantillonnage lent, et

@@ -20,7 +20,6 @@ batterie** (1 h).
 | Débits réseau, route par défaut et interface | toujours |
 | Fréquence CPU | infobulle CPU ouverte |
 | Débits disque | infobulle DISK ouverte |
-| Périphériques de swap, zram, zswap | infobulle SWAP ouverte |
 | Fréquence et signal Wi-Fi | infobulle NET ouverte |
 
 ## Slow
@@ -32,6 +31,7 @@ batterie** (1 h).
 | Uptime | toujours |
 | Utilisation GPU | toujours |
 | PSI `some`/`full` | infobulle RAM, CPU ou DISK ouverte |
+| Périphériques de swap, zram, zswap | infobulle SWAP ouverte |
 | Processus (CPU/RAM) | leur infobulle ouverte |
 | E/S disque par processus | infobulle DISK ouverte |
 

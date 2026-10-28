@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.4
+Version 1.27.5
 
 **English** | [Français](README-fr.md)
 
@@ -29,7 +29,7 @@ More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 | --- | --- | --- |
 | CPU | `/proc/stat` | Fast |
 | RAM | `/proc/meminfo` (`MemAvailable`) | Fast |
-| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast |
+| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast (bar) / Slow (tooltip) |
 | Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | Fast |
 | GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | Slow |
 | Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | Slow |
@@ -457,7 +457,8 @@ and `/proc/net/ipv6_route` are read on the same fast tick, without spawning a
 process.
 
 Swap devices, the `mm_stat` of each zram device and the zswap state are read
-only while the SWAP tooltip is open, without spawning a process.
+on the Slow tick only while the SWAP tooltip is open, without spawning a
+process.
 
 The CPU tooltip reads `/proc/<pid>/stat` snapshots (no process) for
 instantaneous deltas; the RAM tooltip launches a `ps` (~15 ms, wrapped in
