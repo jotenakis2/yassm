@@ -56,3 +56,5 @@ batterie** (1 h).
   aucun processus ni lecture de fichier quand rien n'est survolé.
 - Slow ne descend pas sous 5 s car disque et température lancent chacun un
   script court.
+- Les adresses LAN et publique sont récupérées à l'ouverture de l'infobulle
+  NET (la recherche publique est mise en cache 5 minutes).

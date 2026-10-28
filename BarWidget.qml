@@ -1913,6 +1913,8 @@ BarWidget {
         entry.spacing = root.moduleSpacing;
         entry.refreshInterval = root.refreshInterval;
         entry.slowInterval = root.slowInterval;
+        // Older configs still carry the removed Processes interval.
+        delete entry.processInterval;
         entry.maxProcesses = root.maxProcesses;
         entry.moduleOrder = root.moduleOrder;
         entry.tempWarm = root.temperatureWarm;
@@ -1933,7 +1935,7 @@ BarWidget {
     }
 
     function updateGpuFromCommand() {
-        gpuProcess.command = ["bash", "-c", root.gpuCommand];
+        gpuProcess.command = ["timeout", "5", "bash", "-c", root.gpuCommand];
         gpuProcess.running = true;
     }
 
@@ -2130,7 +2132,7 @@ BarWidget {
     Process {
         id: procSnapshotProcess
 
-        command: ["bash", root.procSnapshotPath]
+        command: ["timeout", "5", "bash", root.procSnapshotPath]
 
         stdout: StdioCollector {
             id: procSnapshotOutput
@@ -2160,7 +2162,7 @@ BarWidget {
     Process {
         id: diskIoProcess
 
-        command: ["bash", root.diskIoScriptPath]
+        command: ["timeout", "5", "bash", root.diskIoScriptPath]
 
         stdout: StdioCollector {
             id: diskIoOutput

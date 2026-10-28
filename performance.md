@@ -28,8 +28,8 @@ tooltip open and the screensaver/locking disabled.
   frequency and CPU frequency only run while their tooltip is open;
   while the CPU tooltip is open it runs on the **Fast** tick.
 - **Per-process disk I/O only runs while the DISK tooltip is open**
-  (extended data): 13 ms per sample for ≈120 readable processes, every
-  Processes interval, and nothing once the tooltip closes.
+  (extended data): 13 ms per sample for ≈120 readable processes, at each
+  Slow tick, and nothing once the tooltip closes.
 - **No battery polling**: UPower and NetworkManager are event-driven over
   D-Bus; only the cycle count is re-read once an hour.
 

@@ -195,6 +195,11 @@ Singleton {
         // The rate needs two samples: read now, then once more shortly after
         // so the tooltip is not empty during the first detail tick.
         if (enabled && !wasEnabled) {
+            // Do not average the first rate over the gap since the last
+            // hover: start a fresh baseline, then let the 1 s warm-up give
+            // the first real rate.
+            metrics.diskIoPrevious = null;
+            metrics.diskIoPreviousTime = 0;
             procDiskStats.reload();
             diskIoWarmup.restart();
         }
@@ -301,8 +306,8 @@ Singleton {
     property var zombieAlerts: []
     readonly property bool hasSystemFailure: failedSystemUnits.length > 0 || failedUserUnits.length > 0
     readonly property bool hasZombies: zombieAlerts.length > 0
-    readonly property bool diskAlert: Math.round(diskPercent) >= 95
-    readonly property bool memoryAlert: Math.round(memoryPercent) >= 95
+    readonly property bool diskAlert: diskEnabled && Math.round(diskPercent) >= 95
+    readonly property bool memoryAlert: memoryEnabled && Math.round(memoryPercent) >= 95
     readonly property bool hasAlerts: hasSystemFailure || hasZombies || diskAlert || memoryAlert
 
     // Quickshell models are untyped from qmllint's point of view; keep the
@@ -1427,7 +1432,7 @@ Singleton {
             }
 
             Timer {
-                interval: 5000
+                interval: metrics.fastIntervalMs
                 running: metrics.swapDetailEnabled
                 repeat: true
                 triggeredOnStart: true
@@ -1650,7 +1655,7 @@ Singleton {
     Process {
         id: cpuFreqProcess
 
-        command: ["bash", metrics.cpuFreqScriptPath]
+        command: ["timeout", "5", "bash", metrics.cpuFreqScriptPath]
 
         stdout: StdioCollector {
             id: cpuFreqOutput

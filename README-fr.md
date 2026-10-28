@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.3
+Version 1.27.4
 
 [English](README.md) | **Français**
 
@@ -161,7 +161,7 @@ Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
 **Intervalles**
 
 - Échantillonnage rapide (métriques rapides : CPU, RAM, swap, charge, réseau, 1–5 s ; 1 par défaut)
-- Échantillonnage lent (disque, température et uptime, 5–30 s ; 10 par défaut)
+- Échantillonnage lent (disque, température, uptime et GPU, 5–30 s ; 10 par défaut)
 
 Toutes les cadences, y compris les fixes (alertes 60 s, cycles batterie 1 h) et
 les échantillonneurs à la demande des tooltips, sont détaillées dans
@@ -211,6 +211,7 @@ Exemple d'entrée :
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
+  "slowInterval": 10,
   "maxProcesses": 10,
   "tempWarm": 40,
   "tempHot": 50,
@@ -390,9 +391,12 @@ Quand il est actif, `alerts.sh` tourne toutes les 60 s et signale :
   rouge) ;
 - les zombies de plus de **60 s** (icône orange) ;
 - la racine à **95 % ou plus** (icône rouge), contrôlée avec le module disque
-  toutes les 10 s ;
+  au tick Slow ;
 - la RAM à **95 % ou plus** (icône rouge), contrôlée avec le module mémoire
-  chaque seconde.
+  au tick Fast.
+
+Toutes deux réutilisent les échantillons Disque et Mémoire : elles ne sont
+actives que si ces modules sont affichés.
 
 Il apparaît à l'extrême droite, après Battery, avec une icône seule (sans
 compteur), et uniquement tant qu'une alerte existe. Le tooltip liste les unités

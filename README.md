@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.3
+Version 1.27.4
 
 **English** | [Français](README-fr.md)
 
@@ -158,7 +158,7 @@ Green, Orange or Red label to read what that threshold changes.
 **Timers**
 
 - Fast sampling (fast metrics: CPU, RAM, swap, load, network, 1–5 s; default 1)
-- Slow sampling (disk, temperature and uptime, 5–30 s; default 10)
+- Slow sampling (disk, temperature, uptime and GPU, 5–30 s; default 10)
 
 Every cadence, including the fixed ones (alerts 60 s, battery cycles 1 h) and
 the on-demand tooltip samplers, is listed in [timers.md](timers.md).
@@ -205,6 +205,7 @@ Example entry:
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
+  "slowInterval": 10,
   "maxProcesses": 10,
   "tempWarm": 40,
   "tempHot": 50,
@@ -379,9 +380,12 @@ enabled, `alerts.sh` runs every 60 s and reports:
   (red icon);
 - zombies older than **60 s** (orange icon);
 - the root filesystem at **95 % or more** (red icon), checked with the disk
-  module every 10 s;
-- RAM at **95 % or more** (red icon), checked with the memory module every
-  second.
+  module on the Slow tick;
+- RAM at **95 % or more** (red icon), checked with the memory module on the
+  Fast tick.
+
+Both reuse the Disk and Memory samples, so they are active only while those
+modules are enabled.
 
 It appears at the far right, after Battery, with an icon only (no counter),
 and only while at least one alert exists. The tooltip lists the failed units

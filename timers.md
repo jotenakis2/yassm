@@ -54,3 +54,5 @@ Only two things are fixed: **alerts** (60 s) and **battery cycles** (1 h).
   read when nothing is hovered.
 - Slow never goes below 5 s because disk and temperature each spawn a short
   script.
+- LAN and WAN addresses are fetched when the NET tooltip opens (the WAN
+  lookup is cached for 5 minutes).

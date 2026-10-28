@@ -30,7 +30,7 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
   pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne au tick **Fast**.
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
-  lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.
+  lisibles, à chaque tick Slow, et rien une fois l'infobulle fermée.
 - **Aucun polling batterie** : UPower et NetworkManager sont événementiels via
   D-Bus ; seul le nombre de cycles est relu une fois par heure.
 
