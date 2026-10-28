@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.26.1
+Version 1.26.2
 
 **English** | [Français](README-fr.md)
 
@@ -25,7 +25,7 @@ More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 
 ## Modules
 
-| Module | Source | Refresh |
+| Module | Source | Interval |
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
@@ -157,7 +157,7 @@ Green, Orange or Red label to read what that threshold changes.
 
 **Timers**
 
-- Refresh (fast metrics: CPU, RAM, swap, load, network, 1–5 s; default 1)
+- Fast sampling (fast metrics: CPU, RAM, swap, load, network, 1–5 s; default 1)
 - Processes (tooltip process refresh, 2–10 s; default 5)
 - Slow sampling (disk, temperature and uptime, 5–30 s; default 10)
 
@@ -169,7 +169,7 @@ The **Between modules** slider sets the gap between modules from 0 to 5 spaces
 module's icon and value from 0 to 3 spaces (default 1, i.e. 7.19 px). At 0, a
 minimum gap of 2 px is kept.
 
-The **Refresh** slider drives the fast loop (CPU, RAM, swap, load, network).
+The **Fast sampling** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
 distort them. The **Processes** slider sets how often the CPU and RAM tooltips
 refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
@@ -421,7 +421,7 @@ The overhead is **0.05 % of the machine's total capacity** at the default 1 s
 refresh (0.60 points of one core out of 12 cores); YASSM's absolute footprint
 when enabled is 1.20 % of one core. The cost is dominated by the
 once-a-second update path
-(four `/proc` reads, binding updates, text layout), which is why the Refresh
+(four `/proc` reads, binding updates, text layout), which is why the Fast sampling
 slider has such a visible effect.
 
 Short-lived scripts (CPU time per run, 10 runs each; none stays alive):
@@ -443,7 +443,7 @@ IP lookup at most every 5 minutes.
 **Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
 process.** Module-aware sampling stops the reads and timers of hidden modules,
 and the CPU frequency process only exists while its tooltip is open, sampled
-every two Refresh intervals.
+at twice the Fast sampling interval.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
 the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk

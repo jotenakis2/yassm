@@ -27,8 +27,7 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
 - **~13 lancements de scripts par minute** au repos avec l'échantillonnage
   lent par défaut à 10 s (température et disque), plus une vérification des
   alertes par minute ; la fréquence Wi-Fi et la fréquence CPU ne tournent que
-  pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle
-  Refresh** (2 s au défaut de 1 s, 10 s à 5 s).
+  pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle d'échantillonnage rapide** (2 s au défaut de 1 s, 10 s à 5 s).
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
   lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.
@@ -91,7 +90,7 @@ absolue de YASSM activé est de 1,20 % d'un cœur, soit 0,10 % de la machine.
 
 Le coût est dominé par la boucle d'une seconde : quatre lectures `/proc`, mises
 à jour de bindings et mise en page du texte des modules visibles. C'est
-pourquoi le curseur **Refresh** (1–5 s) a un effet aussi net : à 5 s, le shell
+pourquoi le curseur **Échantillonnage rapide** (1–5 s) a un effet aussi net : à 5 s, le shell
 baisse d'un tiers.
 
 Les réveils suivent la même courbe : +830/min à 1 s (≈ 14/s), +560/min à 5 s.

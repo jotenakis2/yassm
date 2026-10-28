@@ -26,7 +26,7 @@ tooltip open and the screensaver/locking disabled.
 - **~13 script spawns per minute** when idle with the default 10 s slow
   sampling (temperature and disk), plus one alert check per minute; Wi-Fi
   frequency and CPU frequency only run while their tooltip is open;
-  while the CPU tooltip is open it runs every **2 × the Refresh interval**
+  while the CPU tooltip is open it runs every **2 × the Fast sampling interval**
   (2 s at the default 1 s, 10 s at 5 s).
 - **Per-process disk I/O only runs while the DISK tooltip is open**
   (extended data): 13 ms per sample for ≈120 readable processes, every
@@ -91,7 +91,7 @@ i.e. 0.10 % of the machine.
 
 The cost is dominated by the once-a-second update path: four `/proc` reads,
 binding updates and text layout for the visible modules. That is why the
-**Refresh** slider (1–5 s) has such a visible effect: at 5 s the shell drops
+**Fast sampling** slider (1–5 s) has such a visible effect: at 5 s the shell drops
 by a third.
 
 Wakeups follow the same curve: +830/min at 1 s (≈ 14/s), +560/min at 5 s.

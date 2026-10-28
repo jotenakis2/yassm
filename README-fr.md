@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.26.1
+Version 1.26.2
 
 [English](README.md) | **Français**
 
@@ -25,7 +25,7 @@ D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, up
 
 ## Modules
 
-| Module | Source | Rafraîchissement |
+| Module | Source | Intervalle |
 | --- | --- | --- |
 | CPU | `/proc/stat` | 1 s |
 | RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
@@ -435,7 +435,7 @@ Le surcoût est de **0,05 % de la capacité totale** au refresh par défaut de
 1 s (0,60 point d'un cœur sur 12) ; l'empreinte absolue de YASSM activé est de
 1,20 % d'un cœur. Le coût est dominé par la boucle d'une seconde (quatre lectures
 `/proc`, mises à jour de bindings et mise en page du texte), d'où l'effet
-visible du curseur Refresh.
+visible du curseur **Échantillonnage rapide**.
 
 Scripts éphémères (temps CPU par exécution, 10 exécutions ; aucun ne reste
 vivant) :

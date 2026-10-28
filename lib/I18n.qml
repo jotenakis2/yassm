@@ -92,7 +92,7 @@ QtObject {
             "settings.icon_gap_tip": "Gap between each icon and its value, in cells.\n0–3 cells, with a 2 px minimum at 0.",
             "settings.processes_shown": "Processes shown",
             "settings.processes_shown_tip": "Maximum userland processes listed in CPU and RAM tooltips.\nThe kernel line (extended data) is extra.",
-            "settings.refresh": "Refresh",
+            "settings.refresh": "Fast sampling",
             "settings.refresh_tip": "Fast sampling: CPU, RAM, swap, load and network.\nDisk, temperature, GPU and zram always stay at 10 s\nto limit CPU overhead.",
             "settings.processes": "Processes",
             "settings.slow": "Slow sampling",

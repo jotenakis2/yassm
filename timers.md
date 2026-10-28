@@ -5,7 +5,7 @@ Every cadence used by YASSM, by data. **Fast** and **Slow** are user settings
 
 | Data | Cadence | Kind | Source |
 | --- | --- | --- | --- |
-| CPU, per-core %, load | **Fast** (Refresh, 1–5 s) | background | `/proc/stat`, `/proc/loadavg` |
+| CPU, per-core %, load | **Fast sampling** (1–5 s) | background | `/proc/stat`, `/proc/loadavg` |
 | RAM, swap % | **Fast** | background | `/proc/meminfo` |
 | Network rates | **Fast** | background | `/proc/net/dev` |
 | Default route, interface, online state | **Fast** | background | `/proc/net/route`, `/proc/net/ipv6_route` |
