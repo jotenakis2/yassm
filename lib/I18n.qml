@@ -215,7 +215,7 @@ QtObject {
             "settings.icon_gap_tip": "Espace entre chaque icône et sa valeur, en cellules.\n0 à 3 cellules, minimum 2 px à 0.",
             "settings.processes_shown": "Processus affichés",
             "settings.processes_shown_tip": "Nombre maximal de processus espace-utilisateurs listés dans les infobulles CPU et RAM.\nLa ligne noyau (données étendues) est en plus.",
-            "settings.refresh": "Rafraîchissement",
+            "settings.refresh": "Échantillonnage rapide",
             "settings.refresh_tip": "Échantillonnage rapide : CPU, RAM, swap, charge et réseau.\nLe disque, la température, le GPU et zram restent à 10 s\npour limiter la charge CPU.",
             "settings.processes": "Processus",
             "settings.slow": "Échantillonnage lent",

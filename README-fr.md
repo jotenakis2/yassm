@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.26.0
+Version 1.26.1
 
 [English](README.md) | **Français**
 
@@ -160,7 +160,7 @@ Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
 
 **Intervalles**
 
-- Rafraîchissement (métriques rapides : CPU, RAM, swap, charge, réseau, 1–5 s ; 1 par défaut)
+- Échantillonnage rapide (métriques rapides : CPU, RAM, swap, charge, réseau, 1–5 s ; 1 par défaut)
 - Processus (rafraîchissement des processus de l'infobulle, 2–10 s ; 5 par défaut)
 - Échantillonnage lent (disque, température et uptime, 5–30 s ; 10 par défaut)
 
@@ -173,7 +173,7 @@ espaces (2 par défaut). Le curseur **Entre l'icône et la valeur** règle l'esp
 entre l'icône et la valeur de chaque module de 0 à 3 espaces (1 par défaut,
 soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
 
-Le curseur **Rafraîchissement** pilote la boucle rapide (CPU, RAM, swap,
+Le curseur **Échantillonnage rapide** pilote la boucle rapide (CPU, RAM, swap,
 charge, réseau). Les débits réseau utilisent le temps réel écoulé, donc
 changer l'intervalle ne les fausse pas. Le curseur **Processus** règle la
 fréquence de rafraîchissement des infobulles CPU et RAM ; il descend jusqu'à

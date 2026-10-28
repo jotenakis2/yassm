@@ -5,7 +5,7 @@ des réglages (Settings → Intervalles) ; les autres valeurs sont fixes.
 
 | Donnée | Cadence | Type | Source |
 | --- | --- | --- | --- |
-| CPU, % par cœur, load | **Fast** (Rafraîchissement, 1–5 s) | fond | `/proc/stat`, `/proc/loadavg` |
+| CPU, % par cœur, load | **Fast** (Échantillonnage rapide, 1–5 s) | fond | `/proc/stat`, `/proc/loadavg` |
 | RAM, swap % | **Fast** | fond | `/proc/meminfo` |
 | Débits réseau | **Fast** | fond | `/proc/net/dev` |
 | Route par défaut, interface, état en ligne | **Fast** | fond | `/proc/net/route`, `/proc/net/ipv6_route` |
