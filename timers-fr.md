@@ -18,10 +18,10 @@ batterie** (1 h).
 | CPU, % par cœur, load | toujours |
 | RAM, swap % | toujours |
 | Débits réseau, route par défaut et interface | toujours |
-| Fréquence CPU | infobulle CPU ouvert |
-| Débits disque | infobulle DISK ouvert |
-| Périphériques de swap, zram, zswap | infobulle SWAP ouvert |
-| Fréquence et signal Wi-Fi | infobulle NET ouvert |
+| Fréquence CPU | infobulle CPU ouverte |
+| Débits disque | infobulle DISK ouverte |
+| Périphériques de swap, zram, zswap | infobulle SWAP ouverte |
+| Fréquence et signal Wi-Fi | infobulle NET ouverte |
 
 ## Slow
 
@@ -31,8 +31,8 @@ batterie** (1 h).
 | Température | toujours |
 | Uptime | toujours |
 | Utilisation GPU | toujours |
-| PSI `some`/`full` | infobulle RAM, CPU ou DISK ouvert |
-| Processus (CPU/RAM) | leur infobulle ouvert |
+| PSI `some`/`full` | infobulle RAM, CPU ou DISK ouverte |
+| Processus (CPU/RAM) | leur infobulle ouverte |
 | E/S disque par processus | infobulle DISK ouvert |
 
 ## Fixes
@@ -52,7 +52,7 @@ batterie** (1 h).
 
 ## Remarques
 
-- Les lignes « à l'ouverture » ne tournent que pendant le infobulle concerné :
+- Les lignes « à l'ouverture » ne tournent que pendant l'infobulle concernée :
   aucun processus ni lecture de fichier quand rien n'est survolé.
 - Slow ne descend pas sous 5 s car disque et température lancent chacun un
   script court.
