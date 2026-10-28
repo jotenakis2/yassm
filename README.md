@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.5
+Version 1.25.6
 
 **English** | [Français](README-fr.md)
 

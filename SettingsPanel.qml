@@ -1253,7 +1253,11 @@ PanelWindow {
         Rectangle {
             id: tempTip
 
-            readonly property int anchorY: tempBlock.mapToItem(settingsPanel, 0, 0).y
+            // Reactive position: mapToItem() is a function call, so a binding
+            // on it would only be evaluated once (while the section is still
+            // hidden, hence the bubble stuck at the top). tempBlock.y and the
+            // scroll offset are properties, so this follows both.
+            readonly property real anchorY: root.panelPadding + tempBlock.y - settingsFlick.contentY
 
             x: root.panelPadding
             width: settingsPanel.width - root.panelPadding * 2
