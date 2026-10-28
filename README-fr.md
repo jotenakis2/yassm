@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.9
+Version 1.26.0
 
 [English](README.md) | **Français**
 
@@ -160,8 +160,13 @@ Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
 
 **Intervalles**
 
-- Rafraîchissement (intervalle d'échantillonnage des métriques, 1–5 s ; 1 par défaut)
+- Rafraîchissement (métriques rapides : CPU, RAM, swap, charge, réseau, 1–5 s ; 1 par défaut)
 - Processus (rafraîchissement des processus de l'infobulle, 2–10 s ; 5 par défaut)
+- Échantillonnage lent (disque, température et uptime, 5–30 s ; 10 par défaut)
+
+Toutes les cadences, y compris les fixes (alertes 60 s, cycles batterie 1 h) et
+les échantillonneurs à la demande des tooltips, sont détaillées dans
+[timers-fr.md](timers-fr.md).
 
 Le curseur **Entre les modules** règle l'espacement entre les modules de 0 à 5
 espaces (2 par défaut). Le curseur **Entre l'icône et la valeur** règle l'espace

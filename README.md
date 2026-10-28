@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.9
+Version 1.26.0
 
 **English** | [Français](README-fr.md)
 
@@ -157,8 +157,12 @@ Green, Orange or Red label to read what that threshold changes.
 
 **Timers**
 
-- Refresh (metrics sampling interval, 1–5 s; default 1)
+- Refresh (fast metrics: CPU, RAM, swap, load, network, 1–5 s; default 1)
 - Processes (tooltip process refresh, 2–10 s; default 5)
+- Slow sampling (disk, temperature and uptime, 5–30 s; default 10)
+
+Every cadence, including the fixed ones (alerts 60 s, battery cycles 1 h) and
+the on-demand tooltip samplers, is listed in [timers.md](timers.md).
 
 The **Between modules** slider sets the gap between modules from 0 to 5 spaces
 (default 2). The **Between icon and value** slider sets the gap between each

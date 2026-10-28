@@ -24,9 +24,10 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
   machine) au refresh par défaut de 1 s, et ≈ 0,4 point à 5 s.
 - **Coût absolu de YASSM activé** ≈ 1,4 point d'un cœur (≈ 0,12 % de la
   machine), dont l'essentiel est la mise à jour de la barre à 1 Hz.
-- **~15 lancements de scripts par minute** au repos (température, disque,
-  alertes, fréquence Wi-Fi), et **0** pour la fréquence CPU hors de son
-  tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle
+- **~13 lancements de scripts par minute** au repos avec l'échantillonnage
+  lent par défaut à 10 s (température et disque), plus une vérification des
+  alertes par minute ; la fréquence Wi-Fi et la fréquence CPU ne tournent que
+  pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle
   Refresh** (2 s au défaut de 1 s, 10 s à 5 s).
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus

@@ -125,6 +125,11 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(2, Math.min(10, value)) : 5;
     }
 
+    readonly property int slowInterval: {
+        const value = Math.round(Number(setting("slowInterval", 10)));
+        return Number.isFinite(value) ? Math.max(5, Math.min(30, value)) : 10;
+    }
+
     // Temperature thresholds are user-tunable: machines differ by tens of
     // degrees. Values are normalised so an inconsistent shell.json cannot
     // invert the order.
@@ -1138,11 +1143,8 @@ BarWidget {
         const values = [ten, sixty, threeHundred].map(function (value) {
             return Number(value || 0).toFixed(1) + "%";
         });
-        let valueWidth = 4;
-
-        for (let i = 0; i < values.length; i++) {
-            valueWidth = Math.max(valueWidth, values[i].length);
-        }
+        // Fixed columns: PSI values never shift when a digit appears.
+        const valueWidth = 6;
 
         return labels.map(function (label, index) {
             return label.padStart(4) + "  " + values[index].padStart(valueWidth);
@@ -1158,11 +1160,8 @@ BarWidget {
             return Number(value || 0).toFixed(1) + "%";
         });
         const labelWidth = 4;
-        let valueWidth = 4;
-
-        for (let i = 0; i < some.length; i++) {
-            valueWidth = Math.max(valueWidth, some[i].length, full[i].length);
-        }
+        // Fixed columns: PSI values never shift when a digit appears.
+        const valueWidth = 6;
 
         const lines = ["".padEnd(labelWidth) + "  " + "some".padStart(valueWidth) + "  " + "full".padStart(valueWidth)];
 
@@ -1921,6 +1920,7 @@ BarWidget {
         entry.spacing = root.moduleSpacing;
         entry.refreshInterval = root.refreshInterval;
         entry.processInterval = root.processInterval;
+        entry.slowInterval = root.slowInterval;
         entry.maxProcesses = root.maxProcesses;
         entry.moduleOrder = root.moduleOrder;
         entry.tempWarm = root.temperatureWarm;
@@ -1974,8 +1974,11 @@ BarWidget {
         metrics.setLoadUser(root, root.showLoad);
         metrics.setNetworkUser(root, root.showNet);
         metrics.setUptimeUser(root, root.showUptime);
-        metrics.setPressureUser(root, extended && (root.showCpu || root.showMemory || root.showDisk));
+        metrics.setPressureUser(root, extended && (root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || root.hoveredSegment === "disk"));
         metrics.setCpuFreqUser(root, extended && root.showCpu && root.hoveredSegment === "cpu");
+        metrics.setDiskIoUser(root, extended && root.showDisk && root.hoveredSegment === "disk");
+        metrics.setSwapDetailUser(root, extended && root.showSwap && root.hoveredSegment === "swap");
+        metrics.setWifiDetailUser(root, extended && root.showNet && root.hoveredSegment === "net");
     }
 
     function releaseMetricsSubscriptions() {
@@ -1992,6 +1995,9 @@ BarWidget {
         metrics.setUptimeUser(root, false);
         metrics.setPressureUser(root, false);
         metrics.setCpuFreqUser(root, false);
+        metrics.setDiskIoUser(root, false);
+        metrics.setSwapDetailUser(root, false);
+        metrics.setWifiDetailUser(root, false);
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -2220,6 +2226,13 @@ BarWidget {
         target: Yassm.SystemMetrics
         property: "fastIntervalMs"
         value: root.refreshInterval * 1000
+        restoreMode: Binding.RestoreNone
+    }
+
+    Binding {
+        target: Yassm.SystemMetrics
+        property: "slowIntervalMs"
+        value: root.slowInterval * 1000
         restoreMode: Binding.RestoreNone
     }
 
@@ -2512,5 +2525,5 @@ BarWidget {
     onShowAlertsChanged: root.syncMetricsSubscriptions()
     onShowUptimeChanged: root.syncMetricsSubscriptions()
     onShowExtendedChanged: root.syncMetricsSubscriptions()
-    onHoveredSegmentChanged: Yassm.SystemMetrics.setCpuFreqUser(root, root.showExtended && root.showCpu && root.hoveredSegment === "cpu")
+    onHoveredSegmentChanged: root.syncMetricsSubscriptions()
 }

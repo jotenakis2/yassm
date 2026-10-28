@@ -23,8 +23,9 @@ tooltip open and the screensaver/locking disabled.
   capacity) at the default 1 s refresh, dropping to ≈ 0.4 points at 5 s.
 - **YASSM's absolute cost** when enabled is ≈ 1.4 points of one core
   (≈ 0.12 % of the machine), most of which is the 1 Hz bar update itself.
-- **~15 script spawns per minute** when idle (temperature, disk, alerts,
-  Wi-Fi frequency), and **0** for the CPU frequency outside its tooltip;
+- **~13 script spawns per minute** when idle with the default 10 s slow
+  sampling (temperature and disk), plus one alert check per minute; Wi-Fi
+  frequency and CPU frequency only run while their tooltip is open;
   while the CPU tooltip is open it runs every **2 × the Refresh interval**
   (2 s at the default 1 s, 10 s at 5 s).
 - **Per-process disk I/O only runs while the DISK tooltip is open**

@@ -14,7 +14,7 @@ Singleton {
     id: metrics
 
     property int fastIntervalMs: 1000
-    readonly property int diskIntervalMs: 10000
+    property int slowIntervalMs: 10000
 
     property int nproc: 1
 
@@ -90,6 +90,9 @@ Singleton {
     property var uptimeUsers: []
     property var pressureUsers: []
     property var cpuFreqUsers: []
+    property var diskIoUsers: []
+    property var swapDetailUsers: []
+    property var wifiDetailUsers: []
     readonly property bool temperatureEnabled: temperatureUsers.length > 0
     readonly property bool diskEnabled: diskUsers.length > 0
     readonly property bool swapEnabled: swapUsers.length > 0
@@ -101,6 +104,9 @@ Singleton {
     readonly property bool uptimeEnabled: uptimeUsers.length > 0
     readonly property bool pressureEnabled: pressureUsers.length > 0
     readonly property bool cpuFreqEnabled: cpuFreqUsers.length > 0
+    readonly property bool diskIoEnabled: diskIoUsers.length > 0
+    readonly property bool swapDetailEnabled: swapDetailUsers.length > 0
+    readonly property bool wifiDetailEnabled: wifiDetailUsers.length > 0
     readonly property bool fastEnabled: cpuEnabled || memoryEnabled || swapEnabled || loadEnabled || networkEnabled
 
     function withUser(users, widget, enabled) {
@@ -181,6 +187,44 @@ Singleton {
         metrics.cpuFreqUsers = withUser(metrics.cpuFreqUsers, widget, enabled);
     }
 
+    function setDiskIoUser(widget, enabled) {
+        const wasEnabled = metrics.diskIoEnabled;
+
+        metrics.diskIoUsers = withUser(metrics.diskIoUsers, widget, enabled);
+
+        // The rate needs two samples: read now, then once more shortly after
+        // so the tooltip is not empty during the first detail tick.
+        if (enabled && !wasEnabled) {
+            procDiskStats.reload();
+            diskIoWarmup.restart();
+        }
+    }
+
+    function setSwapDetailUser(widget, enabled) {
+        const wasEnabled = metrics.swapDetailEnabled;
+
+        metrics.swapDetailUsers = withUser(metrics.swapDetailUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            procSwaps.reload();
+            zswapEnabledFile.reload();
+        }
+    }
+
+    function setWifiDetailUser(widget, enabled) {
+        const wasEnabled = metrics.wifiDetailEnabled;
+
+        metrics.wifiDetailUsers = withUser(metrics.wifiDetailUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            procWireless.reload();
+
+            if (metrics.activeWifi) {
+                wifiFreqProcess.running = true;
+            }
+        }
+    }
+
     property string networkInterface: ""
     property string networkRouteV4: ""
     property string networkRouteV6: ""
@@ -234,7 +278,6 @@ Singleton {
     property real wanIpUpdatedAt: 0
 
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
-    readonly property int temperatureIntervalMs: 10000
     property bool hasTemperature: false
     property real temperatureC: 0
     property var temperatures: []
@@ -1384,8 +1427,8 @@ Singleton {
             }
 
             Timer {
-                interval: 10000
-                running: metrics.swapEnabled
+                interval: 5000
+                running: metrics.swapDetailEnabled
                 repeat: true
                 triggeredOnStart: true
 
@@ -1394,42 +1437,67 @@ Singleton {
         }
     }
 
-    // Interfaces and swap devices change slowly. Keeping these reads out of
-    // the fast loop avoids rebuilding swapDevices every second.
+    // Slow background loop: what the bar itself displays beyond the fast
+    // values (disk usage, temperature and uptime). Alerts keep their own
+    // 60 s timer and battery cycles their hourly one.
     Timer {
-        interval: 5000
-        running: metrics.networkEnabled || metrics.pressureEnabled || metrics.uptimeEnabled || metrics.swapEnabled || metrics.diskEnabled
+        interval: metrics.slowIntervalMs
+        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled
         repeat: true
         triggeredOnStart: true
 
         onTriggered: {
-            if (metrics.networkEnabled) {
-                procNetRoute.reload();
-                procNetIpv6Route.reload();
-
-                if (metrics.activeWifi) {
-                    procWireless.reload();
-                }
+            if (metrics.diskEnabled) {
+                mountProcess.running = true;
             }
 
+            if (metrics.temperatureEnabled) {
+                temperatureProcess.running = true;
+            }
+
+            if (metrics.uptimeEnabled) {
+                procUptime.reload();
+            }
+        }
+    }
+
+    // Tooltip-only data (PSI, disk I/O rates, swap devices, zram, Wi-Fi
+    // signal): read only while the matching tooltip is open.
+    Timer {
+        interval: 5000
+        running: metrics.pressureEnabled || metrics.diskIoEnabled || metrics.swapDetailEnabled || metrics.wifiDetailEnabled
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: {
             if (metrics.pressureEnabled) {
                 memoryPressureFile.reload();
                 ioPressureFile.reload();
                 cpuPressureFile.reload();
             }
 
-            if (metrics.uptimeEnabled) {
-                procUptime.reload();
+            if (metrics.diskIoEnabled) {
+                procDiskStats.reload();
             }
 
-            if (metrics.swapEnabled) {
+            if (metrics.swapDetailEnabled) {
+                procSwaps.reload();
                 zswapEnabledFile.reload();
             }
 
-            if (metrics.diskEnabled) {
-                procDiskStats.reload();
+            if (metrics.wifiDetailEnabled && metrics.activeWifi) {
+                procWireless.reload();
             }
         }
+    }
+
+    Timer {
+        id: diskIoWarmup
+
+        interval: 1000
+        repeat: false
+
+        onTriggered: procDiskStats.reload()
     }
 
     Timer {
@@ -1440,15 +1508,6 @@ Singleton {
         repeat: true
 
         onTriggered: batteryCyclesFile.reload()
-    }
-
-    Timer {
-        interval: 5000
-        running: metrics.swapEnabled
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: procSwaps.reload()
     }
 
     Timer {
@@ -1474,6 +1533,8 @@ Singleton {
             }
 
             if (metrics.networkEnabled) {
+                procNetRoute.reload();
+                procNetIpv6Route.reload();
                 procNetDev.reload();
             }
         }
@@ -1513,24 +1574,6 @@ Singleton {
                 console.warn("yassm: temperature scan exited with", exitCode);
             }
         }
-    }
-
-    Timer {
-        interval: metrics.temperatureIntervalMs
-        running: metrics.temperatureEnabled
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: temperatureProcess.running = true
-    }
-
-    Timer {
-        interval: metrics.diskIntervalMs
-        running: metrics.diskEnabled
-        repeat: true
-        triggeredOnStart: true
-
-        onTriggered: mountProcess.running = true
     }
 
     Process {
@@ -1594,10 +1637,10 @@ Singleton {
     }
 
     Timer {
-        // Roaming is the only thing that changes the frequency, so a slow
-        // refresh is enough; no process runs while the link is wired.
-        interval: 30000
-        running: metrics.activeWifi
+        // Only shown in the NET tooltip: sample it while that tooltip is
+        // open (roaming is the only thing that changes the frequency).
+        interval: 10000
+        running: metrics.wifiDetailEnabled && metrics.activeWifi
         repeat: true
         triggeredOnStart: true
 
