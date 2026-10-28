@@ -105,11 +105,10 @@ Idle state (no tooltip), reference machine:
 | `temperature.sh` (temperatures + fans) | 14 ms | 6×/min | 85 ms |
 | `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
 | `findmnt` (local filesystems) | 1 ms | 6×/min | 6 ms |
-| `wifi-freq.sh` | 6 ms | 2×/min (wireless only) | 12 ms |
-| Battery cycle count (`sysfs`) | < 1 ms | 1×/10 min | < 0.1 ms |
-| **Total** | | | **≈ 126 ms/min** |
+| Battery cycle count (`sysfs`) | < 1 ms | 1×/h | < 0.1 ms |
+| **Total** | | | **≈ 114 ms/min** |
 
-≈ 126 ms of CPU per minute is **0.21 % of one core** (0.018 % of the
+≈ 114 ms of CPU per minute is **0.19 % of one core** (0.018 % of the
 machine). None of these processes stays alive between runs.
 
 On demand only:
@@ -117,11 +116,12 @@ On demand only:
 | Action | Cost | When |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
-| `cpu-freq.sh` | 3 ms | CPU tooltip open, every 5 s |
-| `ps -eo … rss` | ~15 ms | RAM tooltip open, every 5 s |
+| `cpu-freq.sh` | 3 ms | CPU tooltip open, 2 × Fast (4 s here) |
+| `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |
+| `disk-io.sh` | 13 ms | DISK tooltip open, at the Slow interval |
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
-| `wifi-freq.sh` | 6 ms | each NET tooltip open (wireless) |
-| `/proc/net/wireless` | < 1 ms | each NET tooltip open (wireless) |
+| `wifi-freq.sh` | 6 ms | NET tooltip open, every 10 s (wireless) |
+| `/proc/net/wireless` | < 1 ms | NET tooltip open, every 5 s (wireless) |
 | `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, at most every 5 min |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |
 | `deps.sh` | 5 ms | once at startup (Settings warning) |

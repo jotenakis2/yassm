@@ -1200,66 +1200,6 @@ PanelWindow {
                         }
 
                         HoverHandler {
-                            id: processesHover
-                        }
-
-                        PanelToolTip {
-                            visible: processesHover.hovered
-                            text: Yassm.I18n.t("settings.processes_tip")
-                        }
-
-                        Label {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignVCenter
-                            text: Yassm.I18n.t("settings.processes")
-                            palette.windowText: ShellColor.popups.text
-                            font.family: Style.font.family
-                            font.pixelSize: Style.font.body
-                        }
-
-                        Text {
-                            Layout.preferredWidth: Style.space(28)
-                            Layout.alignment: Qt.AlignVCenter
-                            horizontalAlignment: Text.AlignRight
-                            text: (root.hostWidget ? String(root.hostWidget.processInterval) : "5") + " s"
-                            color: ShellColor.popups.text
-                            font.family: Style.font.family
-                            font.pixelSize: Style.font.body
-                        }
-
-                        PanelSlider {
-                            Layout.preferredWidth: Style.space(160)
-                            Layout.alignment: Qt.AlignVCenter
-                            bar: root.hostBar
-                            minimum: 2
-                            maximum: 10
-                            step: 1
-                            integer: true
-                            value: root.hostWidget ? root.hostWidget.processInterval : 5
-
-                            onReleased: function (value) {
-                                if (root.hostWidget) {
-                                    root.hostWidget.updateSetting("processInterval", Math.round(value));
-                                }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Style.space(32)
-                        spacing: Style.space(8)
-
-                        WheelHandler {
-                            acceptedDevices: PointerDevice.Mouse
-
-                            onWheel: function (event) {
-                                root.scrollPanel(event.angleDelta.y);
-                                event.accepted = true;
-                            }
-                        }
-
-                        HoverHandler {
                             id: slowHover
                         }
 

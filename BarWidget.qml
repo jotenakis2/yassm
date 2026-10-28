@@ -120,11 +120,6 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(1, Math.min(5, value)) : 1;
     }
 
-    readonly property int processInterval: {
-        const value = Math.round(Number(setting("processInterval", 5)));
-        return Number.isFinite(value) ? Math.max(2, Math.min(10, value)) : 5;
-    }
-
     readonly property int slowInterval: {
         const value = Math.round(Number(setting("slowInterval", 10)));
         return Number.isFinite(value) ? Math.max(5, Math.min(30, value)) : 10;
@@ -1919,7 +1914,6 @@ BarWidget {
         entry.iconGap = root.iconGap;
         entry.spacing = root.moduleSpacing;
         entry.refreshInterval = root.refreshInterval;
-        entry.processInterval = root.processInterval;
         entry.slowInterval = root.slowInterval;
         entry.maxProcesses = root.maxProcesses;
         entry.moduleOrder = root.moduleOrder;
@@ -2181,7 +2175,7 @@ BarWidget {
     }
 
     // First CPU sample only gives a baseline; take a second one quickly so the
-    // tooltip does not stay empty for the whole Processes interval.
+    // tooltip does not stay empty for the whole slow interval.
     Timer {
         id: cpuWarmupTimer
         interval: 1000
@@ -2198,9 +2192,10 @@ BarWidget {
         onTriggered: root.startDiskIo()
     }
 
-    // Keep the process list live while the CPU or RAM tooltip is open.
+    // Keep the process list live while the CPU, RAM or DISK tooltip is open,
+    // at the slow background cadence.
     Timer {
-        interval: root.processInterval * 1000
+        interval: root.slowInterval * 1000
         repeat: true
         running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || (root.hoveredSegment === "disk" && root.showExtended)
 

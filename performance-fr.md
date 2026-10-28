@@ -104,11 +104,10 @@ Au repos (aucun tooltip), machine de référence :
 | `temperature.sh` (températures + ventilateurs) | 14 ms | 6×/min | 85 ms |
 | `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
 | `findmnt` (systèmes de fichiers locaux) | 1 ms | 6×/min | 6 ms |
-| `wifi-freq.sh` | 6 ms | 2×/min (sans fil) | 12 ms |
-| Cycles batterie (`sysfs`) | < 1 ms | 1×/10 min | < 0,1 ms |
-| **Total** | | | **≈ 126 ms/min** |
+| Cycles batterie (`sysfs`) | < 1 ms | 1×/h | < 0,1 ms |
+| **Total** | | | **≈ 114 ms/min** |
 
-≈ 126 ms de CPU par minute, soit **0,21 % d'un cœur** (0,018 % de la machine).
+≈ 114 ms de CPU par minute, soit **0,19 % d'un cœur** (0,018 % de la machine).
 Aucun de ces processus ne survit entre deux exécutions.
 
 À la demande uniquement :
@@ -116,11 +115,12 @@ Aucun de ces processus ne survit entre deux exécutions.
 | Action | Coût | Quand |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms chacun | tooltip CPU ouvert (photo initiale + warmup de 1 s) |
-| `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, toutes les 5 s |
-| `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, toutes les 5 s |
+| `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, 2 × Fast (4 s ici) |
+| `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, à l'échantillonnage lent |
+| `disk-io.sh` | 13 ms | tooltip DISK ouvert, à l'échantillonnage lent |
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
-| `wifi-freq.sh` | 6 ms | à chaque ouverture du tooltip NET (sans fil) |
-| `/proc/net/wireless` | < 1 ms | à chaque ouverture du tooltip NET (sans fil) |
+| `wifi-freq.sh` | 6 ms | tooltip NET ouvert, toutes les 10 s (sans fil) |
+| `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, toutes les 5 s (sans fil) |
 | `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, au plus toutes les 5 min |
 | `install-date.sh` | 3 ms | une fois au démarrage |
 | `deps.sh` | 5 ms | une fois au démarrage (avertissement Settings) |

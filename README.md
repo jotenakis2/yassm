@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.26.2
+Version 1.27.0
 
 **English** | [Français](README-fr.md)
 
@@ -158,7 +158,6 @@ Green, Orange or Red label to read what that threshold changes.
 **Timers**
 
 - Fast sampling (fast metrics: CPU, RAM, swap, load, network, 1–5 s; default 1)
-- Processes (tooltip process refresh, 2–10 s; default 5)
 - Slow sampling (disk, temperature and uptime, 5–30 s; default 10)
 
 Every cadence, including the fixed ones (alerts 60 s, battery cycles 1 h) and
@@ -171,8 +170,8 @@ minimum gap of 2 px is kept.
 
 The **Fast sampling** slider drives the fast loop (CPU, RAM, swap, load, network).
 Network rates use the real elapsed time, so changing the interval does not
-distort them. The **Processes** slider sets how often the CPU and RAM tooltips
-refresh; it goes down to 2 s. The **Processes shown** slider caps the userland
+distort them. The CPU and RAM process lists follow the **Slow sampling**
+interval while their tooltip is open. The **Processes shown** slider caps the userland
 list at 1–20 rows (default 10); the `kernel` line (extended data) is counted
 separately. The CPU list is instantaneous (deltas from `/proc/<pid>/stat`),
 while RAM uses RSS from `ps`. **Extended data in tooltips** adds per-core
@@ -206,7 +205,6 @@ Example entry:
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
-  "processInterval": 5,
   "maxProcesses": 10,
   "tempWarm": 40,
   "tempHot": 50,
@@ -234,8 +232,8 @@ Hovering a module shows a contextual tooltip:
 - **RAM**: the tooltip opens with a centered `data` heading, then shows
   `Total`, `Used` and `Available`. A centered `proc` heading introduces the
   top **userland** processes by RSS (up to the **Processes shown** value,
-  default 10), grouped by name; the list refreshes every 5 s by default
-  (2–10 s) while the tooltip stays open; kernel threads are excluded.
+  default 10), grouped by name; the list refreshes at the Slow sampling
+  interval (5–30 s) while the tooltip stays open; kernel threads are excluded.
   Extended data adds `Shared` (`Shmem`: tmpfs and shared mappings, already
   counted in `Cached`), `Buffer` (`Buffers`), `Cache` (`Cached` +
   `SReclaimable`, like `free`; Buffer + Cache is the classic Buff/cache
@@ -299,8 +297,8 @@ Hovering a module shows a contextual tooltip:
   CPU (instantaneous deltas from `/proc/<pid>/stat`, scaled to total CPU
   capacity like the main value; up to **Processes shown**, default 10),
   grouped by name; when fewer processes are active, idle ones fill the
-  remaining rows at 0.0%; the list refreshes every 5 s by default (2–10 s)
-  while the tooltip stays open; kernel threads are excluded. Extended data
+  remaining rows at 0.0%; the list refreshes at the Slow sampling interval
+  (5–30 s) while the tooltip stays open; kernel threads are excluded. Extended data
   adds a `pressure` section (CPU `some` only, since the kernel defines no
   `full` line for the CPU) and each core frequency in parentheses,
   right-aligned per column, sampled while the tooltip is open;
@@ -317,7 +315,8 @@ Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
 uses the theme `muted` color. The `kernel` line in the CPU and RAM tooltips
 (extended data only) is bold too, but keeps the body color. Network, swap,
 disk and temperature tooltips launch no process. The RAM tooltip launches a
-`ps` when it opens and every 5 s by default (2–10 s) while the hover lasts;
+`ps` when it opens and then at the Slow sampling interval while the hover
+lasts;
 the CPU tooltip uses `/proc/<pid>/stat` snapshots instead.
 
 ## Bar colors
@@ -396,7 +395,7 @@ Settings has a hover tooltip explaining what the module reports.
 ## Uptime
 
 The **Uptime** module is enabled by default and can be disabled in Settings.
-It reads `/proc/uptime` every 5 s. The bar shows `42m` below one hour, then
+It reads `/proc/uptime` on the Slow sampling interval. The bar shows `42m` below one hour, then
 `3h42`; the tooltip shows the same duration labelled `Time since boot`.
 Extended data adds the age since installation in days and the distribution
 installation date. `install-date.sh` resolves the date and its Unix timestamp
@@ -450,28 +449,32 @@ the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
 module.
 
 The network module reads `/proc/net/dev` once per fast tick; `/proc/net/route`
-and `/proc/net/ipv6_route` are read every 5 s, without spawning a process.
+and `/proc/net/ipv6_route` are read on the same fast tick, without spawning a
+process.
 
-Swap devices are read from `/proc/swaps` every 5 s, and `mm_stat` every 10 s
-per zram device, also without spawning a process.
+Swap devices, the `mm_stat` of each zram device and the zswap state are read
+only while the SWAP tooltip is open, without spawning a process.
 
 The CPU tooltip reads `/proc/<pid>/stat` snapshots (no process) for
 instantaneous deltas; the RAM tooltip launches a `ps` (~15 ms, wrapped in
-`timeout 5`) when it opens and then every 5 s by default (2–10 s) while the
+`timeout 5`) when it opens and then at the Slow sampling interval while the
 hover lasts, never in the background.
 
-Temperature, disk, swap/ZRAM and alerts only run while at least one bar has
-the corresponding module enabled; hiding them stops the scripts entirely.
+Temperature and disk run on the Slow timer while their module is enabled;
+swap/ZRAM only while the SWAP tooltip is open; hiding a module stops its
+scripts entirely.
 Fan speeds travel with the temperature scan (`temperature.sh`), so they cost
 no extra process. `alerts.sh` runs every 60 s (systemd system/user plus a
 `ps` zombie scan) and only while Alerts is enabled.
 
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
-`/proc/diskstats`, `/proc/net/wireless` and `/proc/uptime` are read every 5 s
-without spawning a process. The SSID comes from the NetworkManager service
+`/proc/diskstats` and `/proc/net/wireless` are read every 5 s only while
+their tooltip is open, without spawning a process; `/proc/uptime` follows Slow
+sampling. The SSID comes from the NetworkManager service
 over D-Bus (no process, no poll); the signal level is read from
-`/proc/net/wireless` every 5 s, and `wifi-freq.sh` asks `iw` for the
-associated frequency every 30 s while the link is wireless only. The LAN and
+`/proc/net/wireless` every 5 s while the NET tooltip is open, and
+`wifi-freq.sh` asks `iw` for the associated frequency every 10 s, also only
+while that tooltip is open and the link is wireless. The LAN and
 public addresses are only fetched when the NET tooltip opens with extended
 data: `ip -4` costs ~3 ms, and <https://api.ipify.org> is queried at most
 every 5 minutes (one HTTPS request, nothing else is sent).

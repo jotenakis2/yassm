@@ -9,6 +9,7 @@ Every cadence used by YASSM, by data. **Fast** and **Slow** are user settings
 | RAM, swap % | **Fast** | background | `/proc/meminfo` |
 | Network rates | **Fast** | background | `/proc/net/dev` |
 | Default route, interface, online state | **Fast** | background | `/proc/net/route`, `/proc/net/ipv6_route` |
+| GPU utilization | 10 s | fixed | sysfs or `nvidia-smi` |
 | Disk usage | **Slow** (5–30 s) | background | `findmnt` |
 | Temperature (bar) | **Slow** | background | `temperature.sh` |
 | Uptime | **Slow** | background | `/proc/uptime` |
@@ -22,8 +23,8 @@ Every cadence used by YASSM, by data. **Fast** and **Slow** are user settings
 | Wi-Fi signal | 5 s while NET is open | on demand | `/proc/net/wireless` |
 | Wi-Fi SSID | events | event | NetworkManager |
 | CPU frequency | 2 × Fast while CPU is open | on demand | `cpu-freq.sh` |
-| Processes (CPU/RAM) | Processes (2–10 s) while open | on demand | `proc-snapshot.sh`, `ps` |
-| Disk I/O per process | Processes while DISK is open (+ 1 s warm-up) | on demand | `disk-io.sh` |
+| Processes (CPU/RAM) | **Slow** while their tooltip is open | on demand | `proc-snapshot.sh`, `ps` |
+| Disk I/O per process | **Slow** while DISK is open (+ 1 s warm-up) | on demand | `disk-io.sh` |
 | Battery level and state | events | event | UPower |
 | Installation date | once | once | `install-date.sh` |
 | Dependencies, GPU detection | once at startup | once | `deps.sh`, `detect-gpu.sh` |
@@ -33,7 +34,7 @@ Every cadence used by YASSM, by data. **Fast** and **Slow** are user settings
 - **On demand** samplers stop as soon as their tooltip closes: no process and
   no file read while nothing is hovered.
 - **Slow** drives the three bar values that change slowly (disk, temperature,
-  uptime). It never goes below 5 s because disk and temperature each spawn a
+  uptime) and the process lists while their tooltip is open. It never goes below 5 s because disk and temperature each spawn a
   short script.
 - **Fixed**: alerts stay at 60 s (systemd + zombies, cheap and stable), battery
   cycles at 1 h (they only change on a full cycle).

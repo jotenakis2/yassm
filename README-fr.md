@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.26.2
+Version 1.27.0
 
 [English](README.md) | **Français**
 
@@ -161,7 +161,6 @@ Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
 **Intervalles**
 
 - Échantillonnage rapide (métriques rapides : CPU, RAM, swap, charge, réseau, 1–5 s ; 1 par défaut)
-- Processus (rafraîchissement des processus de l'infobulle, 2–10 s ; 5 par défaut)
 - Échantillonnage lent (disque, température et uptime, 5–30 s ; 10 par défaut)
 
 Toutes les cadences, y compris les fixes (alertes 60 s, cycles batterie 1 h) et
@@ -175,9 +174,9 @@ soit 7,19 px). À 0, un écart minimal de 2 px est conservé.
 
 Le curseur **Échantillonnage rapide** pilote la boucle rapide (CPU, RAM, swap,
 charge, réseau). Les débits réseau utilisent le temps réel écoulé, donc
-changer l'intervalle ne les fausse pas. Le curseur **Processus** règle la
-fréquence de rafraîchissement des infobulles CPU et RAM ; il descend jusqu'à
-2 s. Le curseur **Processus affichés** plafonne la liste des processus
+changer l'intervalle ne les fausse pas. Les listes de processus CPU et RAM
+suivent l'**échantillonnage lent** tant que leur infobulle est ouverte. Le
+curseur **Processus affichés** plafonne la liste des processus
 espace-utilisateurs à 1–20
 lignes (10 par défaut) ; la ligne `noyau` est toujours en plus. La liste CPU
 est instantanée (deltas `/proc/<pid>/stat`), la RAM utilise le RSS de `ps`.
@@ -212,7 +211,6 @@ Exemple d'entrée :
   "spacing": 2,
   "iconGap": 1,
   "refreshInterval": 1,
-  "processInterval": 5,
   "maxProcesses": 10,
   "tempWarm": 40,
   "tempHot": 50,
@@ -241,8 +239,8 @@ Le survol d'un module affiche une infobulle contextuelle :
 - **RAM** : le tooltip s'ouvre sur un titre `data` centré, puis affiche `Total`,
   `Used` et `Available`. Un titre `proc` centré introduit le top des processus
   **espace-utilisateurs** par RSS (jusqu'à la valeur **Processes shown**, 10 par défaut),
-  regroupés par nom ; la liste est rafraîchie toutes les 5 s par défaut
-  (2–10 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
+  regroupés par nom ; la liste est rafraîchie à l'échantillonnage lent
+  (5–30 s) tant que le tooltip reste ouvert ; les threads noyau sont exclus.
   Extended data ajoute `Shared` (`Shmem` : tmpfs et mappings partagés, déjà
   comptés dans `Cached`), `Tampon` (`Buffers`), `Cache` (`Cached` +
   `SReclaimable`, comme `free` ; Tampon + Cache forme le total Buff/cache
@@ -309,7 +307,7 @@ Le survol d'un module affiche une infobulle contextuelle :
   totale des CPU comme la valeur principale ; jusqu'à **Processes shown**, 10
   par défaut), regroupés par nom ; si moins de processus sont actifs, des
   lignes inactives à 0,0 % complètent la liste ; la liste est rafraîchie
-  toutes les 5 s par défaut (2–10 s) tant que le tooltip reste ouvert ; les
+  à l'échantillonnage lent (5–30 s) tant que le tooltip reste ouvert ; les
   threads noyau sont exclus. Extended data ajoute une section `pressure` (CPU
   `some` uniquement, le noyau ne définissant pas de ligne `full` pour le CPU),
   le CPU noyau (`system` + `irq` + `softirq`, sur la même échelle que les
@@ -409,7 +407,7 @@ module signale.
 ## Uptime
 
 Le module **Uptime** est activé par défaut et peut être désactivé dans
-Settings. Il lit `/proc/uptime` toutes les 5 s. La barre affiche `42m` sous une
+Settings. Il lit `/proc/uptime` à l'échantillonnage lent. La barre affiche `42m` sous une
 heure, puis `3h42` ; le tooltip affiche la même durée sous le libellé
 `Time since boot`. Extended data ajoute l'âge de l'installation en jours et la
 date d'installation de la distribution. `install-date.sh` fournit la date et
@@ -464,28 +462,31 @@ n'existe que pendant l'ouverture de son tooltip.
 mort ne peut pas figer le module disque.
 
 Le module réseau lit `/proc/net/dev` à chaque tick rapide ; `/proc/net/route`
-et `/proc/net/ipv6_route` sont relus toutes les 5 s, sans processus.
+et `/proc/net/ipv6_route` sont relus au même tick rapide, sans processus.
 
-Les périphériques de swap sont relus depuis `/proc/swaps` toutes les 5 s, et
-`mm_stat` toutes les 10 s par zram, également sans processus.
+Les périphériques de swap, `mm_stat` par zram et l'état zswap ne sont lus que
+pendant l'ouverture du tooltip SWAP, sans processus.
 
 Le tooltip CPU lit des snapshots de `/proc/<pid>/stat` (aucun processus) pour
-des deltas instantanés ; seul le tooltip RAM utilise `ps` (RSS).
+des deltas instantanés ; les deux listes suivent l'échantillonnage lent, et
+seul le tooltip RAM utilise `ps` (RSS).
 
-Température, disque, swap/ZRAM et alertes ne sont échantillonnés que si au
-moins une barre a le module correspondant activé ; les masquer arrête
-complètement les scripts. Les ventilateurs sont relevés par le même scan que
+Température et disque suivent l'échantillonnage lent tant que leur module est
+activé ; swap/ZRAM seulement pendant l'ouverture du tooltip SWAP ; masquer un
+module arrête complètement ses scripts. Les ventilateurs sont relevés par le même scan que
 les températures (`temperature.sh`), donc sans processus supplémentaire.
 `alerts.sh` tourne toutes les 60 s (systemd système/utilisateur + scan des
 zombies via `ps`) et uniquement si Alerts est activé.
 
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`,
-`/proc/pressure/cpu`), `/proc/diskstats`, `/proc/net/wireless` et
-`/proc/uptime` sont lus toutes les 5 s sans lancer de processus. Le SSID vient
+`/proc/pressure/cpu`), `/proc/diskstats` et `/proc/net/wireless` ne sont lus
+que pendant l'ouverture du tooltip concerné, toutes les 5 s, sans lancer de
+processus ; `/proc/uptime` suit l'échantillonnage lent. Le SSID vient
 du service NetworkManager via D-Bus (ni processus ni interrogation), le niveau
-du signal est lu dans `/proc/net/wireless` toutes les 5 s, et `wifi-freq.sh`
-demande la fréquence associée à `iw` toutes les 30 s, uniquement si la liaison
-est sans fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouverture
+du signal est lu dans `/proc/net/wireless` toutes les 5 s pendant l'ouverture
+du tooltip NET, et `wifi-freq.sh` demande la fréquence associée à `iw` toutes
+les 10 s, également pendant ce tooltip et uniquement si la liaison est sans
+fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouverture
 du tooltip NET en mode extended : `ip -4` coûte ~3 ms, et
 <https://api.ipify.org> n'est interrogé qu'une fois toutes les 5 minutes (une
 requête HTTPS, rien d'autre n'est envoyé).
