@@ -1442,13 +1442,19 @@ Singleton {
     // 60 s timer and battery cycles their hourly one.
     Timer {
         interval: metrics.slowIntervalMs
-        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled
+        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled || metrics.pressureEnabled
         repeat: true
         triggeredOnStart: true
 
         onTriggered: {
             if (metrics.diskEnabled) {
                 mountProcess.running = true;
+            }
+
+            if (metrics.pressureEnabled) {
+                memoryPressureFile.reload();
+                ioPressureFile.reload();
+                cpuPressureFile.reload();
             }
 
             if (metrics.temperatureEnabled) {
@@ -1465,17 +1471,11 @@ Singleton {
     // signal): read only while the matching tooltip is open.
     Timer {
         interval: metrics.fastIntervalMs
-        running: metrics.pressureEnabled || metrics.diskIoEnabled || metrics.swapDetailEnabled || metrics.wifiDetailEnabled
+        running: metrics.diskIoEnabled || metrics.swapDetailEnabled || metrics.wifiDetailEnabled
         repeat: true
         triggeredOnStart: true
 
         onTriggered: {
-            if (metrics.pressureEnabled) {
-                memoryPressureFile.reload();
-                ioPressureFile.reload();
-                cpuPressureFile.reload();
-            }
-
             if (metrics.diskIoEnabled) {
                 procDiskStats.reload();
             }

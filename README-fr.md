@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.1
+Version 1.27.2
 
 [English](README.md) | **Français**
 
@@ -481,7 +481,7 @@ zombies via `ps`) et uniquement si Alerts est activé.
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`,
 `/proc/pressure/cpu`), `/proc/diskstats` et `/proc/net/wireless` ne sont lus
 que pendant l'ouverture du tooltip concerné, au tick rapide, sans lancer de
-processus ; `/proc/uptime` suit l'échantillonnage lent. Le SSID vient
+processus ; la PSI et `/proc/uptime` suivent l'échantillonnage lent. Le SSID vient
 du service NetworkManager via D-Bus (ni processus ni interrogation), le niveau
 du signal est lu dans `/proc/net/wireless` au tick rapide pendant l'ouverture
 du tooltip NET, et `wifi-freq.sh` demande la fréquence associée à `iw` au même

@@ -19,7 +19,6 @@ batterie** (1 h).
 | RAM, swap % | toujours |
 | Débits réseau, route par défaut et interface | toujours |
 | Fréquence CPU | tooltip CPU ouvert |
-| PSI `some`/`full` | tooltip RAM, CPU ou DISK ouvert |
 | Débits disque | tooltip DISK ouvert |
 | Périphériques de swap, zram, zswap | tooltip SWAP ouvert |
 | Fréquence et signal Wi-Fi | tooltip NET ouvert |
@@ -31,7 +30,8 @@ batterie** (1 h).
 | Usage disque | toujours |
 | Température | toujours |
 | Uptime | toujours |
-| Utilisation GPU | toujours (si le module GPU est activé) |
+| Utilisation GPU | toujours |
+| PSI `some`/`full` | tooltip RAM, CPU ou DISK ouvert |
 | Processus (CPU/RAM) | leur tooltip ouvert |
 | E/S disque par processus | tooltip DISK ouvert |
 
@@ -39,7 +39,7 @@ batterie** (1 h).
 
 | Donnée | Cadence | Source |
 | --- | --- | --- |
-| Alertes : unités systemd en échec, zombies | 60 s | `alerts.sh` |
+| Alertes | 60 s | `alerts.sh` |
 | Cycles batterie | 3600 s | `cycle_count` |
 
 ## Aucun timer
@@ -47,7 +47,8 @@ batterie** (1 h).
 - Niveau et état de la batterie, SSID Wi-Fi, connectivité : **événements**
   D-Bus (UPower, NetworkManager).
 - Date d'installation, vérification des dépendances, détection GPU : **une
-  fois** au démarrage.
+  fois**, au démarrage du shell (lancement du processus Quickshell ou
+  rechargement du plugin).
 
 ## Remarques
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.1
+Version 1.27.2
 
 **English** | [Français](README-fr.md)
 
@@ -469,8 +469,8 @@ no extra process. `alerts.sh` runs every 60 s (systemd system/user plus a
 
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
 `/proc/diskstats` and `/proc/net/wireless` are read on the fast tick while
-their tooltip is open, without spawning a process; `/proc/uptime` follows Slow
-sampling. The SSID comes from the NetworkManager service
+their tooltip is open, without spawning a process; PSI and `/proc/uptime`
+follow Slow sampling. The SSID comes from the NetworkManager service
 over D-Bus (no process, no poll); the signal level is read from
 `/proc/net/wireless` on the fast tick while the NET tooltip is open, and
 `wifi-freq.sh` asks `iw` for the associated frequency on the same tick, also
