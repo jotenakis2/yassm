@@ -33,7 +33,7 @@ batterie** (1 h).
 | Utilisation GPU | toujours |
 | PSI `some`/`full` | infobulle RAM, CPU ou DISK ouverte |
 | Processus (CPU/RAM) | leur infobulle ouverte |
-| E/S disque par processus | infobulle DISK ouvert |
+| E/S disque par processus | infobulle DISK ouverte |
 
 ## Fixes
 
