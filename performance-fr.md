@@ -26,7 +26,8 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
   machine), dont l'essentiel est la mise à jour de la barre à 1 Hz.
 - **~15 lancements de scripts par minute** au repos (température, disque,
   alertes, fréquence Wi-Fi), et **0** pour la fréquence CPU hors de son
-  tooltip.
+  tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle
+  Refresh** (2 s au défaut de 1 s, 10 s à 5 s).
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
   lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.

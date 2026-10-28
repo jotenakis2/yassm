@@ -1617,7 +1617,9 @@ Singleton {
     }
 
     Timer {
-        interval: 5000
+        // Per-core frequencies follow the fast loop at half its rate: 2 s at
+        // the default 1 s refresh, 10 s at 5 s.
+        interval: metrics.fastIntervalMs * 2
         running: metrics.cpuFreqEnabled
         repeat: true
         triggeredOnStart: true

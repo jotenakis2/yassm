@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.25.7
+Version 1.25.8
 
 **English** | [Français](README-fr.md)
 
@@ -438,7 +438,8 @@ IP lookup at most every 5 minutes.
 
 **Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
 process.** Module-aware sampling stops the reads and timers of hidden modules,
-and the CPU frequency process only exists while its tooltip is open.
+and the CPU frequency process only exists while its tooltip is open, sampled
+every two Refresh intervals.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
 the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
