@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.0
+Version 1.27.1
 
 **English** | [Français](README-fr.md)
 
@@ -27,17 +27,17 @@ More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
 
 | Module | Source | Interval |
 | --- | --- | --- |
-| CPU | `/proc/stat` | 1 s |
-| RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` (bar), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
-| Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | 1 s |
-| GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | 10 s |
-| Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | 10 s |
-| Network | `/proc/net/dev` (default route, IPv4 then IPv6) | 1 s |
-| Battery | UPower (D-Bus, event-driven) | immediate on event (~30 s otherwise) |
-| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 95 %, RAM ≥ 95 % | 60 s (disk 10 s, RAM 1 s) |
-| Uptime | `/proc/uptime`, shown as minutes or `hMM` | 5 s |
-| Temperature | all normal temperatures, sorted | 10 s |
+| CPU | `/proc/stat` | Fast |
+| RAM | `/proc/meminfo` (`MemAvailable`) | Fast |
+| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast |
+| Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | Fast |
+| GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | Slow |
+| Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | Slow |
+| Network | `/proc/net/dev` (default route, IPv4 then IPv6) | Fast |
+| Battery | UPower (D-Bus, event-driven) | events |
+| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 95 %, RAM ≥ 95 % | 60 s (disk and RAM alerts reuse the module samples) |
+| Uptime | `/proc/uptime`, shown as minutes or `hMM` | Slow |
+| Temperature | all normal temperatures, sorted | Slow |
 
 Swap is hidden when the machine has no active swap. The GPU shows `--%` when
 no reliable source is available. The network is displayed in two separate
@@ -442,7 +442,7 @@ IP lookup at most every 5 minutes.
 **Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
 process.** Module-aware sampling stops the reads and timers of hidden modules,
 and the CPU frequency process only exists while its tooltip is open, sampled
-at twice the Fast sampling interval.
+on the fast tick.
 
 `findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
 the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
@@ -468,13 +468,13 @@ no extra process. `alerts.sh` runs every 60 s (systemd system/user plus a
 `ps` zombie scan) and only while Alerts is enabled.
 
 PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
-`/proc/diskstats` and `/proc/net/wireless` are read every 5 s only while
+`/proc/diskstats` and `/proc/net/wireless` are read on the fast tick while
 their tooltip is open, without spawning a process; `/proc/uptime` follows Slow
 sampling. The SSID comes from the NetworkManager service
 over D-Bus (no process, no poll); the signal level is read from
-`/proc/net/wireless` every 5 s while the NET tooltip is open, and
-`wifi-freq.sh` asks `iw` for the associated frequency every 10 s, also only
-while that tooltip is open and the link is wireless. The LAN and
+`/proc/net/wireless` on the fast tick while the NET tooltip is open, and
+`wifi-freq.sh` asks `iw` for the associated frequency on the same tick, also
+only while that tooltip is open and the link is wireless. The LAN and
 public addresses are only fetched when the NET tooltip opens with extended
 data: `ip -4` costs ~3 ms, and <https://api.ipify.org> is queried at most
 every 5 minutes (one HTTPS request, nothing else is sent).

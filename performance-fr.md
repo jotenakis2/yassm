@@ -27,7 +27,7 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
 - **~13 lancements de scripts par minute** au repos avec l'échantillonnage
   lent par défaut à 10 s (température et disque), plus une vérification des
   alertes par minute ; la fréquence Wi-Fi et la fréquence CPU ne tournent que
-  pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne à **2 × l'intervalle d'échantillonnage rapide** (2 s au défaut de 1 s, 10 s à 5 s).
+  pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne au tick **Fast**.
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
   lisibles, à chaque intervalle Processus, et rien une fois le tooltip fermé.
@@ -115,12 +115,12 @@ Aucun de ces processus ne survit entre deux exécutions.
 | Action | Coût | Quand |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms chacun | tooltip CPU ouvert (photo initiale + warmup de 1 s) |
-| `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, 2 × Fast (4 s ici) |
+| `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, Fast |
 | `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, à l'échantillonnage lent |
 | `disk-io.sh` | 13 ms | tooltip DISK ouvert, à l'échantillonnage lent |
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
-| `wifi-freq.sh` | 6 ms | tooltip NET ouvert, toutes les 10 s (sans fil) |
-| `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, toutes les 5 s (sans fil) |
+| `wifi-freq.sh` | 6 ms | tooltip NET ouvert, Fast (sans fil) |
+| `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, Fast (sans fil) |
 | `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, au plus toutes les 5 min |
 | `install-date.sh` | 3 ms | une fois au démarrage |
 | `deps.sh` | 5 ms | une fois au démarrage (avertissement Settings) |

@@ -26,8 +26,7 @@ tooltip open and the screensaver/locking disabled.
 - **~13 script spawns per minute** when idle with the default 10 s slow
   sampling (temperature and disk), plus one alert check per minute; Wi-Fi
   frequency and CPU frequency only run while their tooltip is open;
-  while the CPU tooltip is open it runs every **2 × the Fast sampling interval**
-  (2 s at the default 1 s, 10 s at 5 s).
+  while the CPU tooltip is open it runs on the **Fast** tick.
 - **Per-process disk I/O only runs while the DISK tooltip is open**
   (extended data): 13 ms per sample for ≈120 readable processes, every
   Processes interval, and nothing once the tooltip closes.
@@ -116,12 +115,12 @@ On demand only:
 | Action | Cost | When |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
-| `cpu-freq.sh` | 3 ms | CPU tooltip open, 2 × Fast (4 s here) |
+| `cpu-freq.sh` | 3 ms | CPU tooltip open, Fast |
 | `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |
 | `disk-io.sh` | 13 ms | DISK tooltip open, at the Slow interval |
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
-| `wifi-freq.sh` | 6 ms | NET tooltip open, every 10 s (wireless) |
-| `/proc/net/wireless` | < 1 ms | NET tooltip open, every 5 s (wireless) |
+| `wifi-freq.sh` | 6 ms | NET tooltip open, Fast (wireless) |
+| `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
 | `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, at most every 5 min |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |
 | `deps.sh` | 5 ms | once at startup (Settings warning) |

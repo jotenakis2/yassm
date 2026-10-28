@@ -1,42 +1,55 @@
 # Timers
 
-Every cadence used by YASSM, by data. **Fast** and **Slow** are user settings
-(Settings → Timers); the other values are fixed on purpose.
+Everything polled by YASSM follows **one of two cadences**, both user settings
+(Settings → Timers):
 
-| Data | Cadence | Kind | Source |
+| Cadence | Setting | Range | Default |
 | --- | --- | --- | --- |
-| CPU, per-core %, load | **Fast sampling** (1–5 s) | background | `/proc/stat`, `/proc/loadavg` |
-| RAM, swap % | **Fast** | background | `/proc/meminfo` |
-| Network rates | **Fast** | background | `/proc/net/dev` |
-| Default route, interface, online state | **Fast** | background | `/proc/net/route`, `/proc/net/ipv6_route` |
-| GPU utilization | 10 s | fixed | sysfs or `nvidia-smi` |
-| Disk usage | **Slow** (5–30 s) | background | `findmnt` |
-| Temperature (bar) | **Slow** | background | `temperature.sh` |
-| Uptime | **Slow** | background | `/proc/uptime` |
-| Alerts (systemd units, zombies) | **60 s** | fixed | `alerts.sh` |
-| Battery cycles | **3600 s** | fixed | `cycle_count` |
-| PSI `some`/`full` | 5 s while a tooltip is open | on demand | `/proc/pressure/*` |
-| Disk I/O rates | 5 s while DISK is open | on demand | `/proc/diskstats` |
-| Swap devices, zswap | 5 s while SWAP is open | on demand | `/proc/swaps`, zswap sysfs |
-| zram stats | 5 s while SWAP is open | on demand | `mm_stat` |
-| Wi-Fi frequency | 10 s while NET is open | on demand | `wifi-freq.sh` |
-| Wi-Fi signal | 5 s while NET is open | on demand | `/proc/net/wireless` |
-| Wi-Fi SSID | events | event | NetworkManager |
-| CPU frequency | 2 × Fast while CPU is open | on demand | `cpu-freq.sh` |
-| Processes (CPU/RAM) | **Slow** while their tooltip is open | on demand | `proc-snapshot.sh`, `ps` |
-| Disk I/O per process | **Slow** while DISK is open (+ 1 s warm-up) | on demand | `disk-io.sh` |
-| Battery level and state | events | event | UPower |
-| Installation date | once | once | `install-date.sh` |
-| Dependencies, GPU detection | once at startup | once | `deps.sh`, `detect-gpu.sh` |
+| **Fast** | Fast sampling | 1–5 s | 1 s |
+| **Slow** | Slow sampling | 5–30 s | 10 s |
+
+Only two things are fixed: **alerts** (60 s) and **battery cycles** (1 h).
+
+## Fast
+
+| Data | When |
+| --- | --- |
+| CPU, per-core %, load | always |
+| RAM, swap % | always |
+| Network rates, default route and interface | always |
+| CPU frequency | CPU tooltip open |
+| PSI `some`/`full` | RAM, CPU or DISK tooltip open |
+| Disk I/O rates | DISK tooltip open |
+| Swap devices, zram, zswap | SWAP tooltip open |
+| Wi-Fi frequency and signal | NET tooltip open |
+
+## Slow
+
+| Data | When |
+| --- | --- |
+| Disk usage | always |
+| Temperature | always |
+| Uptime | always |
+| GPU utilization | always (when GPU is enabled) |
+| Processes (CPU/RAM) | their tooltip open |
+| Disk I/O per process | DISK tooltip open |
+
+## Fixed
+
+| Data | Cadence | Source |
+| --- | --- | --- |
+| Alerts: systemd failed units, zombies | 60 s | `alerts.sh` |
+| Battery cycles | 3600 s | `cycle_count` |
+
+## No timer
+
+- Battery level and state, Wi-Fi SSID, connectivity: **events** over D-Bus
+  (UPower, NetworkManager).
+- Installation date, dependency check, GPU detection: **once** at startup.
 
 ## Notes
 
-- **On demand** samplers stop as soon as their tooltip closes: no process and
-  no file read while nothing is hovered.
-- **Slow** drives the three bar values that change slowly (disk, temperature,
-  uptime) and the process lists while their tooltip is open. It never goes below 5 s because disk and temperature each spawn a
-  short script.
-- **Fixed**: alerts stay at 60 s (systemd + zombies, cheap and stable), battery
-  cycles at 1 h (they only change on a full cycle).
-- Battery level, charge state and the Wi-Fi SSID are event-driven over D-Bus:
-  no polling at all.
+- On-demand rows only run while their tooltip is open: no process and no file
+  read when nothing is hovered.
+- Slow never goes below 5 s because disk and temperature each spawn a short
+  script.

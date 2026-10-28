@@ -16,8 +16,6 @@ BarWidget {
     readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
     readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
 
-    readonly property int gpuIntervalMs: 10000
-
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
 
@@ -2232,7 +2230,7 @@ BarWidget {
     }
 
     Timer {
-        interval: root.gpuIntervalMs
+        interval: root.slowInterval * 1000
         running: root.showGpu && root.gpuKind !== "none"
         repeat: true
         triggeredOnStart: true

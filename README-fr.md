@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.0
+Version 1.27.1
 
 [English](README.md) | **Français**
 
@@ -27,17 +27,17 @@ D'autres dans [`docs/screenshots`](docs/screenshots) (load, disque, batterie, up
 
 | Module | Source | Intervalle |
 | --- | --- | --- |
-| CPU | `/proc/stat` | 1 s |
-| RAM | `/proc/meminfo` (`MemAvailable`) | 1 s |
-| Swap | `/proc/meminfo` (barre), `/proc/swaps` (5 s) + zram `mm_stat` (tooltip, 10 s) | 1 s |
-| Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | 1 s |
-| GPU | `gpu_busy_percent` sysfs, ou `nvidia-smi` | 10 s |
-| Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | 10 s |
-| Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | 1 s |
-| Batterie | UPower (D-Bus, événementiel) | immédiat sur événement (~30 s sinon) |
-| Alertes | unités systemd en échec, zombies de plus de 60 s, racine ≥ 95 %, RAM ≥ 95 % | 60 s (disque 10 s, RAM 1 s) |
-| Uptime | `/proc/uptime`, affiché en minutes ou `hMM` | 5 s |
-| Température | toutes les températures normales, triées | 10 s |
+| CPU | `/proc/stat` | Fast |
+| RAM | `/proc/meminfo` (`MemAvailable`) | Fast |
+| Swap | `/proc/meminfo` (barre), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast |
+| Load average | `/proc/loadavg`, normalisée par le nombre de CPU, sans plafond à 100 % | Fast |
+| GPU | `gpu_busy_percent` sysfs, ou `nvidia-smi` | Slow |
+| Disque | `findmnt` (racine pour la barre, FS locaux dans le tooltip) | Slow |
+| Réseau | `/proc/net/dev` (route par défaut, IPv4 puis IPv6) | Fast |
+| Batterie | UPower (D-Bus, événementiel) | événements |
+| Alertes | unités systemd en échec, zombies de plus de 60 s, racine ≥ 95 %, RAM ≥ 95 % | 60 s (alertes disque et RAM réutilisent les échantillons des modules) |
+| Uptime | `/proc/uptime`, affiché en minutes ou `hMM` | Slow |
+| Température | toutes les températures normales, triées | Slow |
 
 Le swap est masqué lorsque la machine n'a pas de swap actif. Le GPU affiche
 `--%` lorsqu'aucune source fiable n'est disponible. Le réseau est affiché dans
@@ -480,13 +480,12 @@ zombies via `ps`) et uniquement si Alerts est activé.
 
 La pression PSI (`/proc/pressure/memory`, `/proc/pressure/io`,
 `/proc/pressure/cpu`), `/proc/diskstats` et `/proc/net/wireless` ne sont lus
-que pendant l'ouverture du tooltip concerné, toutes les 5 s, sans lancer de
+que pendant l'ouverture du tooltip concerné, au tick rapide, sans lancer de
 processus ; `/proc/uptime` suit l'échantillonnage lent. Le SSID vient
 du service NetworkManager via D-Bus (ni processus ni interrogation), le niveau
-du signal est lu dans `/proc/net/wireless` toutes les 5 s pendant l'ouverture
-du tooltip NET, et `wifi-freq.sh` demande la fréquence associée à `iw` toutes
-les 10 s, également pendant ce tooltip et uniquement si la liaison est sans
-fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouverture
+du signal est lu dans `/proc/net/wireless` au tick rapide pendant l'ouverture
+du tooltip NET, et `wifi-freq.sh` demande la fréquence associée à `iw` au même
+tick, également pendant ce tooltip et uniquement si la liaison est sans fil. Les adresses LAN et publique ne sont récupérées qu'à l'ouverture
 du tooltip NET en mode extended : `ip -4` coûte ~3 ms, et
 <https://api.ipify.org> n'est interrogé qu'une fois toutes les 5 minutes (une
 requête HTTPS, rien d'autre n'est envoyé).

@@ -1464,7 +1464,7 @@ Singleton {
     // Tooltip-only data (PSI, disk I/O rates, swap devices, zram, Wi-Fi
     // signal): read only while the matching tooltip is open.
     Timer {
-        interval: 5000
+        interval: metrics.fastIntervalMs
         running: metrics.pressureEnabled || metrics.diskIoEnabled || metrics.swapDetailEnabled || metrics.wifiDetailEnabled
         repeat: true
         triggeredOnStart: true
@@ -1639,7 +1639,7 @@ Singleton {
     Timer {
         // Only shown in the NET tooltip: sample it while that tooltip is
         // open (roaming is the only thing that changes the frequency).
-        interval: 10000
+        interval: metrics.fastIntervalMs
         running: metrics.wifiDetailEnabled && metrics.activeWifi
         repeat: true
         triggeredOnStart: true
@@ -1660,9 +1660,9 @@ Singleton {
     }
 
     Timer {
-        // Per-core frequencies follow the fast loop at half its rate: 2 s at
-        // the default 1 s refresh, 10 s at 5 s.
-        interval: metrics.fastIntervalMs * 2
+        // Per-core frequencies follow the fast loop while the CPU tooltip is
+        // open; the script is only a few milliseconds.
+        interval: metrics.fastIntervalMs
         running: metrics.cpuFreqEnabled
         repeat: true
         triggeredOnStart: true
