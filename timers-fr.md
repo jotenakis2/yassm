@@ -18,10 +18,10 @@ batterie** (1 h).
 | CPU, % par cœur, load | toujours |
 | RAM, swap % | toujours |
 | Débits réseau, route par défaut et interface | toujours |
-| Fréquence CPU | tooltip CPU ouvert |
-| Débits disque | tooltip DISK ouvert |
-| Périphériques de swap, zram, zswap | tooltip SWAP ouvert |
-| Fréquence et signal Wi-Fi | tooltip NET ouvert |
+| Fréquence CPU | infobulle CPU ouvert |
+| Débits disque | infobulle DISK ouvert |
+| Périphériques de swap, zram, zswap | infobulle SWAP ouvert |
+| Fréquence et signal Wi-Fi | infobulle NET ouvert |
 
 ## Slow
 
@@ -31,9 +31,9 @@ batterie** (1 h).
 | Température | toujours |
 | Uptime | toujours |
 | Utilisation GPU | toujours |
-| PSI `some`/`full` | tooltip RAM, CPU ou DISK ouvert |
-| Processus (CPU/RAM) | leur tooltip ouvert |
-| E/S disque par processus | tooltip DISK ouvert |
+| PSI `some`/`full` | infobulle RAM, CPU ou DISK ouvert |
+| Processus (CPU/RAM) | leur infobulle ouvert |
+| E/S disque par processus | infobulle DISK ouvert |
 
 ## Fixes
 
@@ -52,7 +52,7 @@ batterie** (1 h).
 
 ## Remarques
 
-- Les lignes « à l'ouverture » ne tournent que pendant le tooltip concerné :
+- Les lignes « à l'ouverture » ne tournent que pendant le infobulle concerné :
   aucun processus ni lecture de fichier quand rien n'est survolé.
 - Slow ne descend pas sous 5 s car disque et température lancent chacun un
   script court.
