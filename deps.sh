@@ -16,7 +16,7 @@ checks=(
 	"required|timeout|command guards"
 	"optional|curl|public address in the NET tooltip"
 	"optional|ip|LAN address in the NET tooltip"
-	"optional|iw|Wi-Fi frequency in the NET tooltip"
+	"optional|nmcli|Wi-Fi frequency in the NET tooltip"
 )
 
 for entry in "${checks[@]}"; do

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.35
+Version 1.29.36
 
 **English** | [Français](README-fr.md)
 
@@ -143,8 +143,8 @@ Measurements: [performance.md](performance.md).
 ## Requirements
 
 Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
-`btop` or `htop` (left-click target), `curl` and `ip` (network addresses), `iw` (Wi-Fi
-frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU), UPower and
+`btop` or `htop` (left-click target), `curl` and `ip` (network addresses),
+`nmcli` (Wi-Fi frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU), UPower and
 NetworkManager (battery and SSID). A missing optional tool simply hides the corresponding field.
 
 The widget needs a horizontal bar; it is hidden on vertical bars.

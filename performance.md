@@ -119,7 +119,7 @@ On demand only:
 | `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |
 | `disk-io.sh` | 13 ms | DISK tooltip open, at the Slow interval |
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
-| `wifi-freq.sh` | 6 ms | NET tooltip open, Fast (wireless) |
+| `wifi-freq.sh` | 9 ms | NET tooltip open, Fast (wireless) |
 | `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
 | `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, cache 5 min or uplink change |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |

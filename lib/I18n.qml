@@ -143,7 +143,7 @@ QtObject {
             "dep.timeout": "command guards",
             "dep.curl": "public address in the NET tooltip",
             "dep.ip": "LAN address in the NET tooltip",
-            "dep.iw": "Wi-Fi frequency in the NET tooltip"
+            "dep.nmcli": "Wi-Fi frequency in the NET tooltip"
         })
 
     readonly property var stringsFr: ({
@@ -278,7 +278,7 @@ QtObject {
             "dep.timeout": "garde-fous des commandes",
             "dep.curl": "adresse publique dans l'infobulle NET",
             "dep.ip": "adresse LAN dans l'infobulle NET",
-            "dep.iw": "fréquence Wi-Fi dans l'infobulle NET"
+            "dep.nmcli": "fréquence Wi-Fi dans l'infobulle NET"
         })
 
     function table() {
