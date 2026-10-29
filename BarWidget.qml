@@ -2329,6 +2329,9 @@ BarWidget {
                         Text {
                             text: root.segmentValue(metricKey)
                             color: root.segmentColor(metricKey)
+                            // No usable GPU source: keep the "--%" readable
+                            // but dimmed so it reads as unavailable.
+                            opacity: metricKey === "gpu" && root.gpu === null ? 0.45 : 1.0
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize
                             renderType: Text.NativeRendering
