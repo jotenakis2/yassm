@@ -1247,14 +1247,19 @@ BarWidget {
             lines.push("");
             lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc_user"));
 
-            if (root.diskProcesses.length === 0) {
-                lines.push(Yassm.I18n.t("common.no_io"));
-            } else {
-                const nameWidth = 15;
-                // "999.9 MiB/s" is the widest rate (11 chars); a 10-wide
-                // field let 100+ MiB/s values widen the whole tooltip.
-                const rateWidth = 11;
+            const nameWidth = 15;
+            // "999.9 MiB/s" is the widest rate (11 chars); a 10-wide field
+            // let 100+ MiB/s values widen the whole tooltip.
+            const rateWidth = 11;
+            // name + "  R" + rate + "  W" + rate.
+            const processWidth = nameWidth + rateWidth * 2 + 6;
 
+            if (root.diskProcesses.length === 0) {
+                // Keep the row width so the bubble does not shrink when the
+                // last active process goes idle. Non-breaking spaces are not
+                // trimmed from the end of the line.
+                lines.push(Yassm.I18n.t("common.no_io").padEnd(processWidth, "\u00A0"));
+            } else {
                 for (let i = 0; i < root.diskProcesses.length; i++) {
                     const entry = root.diskProcesses[i];
                     const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
