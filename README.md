@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.50
+Version 1.29.51
 
 **English** | [Français](README-fr.md)
 
@@ -88,14 +88,15 @@ rows marked below.
 - **Temperature**: every sensor and fan speed, hottest first;
 - **Battery**: state and time remaining; power, pack temperature, cycles and
   health (extended);
-- **Uptime**: time since boot; installation age and date (extended);
+- **Uptime**: time since boot; installation age and date, date of the last
+  package update (extended);
 - **Load**, **GPU**, **Alerts**: a short summary, or the alert list (failed
   units, zombies, disk/RAM).
 
 Extended data adds per-core frequencies and PSI, disk and per-process I/O,
 swap/zram/zswap details, Wi-Fi power and frequency, the gateway and WAN IPs
-(with their country flag), the NET latency ping, the installation age, and
-battery power, temperature, cycles and health.
+(with their country flag), the NET latency ping, the installation and last
+update dates, and battery power, temperature, cycles and health.
 
 ## Colors
 

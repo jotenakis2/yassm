@@ -1178,7 +1178,8 @@ BarWidget {
         const ageDays = root.installAgeDays();
         const ageLabel = Yassm.I18n.t("uptime.age");
         const dateLabel = Yassm.I18n.t("uptime.date");
-        const width = Math.max(bootLabel.length, ageLabel.length, dateLabel.length);
+        const updateLabel = Yassm.I18n.t("uptime.update");
+        const width = Math.max(bootLabel.length, ageLabel.length, dateLabel.length, updateLabel.length);
         const lines = [];
 
         if (ageDays >= 0) {
@@ -1186,6 +1187,7 @@ BarWidget {
         }
 
         lines.push(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : Yassm.I18n.t("common.unknown")));
+        lines.push(updateLabel.padEnd(width) + " : " + (metrics.updateDate !== "" ? metrics.updateDate : Yassm.I18n.t("common.unknown")));
 
         return {
             width: width,

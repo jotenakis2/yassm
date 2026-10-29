@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.50
+Version 1.29.51
 
 [English](README.md) | **Français**
 
@@ -92,16 +92,16 @@ marquées ci-dessous.
   froid ;
 - **Batterie** : état et temps restant ; puissance, température du pack,
   cycles et santé (étendu) ;
-- **Uptime** : temps depuis le démarrage ; âge et date d'installation
-  (étendu) ;
+- **Uptime** : temps depuis le démarrage ; âge et date d'installation, date
+  de la dernière mise à jour des paquets (étendu) ;
 - **Charge**, **GPU**, **Alertes** : résumé court, ou liste des alertes
   (unités en échec, zombies, disque/RAM).
 
 Données étendues ajoute les fréquences et PSI CPU, les E/S disque et par
 processus, les détails swap/zram/zswap, la puissance et la fréquence Wi-Fi, les IP
-Gateway et WAN (avec leur drapeau), le ping de latence NET, l'âge
-d'installation, et la puissance, la température, les cycles et la santé de la
-batterie.
+Gateway et WAN (avec leur drapeau), le ping de latence NET, les dates
+d'installation et de dernière mise à jour, et la puissance, la température,
+les cycles et la santé de la batterie.
 
 ## Couleurs
 
