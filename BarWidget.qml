@@ -1581,11 +1581,12 @@ BarWidget {
 
             const ifaceRows = [];
 
+            ifaceRows.push({
+                label: Yassm.I18n.t("net.lan_ip"),
+                value: metrics.ifaceIpv4 !== "" ? metrics.ifaceIpv4 : "--"
+            });
+
             if (root.showExtended) {
-                ifaceRows.push({
-                    label: Yassm.I18n.t("net.lan_ip"),
-                    value: metrics.ifaceIpv4 !== "" ? metrics.ifaceIpv4 : "--"
-                });
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.wan_ip"),
                     value: metrics.wanIp !== "" ? metrics.wanIp : "--"
@@ -1597,11 +1598,14 @@ BarWidget {
                 value: metrics.networkInterface
             });
 
-            if (root.showExtended && metrics.activeWifi) {
+            if (metrics.activeWifi) {
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.ssid"),
                     value: metrics.wifiSsid !== "" ? metrics.wifiSsid : Yassm.I18n.t("common.hidden_ssid")
                 });
+            }
+
+            if (root.showExtended && metrics.activeWifi) {
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.signal"),
                     value: metrics.wifiLevel < 0 ? Math.round(metrics.wifiLevel) + " dBm" : "--"
@@ -1612,10 +1616,12 @@ BarWidget {
                 });
             }
 
+            // Keep the colon column stable when extended data is toggled.
+            const ifaceLabels = [Yassm.I18n.t("net.lan_ip"), Yassm.I18n.t("net.wan_ip"), Yassm.I18n.t("net.iface"), Yassm.I18n.t("net.ssid"), Yassm.I18n.t("net.signal"), Yassm.I18n.t("net.frequency")];
             let ifaceLabelWidth = 0;
 
-            for (let i = 0; i < ifaceRows.length; i++) {
-                ifaceLabelWidth = Math.max(ifaceLabelWidth, ifaceRows[i].label.length);
+            for (let i = 0; i < ifaceLabels.length; i++) {
+                ifaceLabelWidth = Math.max(ifaceLabelWidth, ifaceLabels[i].length);
             }
 
             for (let i = 0; i < ifaceRows.length; i++) {
@@ -1931,8 +1937,8 @@ BarWidget {
 
         root.refreshProcesses();
 
-        if (root.showExtended && hit.key.indexOf("net") === 0) {
-            Yassm.SystemMetrics.refreshNetworkDetails();
+        if (hit.key.indexOf("net") === 0) {
+            Yassm.SystemMetrics.refreshNetworkDetails(root.showExtended);
         }
 
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
@@ -2696,14 +2702,14 @@ BarWidget {
         function onNetworkInterfaceChanged() {
             // A tooltip left open across a link change must fetch the new
             // LAN/WAN addresses instead of keeping the previous link's.
-            if (root.showExtended && root.hoveredSegment.indexOf("net") === 0) {
-                Yassm.SystemMetrics.refreshNetworkDetails();
+            if (root.hoveredSegment.indexOf("net") === 0) {
+                Yassm.SystemMetrics.refreshNetworkDetails(root.showExtended);
             }
         }
 
         function onNetworkDetailsInvalidated() {
-            if (root.showExtended && root.hoveredSegment.indexOf("net") === 0) {
-                Yassm.SystemMetrics.refreshNetworkDetails();
+            if (root.hoveredSegment.indexOf("net") === 0) {
+                Yassm.SystemMetrics.refreshNetworkDetails(root.showExtended);
             }
         }
     }

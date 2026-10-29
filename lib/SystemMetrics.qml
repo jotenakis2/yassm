@@ -1287,12 +1287,17 @@ Singleton {
         }
     }
 
-    function refreshNetworkDetails() {
+    function refreshNetworkDetails(extended) {
         if (metrics.networkInterface === "") {
             return;
         }
 
+        // The LAN address is part of the base interface section.
         ifaceIpProcess.running = true;
+
+        if (!extended) {
+            return;
+        }
 
         // Opening the tooltip should not show a level up to 5 s old or a
         // frequency up to 30 s old: refresh both immediately, then let the
