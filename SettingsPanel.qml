@@ -681,13 +681,15 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(14)
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
-                            text: root.hostWidget ? String(root.hostWidget.moduleSpacing) : "2"
+                            text: String(Math.round(spacingSlider.liveValue))
                             color: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
 
                         PanelSlider {
+                            id: spacingSlider
+
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
@@ -741,13 +743,15 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(14)
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
-                            text: root.hostWidget ? String(root.hostWidget.iconGap) : "1"
+                            text: String(Math.round(iconGapSlider.liveValue))
                             color: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
 
                         PanelSlider {
+                            id: iconGapSlider
+
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
@@ -801,13 +805,15 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(28)
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
-                            text: root.hostWidget ? String(root.hostWidget.maxProcesses) : "10"
+                            text: String(Math.round(maxProcessesSlider.liveValue))
                             color: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
 
                         PanelSlider {
+                            id: maxProcessesSlider
+
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
@@ -1161,13 +1167,15 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(28)
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
-                            text: (root.hostWidget ? String(root.hostWidget.refreshInterval) : "1") + " s"
+                            text: String(Math.round(fastSlider.liveValue)) + " s"
                             color: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
 
                         PanelSlider {
+                            id: fastSlider
+
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
@@ -1221,13 +1229,15 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(28)
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
-                            text: (root.hostWidget ? String(root.hostWidget.slowInterval) : "10") + " s"
+                            text: String(Math.round(slowSlider.liveValue)) + " s"
                             color: ShellColor.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
 
                         PanelSlider {
+                            id: slowSlider
+
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
