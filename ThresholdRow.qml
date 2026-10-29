@@ -18,6 +18,12 @@ ColumnLayout {
     property string title: ""
     property string tooltip: ""
     property string prefix: ""
+    property string keyGreen: root.prefix + "Green"
+    property string keyOrange: root.prefix + "Orange"
+    property string keyRed: root.prefix + "Red"
+    property string propertyGreen: root.prefix + "Green"
+    property string propertyOrange: root.prefix + "Orange"
+    property string propertyRed: root.prefix + "Red"
     property int defaultGreen: 10
     property int defaultOrange: 33
     property int defaultRed: 66
@@ -30,9 +36,9 @@ ColumnLayout {
     property int stepSize: 1
     property bool inverted: false
 
-    readonly property int greenValue: root.hostWidget ? root.hostWidget[root.prefix + "Green"] : root.defaultGreen
-    readonly property int orangeValue: root.hostWidget ? root.hostWidget[root.prefix + "Orange"] : root.defaultOrange
-    readonly property int redValue: root.hostWidget ? root.hostWidget[root.prefix + "Red"] : root.defaultRed
+    readonly property int greenValue: root.hostWidget ? root.hostWidget[root.propertyGreen] : root.defaultGreen
+    readonly property int orangeValue: root.hostWidget ? root.hostWidget[root.propertyOrange] : root.defaultOrange
+    readonly property int redValue: root.hostWidget ? root.hostWidget[root.propertyRed] : root.defaultRed
 
     Layout.fillWidth: true
     spacing: Style.space(2)
@@ -82,7 +88,7 @@ ColumnLayout {
 
                     const next = root.inverted ? Math.max(root.fromGreen, Math.min(root.toGreen, Math.round(value)), root.orangeValue + 1) : Math.max(root.fromGreen, Math.min(root.toGreen, Math.round(value), root.orangeValue - 1));
 
-                    root.hostWidget.updateSetting(root.prefix + "Green", next);
+                    root.hostWidget.updateSetting(root.keyGreen, next);
                 }
             }
         }
@@ -111,7 +117,7 @@ ColumnLayout {
                     const high = root.inverted ? root.greenValue - 1 : root.redValue - 1;
                     const next = Math.max(root.fromOrange, low, Math.min(root.toOrange, high, Math.round(value)));
 
-                    root.hostWidget.updateSetting(root.prefix + "Orange", next);
+                    root.hostWidget.updateSetting(root.keyOrange, next);
                 }
             }
         }
@@ -138,7 +144,7 @@ ColumnLayout {
 
                     const next = root.inverted ? Math.max(root.fromRed, Math.min(root.toRed, root.orangeValue - 1, Math.round(value))) : Math.max(root.fromRed, root.orangeValue + 1, Math.min(root.toRed, Math.round(value)));
 
-                    root.hostWidget.updateSetting(root.prefix + "Red", next);
+                    root.hostWidget.updateSetting(root.keyRed, next);
                 }
             }
         }
