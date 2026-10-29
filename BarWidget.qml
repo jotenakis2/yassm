@@ -1251,7 +1251,9 @@ BarWidget {
                 lines.push(Yassm.I18n.t("common.no_io"));
             } else {
                 const nameWidth = 15;
-                const rateWidth = 10;
+                // "999.9 MiB/s" is the widest rate (11 chars); a 10-wide
+                // field let 100+ MiB/s values widen the whole tooltip.
+                const rateWidth = 11;
 
                 for (let i = 0; i < root.diskProcesses.length; i++) {
                     const entry = root.diskProcesses[i];
