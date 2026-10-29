@@ -646,6 +646,8 @@ PanelWindow {
                     }
 
                     RowLayout {
+                        visible: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
+
                         Layout.fillWidth: true
                         Layout.preferredHeight: Style.space(32)
                         spacing: Style.space(8)
@@ -693,7 +695,7 @@ PanelWindow {
                             Layout.preferredWidth: Style.space(160)
                             Layout.alignment: Qt.AlignVCenter
                             bar: root.hostBar
-                            minimum: 0
+                            minimum: 1
                             maximum: 4
                             step: 1
                             integer: true
@@ -708,6 +710,8 @@ PanelWindow {
                     }
 
                     RowLayout {
+                        visible: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
+
                         Layout.fillWidth: true
                         Layout.preferredHeight: Style.space(32)
                         spacing: Style.space(8)

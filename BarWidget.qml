@@ -109,11 +109,11 @@ BarWidget {
     readonly property int boxBorder: {
         const value = Math.round(Number(setting("boxBorder", -1)));
 
-        if (!Number.isFinite(value) || value < 0) {
-            return Math.min(4, Style.normalBorderWidth);
+        if (!Number.isFinite(value) || value < 1) {
+            return Math.max(1, Math.min(4, Style.normalBorderWidth));
         }
 
-        return Math.max(0, Math.min(4, value));
+        return Math.max(1, Math.min(4, value));
     }
     readonly property int boxRadius: {
         const value = Math.round(Number(setting("boxRadius", 4)));

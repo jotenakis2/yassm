@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.28.1
+Version 1.28.2
 
 **English** | [Français](README-fr.md)
 
@@ -139,7 +139,7 @@ quoted in this page are the English ones; the French interface uses
 **Layout**
 
 - Boxes (module frames)
-- Box border (frame border width, 0–4 px; defaults to the theme border width)
+- Box border (frame border width, 1–4 px; defaults to the theme border width)
 - Box corner radius (0–12 px; default 4)
 - Colors (colored thresholds and blue battery icon on mains)
 - Extended data in tooltips (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
