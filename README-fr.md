@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.33
+Version 1.29.34
 
 [English](README.md) | **Français**
 
@@ -84,8 +84,9 @@ marquées ci-dessous.
   (interrogés à l'ouverture de l'infobulle ; un montage qui ne répond pas en
   2 s est omis) ; débits d'E/S, PSI et E/S par processus (étendu) ;
 - **Réseau** : débits et totaux de session ; un ping de latence vers
-  omarchy.org (étendu, un toutes les 30 s tant que l'infobulle est ouverte) ;
-  interface, adresses LAN/publique, SSID, fréquence et signal Wi-Fi (étendu) ;
+  omarchy.org (étendu, à l'ouverture puis à chaque intervalle lent tant que
+  l'infobulle reste ouverte) ; interface, adresses LAN/publique, SSID,
+  fréquence et signal Wi-Fi (étendu) ;
 - **Température** : tous les capteurs et ventilateurs, du plus chaud au plus
   froid ;
 - **Batterie** : état et temps restant ; puissance, température du pack,

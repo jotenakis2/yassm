@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.33
+Version 1.29.34
 
 **English** | [Français](README-fr.md)
 
@@ -82,8 +82,8 @@ rows marked below.
   tooltip opens; a mount that does not answer within 2 s is omitted); I/O
   rates, PSI and per-process I/O (extended);
 - **Network**: rates and session totals; a latency ping to omarchy.org
-  (extended, one every 30 s while the tooltip is open); interface,
-  LAN/public address, Wi-Fi SSID, frequency and signal (extended);
+  (extended, at open then every Slow interval while the tooltip stays open);
+  interface, LAN/public address, Wi-Fi SSID, frequency and signal (extended);
 - **Temperature**: every sensor and fan speed, hottest first;
 - **Battery**: state and time remaining; power, pack temperature, cycles and
   health (extended);

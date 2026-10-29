@@ -1647,7 +1647,8 @@ Singleton {
     }
 
     Timer {
-        interval: 30000
+        // Follow the Slow sampling setting (5–30 s, default 10 s).
+        interval: metrics.slowIntervalMs
         running: metrics.pingEnabled
         repeat: true
         triggeredOnStart: true
