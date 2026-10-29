@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.19
+Version 1.29.20
 
 [English](README.md) | **Français**
 
@@ -113,7 +113,8 @@ adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 - **disque** : le gestionnaire de fichiers par défaut (dossier personnel) ;
 - **réseau** : le panneau **Test de débit** d'Omarchy ;
 - **batterie** : le menu **Système** d'Omarchy ;
-- **alertes** : `journalctl -b -p err` dans un terminal flottant.
+- **alertes** : `journalctl -b -p warning --no-hostname --since=-1h` (la
+  dernière heure) dans un terminal flottant.
 
 Un clic sans module sous le curseur (widget vide, ou module dont l'outil
 manque) garde la cible générique : `btop`, ou Settings si `btop` n'est pas

@@ -1992,7 +1992,7 @@ BarWidget {
         }
 
         if (key === "alerts") {
-            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "journalctl", "-b", "-p", "err"]);
+            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "journalctl", "-b", "-p", "warning", "--no-hostname", "--since=-1h"]);
             return;
         }
 

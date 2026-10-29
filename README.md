@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.19
+Version 1.29.20
 
 **English** | [Français](README-fr.md)
 
@@ -111,7 +111,8 @@ The last command places the widget in the bar's `left` section; adjust
 - **disk**: the default file manager (home folder);
 - **network**: the Omarchy **Network Speed Test** panel;
 - **battery**: the Omarchy **System** menu;
-- **alerts**: `journalctl -b -p err` in a floating terminal.
+- **alerts**: `journalctl -b -p warning --no-hostname --since=-1h` (the
+  last hour) in a floating terminal.
 
 A click with no module under the cursor (empty widget), or on a module whose
 tool is missing, keeps the generic target: `btop`, or Settings when `btop` is
