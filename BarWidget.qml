@@ -1579,30 +1579,47 @@ BarWidget {
             lines.push("");
             lines.push(root.centeredMark + ifaceIcon + " " + Yassm.I18n.t("head.interface"));
 
-            let ifaceLine = metrics.networkInterface;
+            const ifaceRows = [];
 
-            if (root.showExtended && metrics.ifaceIpv4 !== "") {
-                ifaceLine += " · " + metrics.ifaceIpv4;
+            if (root.showExtended) {
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.lan_ip"),
+                    value: metrics.ifaceIpv4 !== "" ? metrics.ifaceIpv4 : "--"
+                });
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.wan_ip"),
+                    value: metrics.wanIp !== "" ? metrics.wanIp : "--"
+                });
             }
 
-            if (root.showExtended && metrics.wanIp !== "") {
-                ifaceLine += " · " + metrics.wanIp;
-            }
-
-            lines.push(ifaceLine);
+            ifaceRows.push({
+                label: Yassm.I18n.t("net.iface"),
+                value: metrics.networkInterface
+            });
 
             if (root.showExtended && metrics.activeWifi) {
-                let wifi = metrics.wifiSsid !== "" ? metrics.wifiSsid : Yassm.I18n.t("common.hidden_ssid");
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.ssid"),
+                    value: metrics.wifiSsid !== "" ? metrics.wifiSsid : Yassm.I18n.t("common.hidden_ssid")
+                });
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.signal"),
+                    value: metrics.wifiLevel < 0 ? Math.round(metrics.wifiLevel) + " dBm" : "--"
+                });
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.frequency"),
+                    value: metrics.wifiFreqMhz > 0 ? Math.round(metrics.wifiFreqMhz) + " MHz" : "--"
+                });
+            }
 
-                if (metrics.wifiFreqMhz > 0) {
-                    wifi += " · " + Math.round(metrics.wifiFreqMhz) + " MHz";
-                }
+            let ifaceLabelWidth = 0;
 
-                if (metrics.wifiLevel < 0) {
-                    wifi += " · " + Math.round(metrics.wifiLevel) + " dBm";
-                }
+            for (let i = 0; i < ifaceRows.length; i++) {
+                ifaceLabelWidth = Math.max(ifaceLabelWidth, ifaceRows[i].label.length);
+            }
 
-                lines.push(wifi);
+            for (let i = 0; i < ifaceRows.length; i++) {
+                lines.push(ifaceRows[i].label.padEnd(ifaceLabelWidth) + " : " + ifaceRows[i].value);
             }
 
             return tooltipBlock(Yassm.I18n.t("title.net"), lines.join("\n"));
