@@ -1892,12 +1892,16 @@ BarWidget {
             }
 
             const lines = [];
+            // Units are right-aligned in their own field: "rpm" is one
+            // character wider than "°C", so the °C pair slides under it and
+            // the "C" and the "m" share a column.
+            const unitWidth = Math.max("°C".length, "rpm".length);
 
             if (tempRows.length > 0) {
                 lines.push(root.centeredMark + root.iconTemp + " " + Yassm.I18n.t("head.temperatures"));
 
                 for (let i = 0; i < tempRows.length; i++) {
-                    lines.push(tempRows[i].name.padEnd(nameWidth) + " : " + tempRows[i].value.padStart(valueWidth) + " °C");
+                    lines.push(tempRows[i].name.padEnd(nameWidth) + " : " + tempRows[i].value.padStart(valueWidth) + " " + "°C".padStart(unitWidth));
                 }
             }
 
@@ -1909,7 +1913,7 @@ BarWidget {
                 lines.push(root.centeredMark + root.iconFan + " " + Yassm.I18n.t("head.fans"));
 
                 for (let i = 0; i < fanRows.length; i++) {
-                    lines.push(fanRows[i].name.padEnd(nameWidth) + " : " + fanRows[i].value.padStart(valueWidth) + " rpm");
+                    lines.push(fanRows[i].name.padEnd(nameWidth) + " : " + fanRows[i].value.padStart(valueWidth) + " " + "rpm".padStart(unitWidth));
                 }
             }
 
