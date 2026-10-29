@@ -667,6 +667,10 @@ BarWidget {
             return "0 B";
         }
 
+        if (value >= 1073741824) {
+            return (value / 1073741824).toFixed(2) + " TiB";
+        }
+
         if (value >= 1048576) {
             return (value / 1048576).toFixed(2) + " GiB";
         }
@@ -1576,7 +1580,7 @@ BarWidget {
             const rateWidth = 12;
             const sessionWidth = 11;
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
-            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + downRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + upSession.padStart(sessionWidth) + ")"];
+            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + downRate.padStart(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padStart(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + upSession.padStart(sessionWidth) + ")"];
 
             if (root.showExtended && root.hasPing) {
                 const latency = metrics.pingMeasured ? (metrics.pingMs > 0 ? Math.round(metrics.pingMs) + " ms" : "KO") : "--";
