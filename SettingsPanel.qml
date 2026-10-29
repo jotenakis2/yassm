@@ -91,47 +91,58 @@ PanelWindow {
     readonly property var moduleSettings: [
         {
             key: "showUptime",
+            icon: 0xF017,
             label: Yassm.I18n.t("module.uptime"),
             defaultValue: true
         },
         {
             key: "showCpu",
+            icon: 0xF0EE0,
             label: Yassm.I18n.t("module.cpu")
         },
         {
             key: "showLoad",
+            icon: 0xF0F86,
             label: Yassm.I18n.t("module.load")
         },
         {
             key: "showGpu",
+            icon: 0xF08AE,
             label: Yassm.I18n.t("module.gpu")
         },
         {
             key: "showMemory",
+            icon: 0xF035B,
             label: Yassm.I18n.t("module.memory")
         },
         {
             key: "showSwap",
+            icon: 0xF04E2,
             label: Yassm.I18n.t("module.swap")
         },
         {
             key: "showDisk",
+            icon: 0xF02CA,
             label: Yassm.I18n.t("module.disk")
         },
         {
             key: "showNet",
+            icon: 0xF01DA,
             label: Yassm.I18n.t("module.net")
         },
         {
             key: "showTemp",
+            icon: 0xF050F,
             label: Yassm.I18n.t("module.temp")
         },
         {
             key: "showBattery",
+            icon: 0xF0079,
             label: Yassm.I18n.t("module.battery")
         },
         {
             key: "showAlerts",
+            icon: 0xF071,
             label: Yassm.I18n.t("module.alerts"),
             defaultValue: true,
             tooltip: Yassm.I18n.t("settings.alerts_tip")
@@ -488,7 +499,7 @@ PanelWindow {
 
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    label: moduleRow.modelData.label
+                                    label: String.fromCodePoint(moduleRow.modelData.icon) + "  " + moduleRow.modelData.label
                                     fontFamily: Style.font.family
                                     titleSize: Style.font.body
                                     foreground: ShellColor.popups.text
