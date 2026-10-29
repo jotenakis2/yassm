@@ -15,6 +15,7 @@ ColumnLayout {
     id: root
 
     property var hostWidget: null
+    property var scrollPanel: null
     property string title: ""
     property string tooltip: ""
     property string prefix: ""
@@ -64,15 +65,44 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: Style.space(50)
-        spacing: Style.space(8)
+        spacing: Style.space(6)
 
+        // The panel scrolls instead of letting the wheel change a value.
+        WheelHandler {
+            acceptedDevices: PointerDevice.Mouse
+
+            onWheel: function (event) {
+                if (root.scrollPanel) {
+                    root.scrollPanel(event.angleDelta.y);
+                }
+
+                event.accepted = true;
+            }
+        }
+
+        // Push the three fields to the right, away from the family title.
         Item {
             Layout.fillWidth: true
+        }
+
+        Item {
+            Layout.preferredWidth: Style.space(64)
             Layout.fillHeight: true
 
+            Rectangle {
+                width: Style.space(8)
+                height: width
+                radius: width / 2
+                color: Yassm.ThemePalette.green
+                anchors.horizontalCenter: greenField.horizontalCenter
+                anchors.bottom: greenField.top
+                anchors.bottomMargin: Style.space(2)
+            }
+
             NumberField {
+                id: greenField
                 anchors.centerIn: parent
-                label: Yassm.I18n.t("settings.green")
+                label: ""
                 from: root.fromGreen
                 to: root.toGreen
                 stepSize: root.stepSize
@@ -94,12 +124,23 @@ ColumnLayout {
         }
 
         Item {
-            Layout.fillWidth: true
+            Layout.preferredWidth: Style.space(64)
             Layout.fillHeight: true
 
+            Rectangle {
+                width: Style.space(8)
+                height: width
+                radius: width / 2
+                color: Yassm.ThemePalette.orange
+                anchors.horizontalCenter: orangeField.horizontalCenter
+                anchors.bottom: orangeField.top
+                anchors.bottomMargin: Style.space(2)
+            }
+
             NumberField {
+                id: orangeField
                 anchors.centerIn: parent
-                label: Yassm.I18n.t("settings.orange")
+                label: ""
                 from: root.fromOrange
                 to: root.toOrange
                 stepSize: root.stepSize
@@ -123,12 +164,23 @@ ColumnLayout {
         }
 
         Item {
-            Layout.fillWidth: true
+            Layout.preferredWidth: Style.space(64)
             Layout.fillHeight: true
 
+            Rectangle {
+                width: Style.space(8)
+                height: width
+                radius: width / 2
+                color: Yassm.ThemePalette.red
+                anchors.horizontalCenter: redField.horizontalCenter
+                anchors.bottom: redField.top
+                anchors.bottomMargin: Style.space(2)
+            }
+
             NumberField {
+                id: redField
                 anchors.centerIn: parent
-                label: Yassm.I18n.t("settings.red")
+                label: ""
                 from: root.fromRed
                 to: root.toRed
                 stepSize: root.stepSize

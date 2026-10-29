@@ -1013,6 +1013,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_percent")
                         tooltip: Yassm.I18n.t("settings.thresholds_percent_tip")
                         prefix: "percent"
@@ -1029,6 +1032,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_disk")
                         prefix: "disk"
                         defaultGreen: 20
@@ -1044,6 +1050,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_load")
                         prefix: "load"
                         defaultGreen: 10
@@ -1059,6 +1068,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_network")
                         prefix: "net"
                         stepSize: 10
@@ -1075,6 +1087,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_battery")
                         tooltip: Yassm.I18n.t("settings.battery_inverted_tip")
                         prefix: "battery"
@@ -1092,6 +1107,9 @@ PanelWindow {
 
                     ThresholdRow {
                         hostWidget: root.hostWidget
+                        scrollPanel: function (deltaY) {
+                            root.scrollPanel(deltaY);
+                        }
                         title: Yassm.I18n.t("settings.thresholds_temperature")
                         keyGreen: "tempWarm"
                         keyOrange: "tempHot"
