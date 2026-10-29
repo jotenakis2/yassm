@@ -1091,7 +1091,7 @@ BarWidget {
         const compressed = Number(compressedKb) || 0;
         const ratio = compressed > 0 ? original / compressed : 0;
 
-        return formatKib(original).padEnd(9, " ") + " → " + root.iconZip + " " + formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
+        return formatKib(original).padEnd(9, " ") + " →  " + root.iconZip + " " + formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
     }
 
     function batteryStateLabel(status) {
@@ -1470,7 +1470,9 @@ BarWidget {
                 for (let i = 0; i < rows.length; i++) {
                     const row = rows[i];
 
-                    lines.push(row.name.padEnd(nameWidth) + "  " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
+                    // Same "name : value" shape as the other tooltips; the
+                    // name field keeps every colon on one column.
+                    lines.push(row.name.padEnd(nameWidth) + " : " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
                 }
             } else {
                 lines.push(formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
