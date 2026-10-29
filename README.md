@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.26
+Version 1.29.27
 
 **English** | [Français](README-fr.md)
 
@@ -183,10 +183,10 @@ Hovering a module shows a contextual tooltip:
   three thresholds are configurable in Settings → Thresholds. A `fans` section lists every
   hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
   0;
-- **Battery**: percentage, state, time remaining or time to full. Extended
-  data adds the instantaneous power when UPower provides it, with an arrow
-  (↓ while discharging, ↑ while charging), the pack temperature when a sensor
-  name contains `batt`, plus battery health and charge cycles;
+- **Battery**: aligned rows for the state (with the percentage), time
+  remaining, instantaneous power, pack temperature (when a sensor name
+  contains `batt`), cycles and health. Extended data controls the last four
+  rows; missing values show `--`;
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`
@@ -310,84 +310,28 @@ once at startup; the age is recomputed when the tooltip opens.
 
 ## Performance
 
-Measured on the reference machine (Apple M2 Pro, 12 cores, Omarchy 4.0.3,
-Quickshell 0.3.2), idle, no tooltip open. CPU is the sum of every `quickshell`
-thread from `/proc/<pid>/task/*/schedstat`; each state is sampled over two
-90–120 s windows and averaged.
+Idle overhead on the reference machine (Apple M2 Pro, 12 cores, Omarchy 4.0.3,
+Quickshell 0.3.2), no tooltip open. CPU is the sum of every `quickshell`
+thread, sampled over two 90–120 s windows and averaged.
 
-| Scenario | `quickshell` CPU (1 core) | Wakeups / min |
+| Fast sampling | `quickshell` CPU (1 core) | Wakeups / min |
 | --- | --- | --- |
-| Without YASSM | 0.60 % | ~1,120 |
-| With YASSM, 1 s refresh | 1.20 % | ~1,950 |
-| With YASSM, 5 s refresh | 0.80 % | ~1,680 |
-| **Overhead at 1 s** | **+0.60 points** | **+830** |
-| **Overhead at 5 s** | **+0.20 points** | **+560** |
+| 5 s | 0.80 % | ~1,680 |
+| 1 s (default) | 1.20 % | ~1,950 |
 
-The overhead is **0.05 % of the machine's total capacity** at the default 1 s
-refresh (0.60 points of one core out of 12 cores); YASSM's absolute footprint
-when enabled is 1.20 % of one core. The cost is dominated by the
-once-a-second update path
-(four `/proc` reads, binding updates, text layout), which is why the Fast sampling
-slider has such a visible effect.
+Without YASSM the shell uses 0.60 % and ~1,120 wakeups/min. The default 1 s
+refresh therefore costs **+0.60 points of one core**, i.e. **0.05 % of the
+machine's total capacity**; at 5 s the overhead drops to +0.20 points. Short
+scripts run only on their timer or while the matching tooltip is open, so
+there is no resident process.
 
-Short-lived scripts (CPU time per run, 10 runs each; none stays alive):
+Module-aware sampling stops the reads and timers of hidden modules; the CPU
+frequency process only exists while its tooltip is open. Temperature and disk
+share the Slow timer, swap/ZRAM only run while the SWAP tooltip is open, and
+fan speeds travel with the temperature scan. `findmnt` is wrapped in
+`timeout 5`, so a dead network mount cannot freeze the disk module.
 
-| Script | CPU / run | Frequency (idle) | CPU / minute |
-| --- | --- | --- | --- |
-| `temperature.sh` (temperatures + fans) | 14 ms | 6×/min | 85 ms |
-| `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
-| `findmnt` | 1 ms | 6×/min | 6 ms |
-| `wifi-freq.sh` | 6 ms | 2×/min (wireless) + once per NET hover | 12 ms |
-| Battery cycle count | <1 ms | 1×/10 min | <0.1 ms |
-| **Total (idle)** | | | **~126 ms/min ≈ 0.21 % of one core** |
-
-On demand only: `cpu-freq.sh` (3 ms) while the CPU tooltip is open,
-`proc-snapshot.sh` (11 ms) while it is open, `ps` (~15 ms) while the RAM
-tooltip is open, `ip` (3 ms) each time the NET tooltip opens, and the public
-IP lookup when the 5-minute cache expires or the link changes.
-
-**Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
-process.** Module-aware sampling stops the reads and timers of hidden modules,
-and the CPU frequency process only exists while its tooltip is open, sampled
-on the fast tick.
-
-`findmnt` may wait ~100 ms on I/O for a network mount (`/media/NAS` here);
-the command is wrapped in `timeout 5`, so a dead mount cannot freeze the disk
-module.
-
-The network module reads `/proc/net/dev` once per fast tick; `/proc/net/route`
-and `/proc/net/ipv6_route` are read on the same fast tick, without spawning a
-process.
-
-Swap devices, the `mm_stat` of each zram device and the zswap state are read
-on the Slow tick only while the SWAP tooltip is open, without spawning a
-process.
-
-The CPU tooltip reads `/proc/<pid>/stat` snapshots (no process) for
-instantaneous deltas; the RAM tooltip launches a `ps` (~15 ms, wrapped in
-`timeout 5`) when it opens and then at the Slow sampling interval while the
-hover lasts, never in the background.
-
-Temperature and disk run on the Slow timer while their module is enabled;
-swap/ZRAM only while the SWAP tooltip is open; hiding a module stops its
-scripts entirely.
-Fan speeds travel with the temperature scan (`temperature.sh`), so they cost
-no extra process. `alerts.sh` runs every 60 s (systemd system/user plus a
-`ps` zombie scan) and only while Alerts is enabled.
-
-PSI (`/proc/pressure/memory`, `/proc/pressure/io`, `/proc/pressure/cpu`),
-`/proc/diskstats` and `/proc/net/wireless` are read on the fast tick while
-their tooltip is open, without spawning a process; PSI and `/proc/uptime`
-follow Slow sampling. The SSID comes from the NetworkManager service
-over D-Bus (no process, no poll); the signal level is read from
-`/proc/net/wireless` on the fast tick while the NET tooltip is open, and
-`wifi-freq.sh` asks `iw` for the associated frequency on the same tick, also
-only while that tooltip is open and the link is wireless. The LAN and
-public addresses are only fetched when the NET tooltip opens with extended
-data: `ip -4` costs ~3 ms, and <https://api.ipify.org> is queried at most
-every 5 minutes (one HTTPS request, nothing else is sent).
-
-Full methodology, raw numbers and reproduction snippets:
+Full methodology, per-script costs and reproduction snippets:
 [performance.md](performance.md).
 
 ## Checks
@@ -403,27 +347,16 @@ consistency, verifies the JSON/thermal output contracts, runs
 
 ## GPU
 
-Sources used, in order:
-
-1. `/sys/class/drm/*/device/gpu_busy_percent`;
-2. `nvidia-smi`;
-3. otherwise `GPU --%`.
+Sources, in order: `/sys/class/drm/*/device/gpu_busy_percent`, `nvidia-smi`,
+otherwise `GPU --%`.
 
 ### Apple Silicon / Asahi
 
-On an Apple Silicon machine with the `asahi` driver (AGX), no GPU utilization
-measurement is currently exposed by the system:
-
-- no `gpu_busy_percent`;
-- no `devfreq` or exposed GPU frequency;
-- no `drm-engine-*` statistics in `/proc/<pid>/fdinfo`;
-- no dedicated GPU power sensor;
-- the driver exposes no utilization counter through debugfs/sysfs.
-
-Existing tools do not cover this case: `btop` is built without GPU support,
-`nvtop` only supports Apple on macOS (Metal), and `asitop`/`macmon` rely on
-`powermetrics`, also macOS-only. YASSM therefore shows `GPU --%` on this
-configuration rather than an invented value.
+With the `asahi` (AGX) driver, the system exposes no usable GPU utilization
+counter: no `gpu_busy_percent`, devfreq/frequency, `drm-engine-*` fdinfo stats
+or GPU power sensor. `btop` is built without GPU support, `nvtop` only
+supports Apple on macOS, and `asitop`/`macmon` rely on macOS-only
+`powermetrics`. YASSM therefore shows `GPU --%` instead of inventing a value.
 
 ## Updating
 
