@@ -223,6 +223,10 @@ Example entry:
 }
 ```
 
+Threshold keys use `<family>Green`, `<family>Orange` and `<family>Red` for
+`percent`, `disk`, `load`, `net` and `battery`, plus `tempWarm`, `tempHot` and
+`tempCritical`.
+
 All keys are optional; missing values use the defaults above. `moduleOrder`
 is the list of module keys shown above (`net` covers both rate boxes); an
 unknown key is dropped and a new module missing from the list is appended, so

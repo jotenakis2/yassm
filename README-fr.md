@@ -229,6 +229,10 @@ Exemple d'entrée :
 }
 ```
 
+Les clés de seuils suivent `<famille>Green`, `<famille>Orange` et
+`<famille>Red` pour `percent`, `disk`, `load`, `net` et `battery`, plus
+`tempWarm`, `tempHot` et `tempCritical`.
+
 Toutes les clés sont optionnelles ; les valeurs absentes utilisent les défauts
 ci-dessus. `moduleOrder` est la liste des clés de modules ci-dessus (`net`
 couvre les deux boîtes de débit) ; une clé inconnue est ignorée et un nouveau
