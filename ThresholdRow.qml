@@ -41,7 +41,7 @@ RowLayout {
 
     Layout.fillWidth: true
     Layout.preferredHeight: Style.space(34)
-    spacing: Style.space(6)
+    spacing: Style.space(10)
 
     // The panel scrolls instead of letting the wheel change a value.
     WheelHandler {
@@ -76,14 +76,14 @@ RowLayout {
     }
 
     NumberField {
-        Layout.preferredWidth: Style.space(64)
+        Layout.preferredWidth: Style.space(72)
         Layout.alignment: Qt.AlignVCenter
         label: ""
         from: root.fromGreen
         to: root.toGreen
         stepSize: root.stepSize
         value: root.greenValue
-        fieldWidth: Style.space(64)
+        fieldWidth: Style.space(72)
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 
@@ -106,7 +106,7 @@ RowLayout {
         to: root.toOrange
         stepSize: root.stepSize
         value: root.orangeValue
-        fieldWidth: Style.space(64)
+        fieldWidth: Style.space(72)
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 
@@ -131,7 +131,7 @@ RowLayout {
         to: root.toRed
         stepSize: root.stepSize
         value: root.redValue
-        fieldWidth: Style.space(64)
+        fieldWidth: Style.space(72)
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 

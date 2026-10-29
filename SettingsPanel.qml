@@ -1015,14 +1015,14 @@ PanelWindow {
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.preferredHeight: Style.space(10)
-                        spacing: Style.space(6)
+                        spacing: Style.space(10)
 
                         Item {
                             Layout.fillWidth: true
                         }
 
                         Item {
-                            Layout.preferredWidth: Style.space(64)
+                            Layout.preferredWidth: Style.space(72)
 
                             Rectangle {
                                 anchors.centerIn: parent
@@ -1034,7 +1034,7 @@ PanelWindow {
                         }
 
                         Item {
-                            Layout.preferredWidth: Style.space(64)
+                            Layout.preferredWidth: Style.space(72)
 
                             Rectangle {
                                 anchors.centerIn: parent
@@ -1046,7 +1046,7 @@ PanelWindow {
                         }
 
                         Item {
-                            Layout.preferredWidth: Style.space(64)
+                            Layout.preferredWidth: Style.space(72)
 
                             Rectangle {
                                 anchors.centerIn: parent

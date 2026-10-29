@@ -195,9 +195,6 @@ BarWidget {
     readonly property string iconWifi: String.fromCodePoint(0xF05A9)
     readonly property string iconEthernet: String.fromCodePoint(0xF0200)
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
-    readonly property string iconTempCool: String.fromCodePoint(0xF1A71)
-    readonly property string iconTempWarm: String.fromCodePoint(0xF0510)
-    readonly property string iconTempHot: String.fromCodePoint(0xF0E01)
     readonly property string iconFan: String.fromCodePoint(0xF0210)
     readonly property string iconProc: String.fromCodePoint(0xF018D)
     readonly property string iconCompress: String.fromCodePoint(0xF066)
@@ -373,7 +370,7 @@ BarWidget {
         }
 
         if (showTemp) {
-            segments.push(makeSegment("temp", root.temperatureIcon(metrics.hasTemperature ? metrics.temperatureC : null), metrics.hasTemperature ? Math.round(metrics.temperatureC) : null, "°C", "temp"));
+            segments.push(makeSegment("temp", iconTemp, metrics.hasTemperature ? Math.round(metrics.temperatureC) : null, "°C", "temp"));
         }
 
         return segments;
@@ -628,32 +625,6 @@ BarWidget {
         }
 
         return button.foreground;
-    }
-
-    function temperatureIcon(celsius) {
-        if (celsius === null || celsius === undefined) {
-            return iconTemp;
-        }
-
-        const value = Math.round(Number(celsius));
-
-        if (!Number.isFinite(value)) {
-            return iconTemp;
-        }
-
-        if (value < root.temperatureWarm) {
-            return iconTempCool;
-        }
-
-        if (value < root.temperatureHot) {
-            return iconTemp;
-        }
-
-        if (value < root.temperatureCritical) {
-            return iconTempWarm;
-        }
-
-        return iconTempHot;
     }
 
     function temperatureColor(value) {

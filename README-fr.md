@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.4
+Version 1.29.5
 
 [English](README.md) | **Français**
 
@@ -169,11 +169,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   la plus élevée. Les capteurs étiquetés gardent leur libellé, les capteurs
   hwmon sans libellé affichent seulement le nom du périphérique
   (`macsmc_battery`, `tas2764`), et les mesures qui partagent un nom sont
-  fusionnées en gardant la plus chaude. L'icône de la barre change de forme
-  selon le niveau, et la valeur prend la couleur du niveau (seuils sur la
-  valeur arrondie affichée) ; avec les valeurs par défaut : flocon sous 40 °C,
-  thermomètre de 40 à 49 °C, chaleur de 50 à 59 °C, alerte à partir de 60 °C.
-  Les trois seuils sont réglables
+  fusionnées en gardant la plus chaude. La barre garde un thermomètre fixe ;
+  seule la valeur prend la couleur du niveau (seuils sur la valeur arrondie
+  affichée). Les trois seuils sont réglables
   dans Settings → Seuils. Une section
   `fans` liste chaque ventilateur hwmon avec sa vitesse en rpm
   (`Fan 1  0 rpm`), y compris les ventilateurs à l'arrêt à 0 ;
