@@ -1652,10 +1652,15 @@ BarWidget {
                 });
             }
 
-            ifaceRows.push({
-                label: Yassm.I18n.t("net.iface"),
-                value: metrics.networkInterface
-            });
+            // The interface name only earns its row next to the extended data
+            // (gateway, WAN, radio details); with IP LAN and SSID alone it just
+            // repeats "wlan0" or "eth0".
+            if (root.showExtended) {
+                ifaceRows.push({
+                    label: Yassm.I18n.t("net.iface"),
+                    value: metrics.networkInterface
+                });
+            }
 
             if (metrics.activeWifi) {
                 ifaceRows.push({
