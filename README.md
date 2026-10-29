@@ -1,11 +1,11 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.27
+Version 1.29.28
 
 **English** | [Français](README-fr.md)
 
-Omarchy bar widget showing uptime, CPU, RAM, swap, system load, network,
-temperature, GPU, battery, alerts and root partition usage.
+A compact Omarchy bar widget: CPU, RAM, swap, load, GPU, disk, network,
+temperature, battery, uptime and alerts, each with a detailed tooltip.
 
 Repository: <https://github.com/jotenakis2/yassm>
 
@@ -15,362 +15,145 @@ Repository: <https://github.com/jotenakis2/yassm>
 
 | Tooltips | |
 | --- | --- |
-| ![CPU](docs/screenshots/tooltip-cpu.png) | ![Memory](docs/screenshots/tooltip-memory.png) |
-| ![Network](docs/screenshots/tooltip-net.png) | ![Sensors](docs/screenshots/tooltip-temp.png) |
-| ![Swap](docs/screenshots/tooltip-swap.png) | ![Alerts](docs/screenshots/tooltip-alerts.png) |
+| ![CPU](docs/screenshots/tooltip-cpu.png) | ![RAM](docs/screenshots/tooltip-memory.png) |
+| ![Network](docs/screenshots/tooltip-net.png) | ![Battery](docs/screenshots/tooltip-battery.png) |
+| ![Disk](docs/screenshots/tooltip-disk.png) | ![Alerts](docs/screenshots/tooltip-alerts.png) |
 
 <img src="docs/screenshots/settings.png" alt="Settings panel" width="380">
 
-More in [`docs/screenshots`](docs/screenshots) (load, disk, battery, uptime).
+More in [`docs/screenshots`](docs/screenshots).
 
-## Modules
-
-| Module | Source | Interval |
-| --- | --- | --- |
-| CPU | `/proc/stat` | Fast |
-| RAM | `/proc/meminfo` (`MemAvailable`) | Fast |
-| Swap | `/proc/meminfo` (bar), `/proc/swaps` + zram `mm_stat` (tooltip) | Fast (bar) / Slow (tooltip) |
-| Load average | `/proc/loadavg`, normalized by CPU count, not capped at 100 % | Fast |
-| GPU | sysfs `gpu_busy_percent`, or `nvidia-smi` | Slow |
-| Disk | `findmnt` (root for the bar, local filesystems in the tooltip) | Slow |
-| Network | `/proc/net/dev` (default route, IPv4 then IPv6) | Fast |
-| Battery | UPower (D-Bus, event-driven) | events |
-| Alerts | systemd failed units, zombies older than 60 s, root disk ≥ 95 %, RAM ≥ 95 % | 60 s (disk and RAM alerts reuse the module samples) |
-| Uptime | `/proc/uptime`, shown as minutes or `hMM` | Slow |
-| Temperature | all normal temperatures, sorted | Slow |
-
-Swap is hidden when the machine has no active swap. The GPU shows `--%` when
-no reliable source is available. The network is displayed in two separate
-boxes, ↓ and ↑. CPU, RAM, swap, load and network share one fast loop, 1 s by
-default and configurable from 1 to 5 s in Settings.
-
-## Architecture
-
-- `lib/SystemMetrics.qml` is a shared singleton: a single `/proc` sampler and a
-  single `findmnt` for every bar instance, including multi-monitor setups.
-  Battery data comes directly from UPower (event-driven).
-- `SettingsPanel.qml` is loaded on demand on first open, then kept for
-  subsequent openings. Its controls are Omarchy `Toggle`/`ToggleSwitch`,
-  using the current theme's fonts, colors and spacing.
-- GPU support remains handled by the widget, consistent with the current
-  limitation of Asahi support.
-
-## Requirements
-
-**Required**
-
-- Omarchy 4.x with its Quickshell shell.
-- `bash` and coreutils (`date`, `head`, `readlink`, `stat`, `timeout`…).
-- `awk` (POSIX).
-- `findmnt` (util-linux) for the disk module.
-- `ps` (procps-ng) for the RAM process list and the zombie scan.
-- `systemctl` (systemd) when the Alerts module is enabled.
-- `/proc`, `/sys` and a Nerd Font for the icons.
-
-**Optional**
-
-- `iw` — Wi-Fi frequency in the NET tooltip, only when the active link is
-  wireless and extended data is on. Without it, the frequency is simply
-  omitted.
-- `ip` (iproute2) — LAN address in the extended NET tooltip.
-- `curl` — public address in the extended NET tooltip (one HTTPS request to
-  <https://api.ipify.org>, cached for 5 minutes and refreshed when the uplink
-  or the Wi-Fi network changes).
-- `nvidia-smi` — NVIDIA GPU usage; the sysfs counter is preferred.
-- `btop` — left-click target for CPU, load, GPU, memory, swap, temperature
-  and uptime; without it those clicks open Settings.
-- UPower and NetworkManager — battery details and SSID over D-Bus; without
-  them those fields are hidden.
-
-A missing optional tool never raises an error: the corresponding field is
-omitted. The Settings panel shows a warning banner as soon as a required or
-optional tool is missing; hovering it lists the exact tools and what they are
-used for. `btop` and `nvidia-smi` are deliberately not flagged: they are
-conveniences, and the GPU detector already falls back when no source exists.
-
-The widget is designed for a horizontal bar (top or bottom). It is hidden on
-vertical bars, where a `barSize`-wide slot cannot hold the module row.
-
-## Installation
+## Install
 
 ```bash
-unzip yassm.zip -d "$HOME/.config/omarchy/plugins/"
-omarchy plugin validate "$HOME/.config/omarchy/plugins/io.github.jotenakis2.yassm"
-omarchy-shell shell rescanPlugins
+omarchy plugin add https://github.com/jotenakis2/yassm.git --enable
+```
+
+The widget is enabled with its default section. To move it:
+
+```bash
 omarchy plugin enable io.github.jotenakis2.yassm --section left
 ```
 
-The last command places the widget in the bar's `left` section; adjust
-`--section` (`left`, `center`, `right`) as you prefer.
+Use `left`, `center` or `right`.
+
+## What it shows
+
+| Module | Value |
+| --- | --- |
+| CPU | usage % |
+| RAM | used % |
+| Swap | used % (hidden without swap) |
+| Load | run-queue load, as a CPU-normalised % (can exceed 100) |
+| GPU | usage %; `--%` when the system exposes no counter (e.g. Apple Silicon) |
+| Disk | root filesystem usage % |
+| Network | ↓ and ↑ rates, or a crossed icon when offline |
+| Temperature | hottest sensor °C |
+| Battery | level %, with a state icon |
+| Uptime | minutes below one hour, then `hMM` |
+| Alerts | icon only, when an alert is active |
+
+The order and visibility of every module are configurable.
 
 ## Clicks
 
-**Left-click a module** to open its tool:
+| Left-click on | Opens |
+| --- | --- |
+| CPU, load, GPU, RAM, swap, temperature, uptime | `btop` |
+| disk | the default file manager (home folder) |
+| network | the Omarchy **Network Speed Test** |
+| battery | the Omarchy **System** menu |
+| alerts | the last hour of warnings/errors, then the failed systemd units |
 
-- **CPU, load, GPU, memory, swap, temperature, uptime**: `btop`;
-- **disk**: the default file manager (home folder);
-- **network**: the Omarchy **Network Speed Test** panel;
-- **battery**: the Omarchy **System** menu;
-- **alerts**: a floating terminal with the last hour of warnings and errors
-  (`journalctl -b -p warning --no-hostname --since=-1h`), followed by the
-  failed units (`systemctl --failed`, then `systemctl --failed --user`).
-
-A click with no module under the cursor (empty widget), or on a module whose
-tool is missing, keeps the generic target: `btop`, or Settings when `btop` is
-not installed.
-**Right-click** the widget to open the Settings panel (modules, layout,
-thresholds, timers and the `shell.json` keys are documented in
-[settings.md](settings.md)).
+Right-click opens **Settings**. A click outside the modules keeps the generic
+target: `btop` (or Settings when `btop` is not installed).
 
 ## Tooltips
 
-Hovering a module shows a contextual tooltip:
+Hover a module for its details. **Extended data** in Settings adds the extra
+rows marked below.
 
-- **Load**: raw 1, 5 and 15 minute load, followed by the CPU-normalised
-  percentage in parentheses, in fixed columns (`1.43 ( 12%)`). The icon tilts
-  with the load: needle low up to 50 %, medium from 51 to 90 %, high above
-  that;
-- **RAM**: the tooltip opens with a centered `data` heading, then shows
-  `Total`, `Used` and `Available`. A centered `proc` heading introduces the
-  top **userland** processes by RSS (up to the **Processes shown** value,
-  default 10), grouped by name; the list refreshes at the Slow sampling
-  interval (5–30 s) while the tooltip stays open; kernel threads are excluded.
-  Extended data adds `Shared` (`Shmem`: tmpfs and shared mappings, already
-  counted in `Cached`), `Buffer` (`Buffers`), `Cache` (`Cached` +
-  `SReclaimable`, like `free`; Buffer + Cache is the classic Buff/cache
-  total), the `kernel` line (Slab − SReclaimable + stacks + page tables
-  + vmalloc + percpu; SReclaimable is already in Cache, and vmalloc and
-  percpu may slightly overlap) and a `pressure` section with `some`/`full`
-  columns for the `10s`, `60s` and `300s` windows (`some`: at least one task
-  stalled, `full`: no task making progress);
-- **Swap**: used / total and the percentage. Extended data lists each
-  swap device (zram included) with its own used / total and percentage under a
-  `devices` heading, then a `zram` section (compressed size, original size,
-  ratio and RAM used per device) and a `zswap` block (compressed size,
-  original size, ratio) whenever zswap is enabled, even while its pool is
-  empty;
-- **Disk**: a `usage` section with one line per detected **local** filesystem,
-  in GiB, with the percentage. Pseudo filesystems (`proc`, `sysfs`, `tmpfs`, `cgroup`, etc.)
-  are ignored, along with ephemeral mounts under `/tmp` (AppImage, FUSE) and
-  `/run/user`. Network filesystems (NFS, CIFS, SSHFS…) are skipped: querying
-  their usage can block for seconds when the server is unreachable. Mount
-  points that share the same device/source are deduplicated: on a btrfs root
-  with subvolumes, `/home` and `/var/log` therefore do not appear separately
-  from `/`. Extended data adds an `io` section (`R` read / `W` write rates),
-  a `pressure` section (`some`/`full` for `10s`, `60s`, `300s`) and a
-  `proc (user)` section with the top processes by read/write rate (`R`/`W`, read from
-  `/proc/<pid>/io`; only the user's processes are readable, and the sum does
-  not rebuild the global rate because of writeback and root daemons);
-- **Network**: an `io` section with download (↓) and upload (↑) rates plus
-  the session total (deltas since the shell started, reset on restart and kept
-  across interface changes), then an `interface` section with the interface name.
-  Both rates are colored independently. The driver's absolute counter is not
-  used because it can be bogus. Without a default route (loopback only), a red
-  crossed-network icon and `--` replace both rates. Extended data completes
-  the `interface` line with the LAN address (`ip -4`) and the public address
-  (`curl`): `wlan0 · 192.168.50.148 · 90.29.68.78`. The heading uses the
-  Wi-Fi icon only when the interface carrying the default route is wireless;
-  in that case it also adds the SSID (from NetworkManager), the associated
-  frequency (`iw`, e.g. `5500 MHz`) and the signal level (from
-  `/proc/net/wireless`): `MaisonDuRuet · 5500 MHz · -67 dBm`;
-- **Temperature**: the tooltip is titled `SENSORS`. A `temperatures` section
-  lists every normal reading, sorted from highest to lowest, with the sensor
-  name in parentheses; the bar shows the highest one. Labelled sensors keep
-  their label, unlabeled hwmon sensors show the device name only
-  (`macsmc_battery`, `tas2764`), and readings sharing a name are merged,
-  keeping the hottest. The bar keeps a fixed thermometer icon; only the value
-  takes the level colour (thresholds on the rounded displayed value). All
-  three thresholds are configurable in Settings → Thresholds. A `fans` section lists every
-  hwmon fan with its speed in rpm (`Fan 1  0 rpm`), including standing fans at
-  0;
-- **Battery**: aligned rows for the state (with the percentage), time
-  remaining, instantaneous power, pack temperature (when a sensor name
-  contains `batt`), cycles and health. Extended data controls the last four
-  rows; missing values show `--`;
-- **CPU**: current percentage. The tooltip opens with a centered `cores`
-  heading, then per-core percentages in two columns (split in half; three or
-  more columns past 20 cores, at most 10 rows tall). A centered `proc`
-  heading then introduces kernel CPU when extended data is on (`system` +
-  `irq` + `softirq`), on the
-  same scale as the processes, followed by the top **userland** processes by
-  CPU (instantaneous deltas from `/proc/<pid>/stat`, scaled to total CPU
-  capacity like the main value; up to **Processes shown**, default 10),
-  grouped by name; when fewer processes are active, idle ones fill the
-  remaining rows at 0.0%; the list refreshes at the Slow sampling interval
-  (5–30 s) while the tooltip stays open; kernel threads are excluded. Extended data
-  adds a `pressure` section (CPU `some` only, since the kernel defines no
-  `full` line for the CPU) and each core frequency in parentheses,
-  right-aligned per column, sampled while the tooltip is open;
-- **Uptime**: minutes below one hour (`42m`), then `3h42`; the tooltip shows
-  `Time since boot : 3h 42m`. Extended data adds
-  `Time since installation : 49 days` and `Installation date : 9 Sep 2026`
-  (taken from the first `pacman` transaction, falling back to the root
-  filesystem birth time; the month name follows the session locale);
-- **GPU**: current percentage.
+- **CPU**: per-core usage; top userland processes; PSI and per-core
+  frequencies (extended);
+- **RAM**: total, used, available; top userland processes; buffers, cache and
+  PSI (extended);
+- **Swap**: per-device usage, zram and zswap details (extended);
+- **Disk**: usage per local filesystem; I/O rates, PSI and per-process I/O
+  (extended);
+- **Network**: rates and session totals; interface, LAN/public address,
+  Wi-Fi SSID, frequency and signal (extended);
+- **Temperature**: every sensor and fan speed, hottest first;
+- **Battery**: state and time remaining; power, pack temperature, cycles and
+  health (extended);
+- **Uptime**: time since boot; installation age and date (extended);
+- **Load**, **GPU**, **Alerts**: a short summary, or the alert list (failed
+  units, zombies, disk/RAM).
 
-Tooltip titles (`CPU`, `RAM`, `NET`, `SENSORS`, etc.) and section headings
-(`cores`, `data`, `pressure`, `proc`, `usage`, `io`, `devices`, `temperatures`,
-`fans`, `zram`, `zswap`) are **bold** and use the tooltip text color; the body
-uses the theme `muted` color. The `kernel` line in the CPU and RAM tooltips
-(extended data only) is bold too, but keeps the body color. Network, swap,
-disk and temperature tooltips launch no process. The RAM tooltip launches a
-`ps` when it opens and then at the Slow sampling interval while the hover
-lasts;
-the CPU tooltip uses `/proc/<pid>/stat` snapshots instead.
+Extended data adds per-core frequencies and PSI, disk and per-process I/O,
+swap/zram/zswap details, Wi-Fi and LAN/WAN details, the installation age, and
+battery power, temperature, cycles and health.
 
-## Bar colors
+## Colors
 
-On the bar only, not in tooltips. Thresholds apply to the rounded displayed
-value:
+Values change colour with the current theme's green/orange/red. Thresholds
+apply to the rounded value shown in the bar:
 
 | Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
-| CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
+| CPU, RAM, swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
 | Disk | < 20 % | 20–32 % | 33–89 % | ≥ 90 % |
 | Load | < 10 % | 10–49 % | 50–89 % | ≥ 90 % |
 | Network | < 10 KiB/s | 10–499 KiB/s | 500–999 KiB/s | ≥ 1000 KiB/s |
 | Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
-| Temperatures (defaults) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
+| Temperature | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-These are the defaults; every family is configurable in Settings →
-Thresholds. Load is not capped: it can exceed 100 % when the run queue is
-longer than the CPU count. Battery uses inverted logic: the lower the value,
-the more alarming the color. Network download and upload rates are colored
-independently.
-
-The green/orange/red colors come from the current Omarchy theme's
-`colors.toml`. Icons keep the normal bar color, except for the battery icon:
-as soon as the machine is on mains power (charging or held at a charge
-threshold), the icon turns theme green while the value keeps the normal bar
-color. On battery, the value follows the thresholds above.
-
-The disk value turns red at 90 %; the **Alerts** module only triggers at
-95 % (disk or RAM). All colour thresholds are defaults and can be changed in
-Settings → Thresholds, per family. The **Colors** toggle
-disables all these colors: values and the green
-battery icon return to the normal bar color. It maps to `showColors` in
-`shell.json` (enabled by default).
+Battery uses an inverted scale: the lower the value, the more alarming. The
+**Colors** toggle disables all of them. Thresholds are editable per family in
+Settings.
 
 ## Battery icon
 
-The icon follows the level in 10 % steps (empty icon at 0 %; 1–9 % shows the
-10 % icon) and the power state:
+- **on battery**: battery filled according to the level;
+- **charging**: battery with a bolt inside, green icon;
+- **plugged but not charging** (full or charge limit reached): a green plug.
 
-- **on battery**: battery alone, filled according to the level;
-- **charging**: a battery with the bolt inside the outline, green icon, value
-  in the normal bar color;
-- **plugged but not charging** (full or charge threshold reached): a single
-  plug icon, green, value in the normal bar color.
-
-Every state is exactly one glyph wide, so the bar never shifts when the
-charger is connected or when charging starts.
-
-The "plugged" state comes from `UPower.onBattery`, which distinguishes a
-machine that is merely plugged in from one that is charging. Percentage,
-state and power are provided by UPower properties: no script or timer is
-needed, the bar reacts to D-Bus signals. UPower polls the hardware about every
-30 s, so the percentage may change at that rate. Battery health comes from the
-UPower battery device (the aggregate `DisplayDevice` leaves it empty); the
-cycle count is read from sysfs (`/sys/class/power_supply/*/cycle_count`) once
-at startup and every 10 minutes.
+Every state is one glyph wide, so the bar never shifts when charging starts.
 
 ## Alerts
 
-The **Alerts** module is enabled by default; it can be disabled in Settings. When
-enabled, `alerts.sh` runs every 60 s and reports:
+The module stays hidden until something is wrong: a failed systemd unit, a
+zombie older than 60 s, the root filesystem at 95 % or more, or RAM at 95 % or
+more. Its icon shows the severity; the tooltip lists the cause.
 
-- systemd units in the `failed` state, for the system and user managers
-  (red icon);
-- zombies older than **60 s** (orange icon);
-- the root filesystem at **95 % or more** (red icon), checked with the disk
-  module on the Slow tick;
-- RAM at **95 % or more** (red icon), checked with the memory module on the
-  Fast tick.
+## Settings
 
-Both reuse the Disk and Memory samples, so they are active only while those
-modules are enabled.
+Right-click the widget. The panel has four sections:
 
-It appears at the far right, after Battery, with an icon only (no counter),
-and only while at least one alert exists. The tooltip lists the failed units
-under a centered lowercase `systemd` heading (server icon), then
-`systemd --user` (user icon), then `proc zombie` (ghost icon), `disk` (disk
-  icon) when the root is ≥ 95 %, and `ram` (memory icon) when RAM is ≥ 95 %; a
-  blank line separates the sections. With
-**Colors** disabled the icon uses the normal bar color. The Alerts toggle in
-Settings has a hover tooltip explaining what the module reports.
+- **Modules**: toggle a module, drag the handle to reorder;
+- **Layout**: boxes, border width, corner radius, colors, extended data,
+  spacing, processes shown;
+- **Thresholds**: usage, disk, load, network, battery, temperature. Hidden
+  while **Colors** is off;
+- **Timers**: fast sampling (1–5 s) and slow sampling (5–30 s).
 
-## Uptime
+Preferences are stored in `~/.config/omarchy/shell.json`.
 
-The **Uptime** module is enabled by default and can be disabled in Settings.
-It reads `/proc/uptime` on the Slow sampling interval. The bar shows `42m` below one hour, then
-`3h42`; the tooltip shows the same duration labelled `Time since boot`.
-Extended data adds the age since installation in days and the distribution
-installation date. `install-date.sh` resolves the date and its Unix timestamp
-once at startup; the age is recomputed when the tooltip opens.
+## Requirements
 
-## Performance
+Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
+`btop` (left-click target), `curl` and `ip` (network addresses), `iw` (Wi-Fi
+frequency), `nvidia-smi` (NVIDIA GPU), UPower and NetworkManager (battery and
+SSID). A missing optional tool simply hides the corresponding field.
 
-Idle overhead on the reference machine (Apple M2 Pro, 12 cores, Omarchy 4.0.3,
-Quickshell 0.3.2), no tooltip open. CPU is the sum of every `quickshell`
-thread, sampled over two 90–120 s windows and averaged.
+The widget needs a horizontal bar; it is hidden on vertical bars.
 
-| Fast sampling | `quickshell` CPU (1 core) | Wakeups / min |
-| --- | --- | --- |
-| 5 s | 0.80 % | ~1,680 |
-| 1 s (default) | 1.20 % | ~1,950 |
-
-Without YASSM the shell uses 0.60 % and ~1,120 wakeups/min. The default 1 s
-refresh therefore costs **+0.60 points of one core**, i.e. **0.05 % of the
-machine's total capacity**; at 5 s the overhead drops to +0.20 points. Short
-scripts run only on their timer or while the matching tooltip is open, so
-there is no resident process.
-
-Module-aware sampling stops the reads and timers of hidden modules; the CPU
-frequency process only exists while its tooltip is open. Temperature and disk
-share the Slow timer, swap/ZRAM only run while the SWAP tooltip is open, and
-fan speeds travel with the temperature scan. `findmnt` is wrapped in
-`timeout 5`, so a dead network mount cannot freeze the disk module.
-
-Full methodology, per-script costs and reproduction snippets:
-[performance.md](performance.md).
-
-## Checks
+## Update
 
 ```bash
-./check.sh
+omarchy plugin update
 ```
 
-The script validates the manifest, checks shell script syntax and version
-consistency, verifies the JSON/thermal output contracts, runs
-`shellcheck --enable=all` on every script, and `qmllint` (Qt 6) with a proper
-`qs.Commons`/`qs.Ui` import root.
-
-## GPU
-
-Sources, in order: `/sys/class/drm/*/device/gpu_busy_percent`, `nvidia-smi`,
-otherwise `GPU --%`.
-
-### Apple Silicon / Asahi
-
-With the `asahi` (AGX) driver, the system exposes no usable GPU utilization
-counter: no `gpu_busy_percent`, devfreq/frequency, `drm-engine-*` fdinfo stats
-or GPU power sensor. `btop` is built without GPU support, `nvtop` only
-supports Apple on macOS, and `asitop`/`macmon` rely on macOS-only
-`powermetrics`. YASSM therefore shows `GPU --%` instead of inventing a value.
-
-## Updating
-
-The remote is:
-
-```text
-https://github.com/jotenakis2/yassm.git
-```
-
-`omarchy plugin update` can therefore be used. Otherwise, replace the files
-manually and run `omarchy plugin validate` and
-`omarchy-shell shell rescanPlugins` again.
-
-No configuration file to migrate: settings live in `shell.json`.
+Settings live in `shell.json`; there is no configuration file to migrate.
 
 ## Uninstall
 
@@ -379,10 +162,8 @@ omarchy plugin disable io.github.jotenakis2.yassm
 omarchy plugin remove io.github.jotenakis2.yassm
 ```
 
-`disable` removes the widget from the bar while keeping the files. Because the
-folder is a Git repository, `remove` deletes the folder: make sure to push the
-repository or keep an archive first.
+`remove` deletes the folder: push the repository or keep an archive first.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT — see [`LICENSE`](LICENSE).
