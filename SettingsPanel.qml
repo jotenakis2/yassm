@@ -1014,6 +1014,7 @@ PanelWindow {
                     ThresholdRow {
                         hostWidget: root.hostWidget
                         title: Yassm.I18n.t("settings.thresholds_percent")
+                        tooltip: Yassm.I18n.t("settings.thresholds_percent_tip")
                         prefix: "percent"
                         defaultGreen: 10
                         defaultOrange: 33
