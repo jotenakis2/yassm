@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.30
+Version 1.29.31
 
 [English](README.md) | **Français**
 
@@ -80,7 +80,8 @@ marquées ci-dessous.
 - **RAM** : total, utilisée, disponible ; top des processus utilisateur ;
   tampon, cache et PSI (étendu) ;
 - **Swap** : usage par périphérique, détails zram et zswap (étendu) ;
-- **Disque** : usage par système de fichiers local ; débits d'E/S, PSI et E/S
+- **Disque** : usage par système de fichiers local et montages NFS/CIFS ; un
+  montage réseau qui ne répond pas en 2 s est omis ; débits d'E/S, PSI et E/S
   par processus (étendu) ;
 - **Réseau** : débits et totaux de session ; interface, adresses LAN/publique,
   SSID, fréquence et signal Wi-Fi (étendu) ;

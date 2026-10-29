@@ -56,6 +56,7 @@ Singleton {
 
     property real diskPercent: 0
     property var mounts: []
+    property var networkMounts: []
     property real diskReadKib: 0
     property real diskWriteKib: 0
     property var diskIoPrevious: null
@@ -826,7 +827,7 @@ Singleton {
         return value.replace(/\\x20/g, " ").replace(/\\x5c/g, "\\");
     }
 
-    function applyMounts(content) {
+    function parseMounts(content) {
         // Pseudo filesystems are never useful in a disk usage tooltip.
         // Everything else (local, removable, NFS, CIFS, overlay…) is kept.
         const excluded = {
@@ -917,13 +918,19 @@ Singleton {
             return bySource[key];
         });
 
-        if (list.length === 0) {
-            return;
-        }
-
         list.sort(function (left, right) {
             return left.target < right.target ? -1 : (left.target > right.target ? 1 : 0);
         });
+
+        return list;
+    }
+
+    function applyMounts(content) {
+        const list = metrics.parseMounts(content);
+
+        if (list.length === 0) {
+            return;
+        }
 
         metrics.mounts = list;
 
@@ -935,6 +942,12 @@ Singleton {
             metrics.diskPercent = list[i].percent;
             break;
         }
+    }
+
+    // NFS/CIFS are queried separately with a hard timeout, so a dead server
+    // can never delay the local mounts or the tooltip.
+    function applyNetworkMounts(content) {
+        metrics.networkMounts = metrics.parseMounts(content);
     }
 
     function applyTemperatures(content) {
@@ -1470,6 +1483,7 @@ Singleton {
         onTriggered: {
             if (metrics.diskEnabled) {
                 mountProcess.running = true;
+                networkMountProcess.running = true;
             }
 
             if (metrics.pressureEnabled) {
@@ -1575,6 +1589,31 @@ Singleton {
         onExited: function (exitCode, exitStatus) {
             if (exitCode !== 0 && exitCode !== 124) {
                 console.warn("yassm: findmnt exited with", exitCode);
+            }
+        }
+    }
+
+    Process {
+        id: networkMountProcess
+
+        // Two seconds is already generous for a healthy server; a dead mount
+        // is killed before it can affect the disk tooltip.
+        command: ["timeout", "2", "findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL", "-t", "nfs,nfs4,cifs,smb3"]
+
+        stdout: StdioCollector {
+            id: networkMountOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyNetworkMounts(networkMountOutput.text)
+        }
+
+        onExited: function (exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                // Timeout, no match or error: never keep a stale network row.
+                metrics.networkMounts = [];
+            }
+
+            if (exitCode !== 0 && exitCode !== 1 && exitCode !== 124) {
+                console.warn("yassm: network findmnt exited with", exitCode);
             }
         }
     }

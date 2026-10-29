@@ -1195,9 +1195,13 @@ BarWidget {
     }
 
     function mountsTooltip() {
-        const mounts = Yassm.SystemMetrics.mounts;
+        const local = Yassm.SystemMetrics.mounts || [];
+        const network = Yassm.SystemMetrics.networkMounts || [];
+        const mounts = local.concat(network).sort(function (left, right) {
+            return left.target < right.target ? -1 : (left.target > right.target ? 1 : 0);
+        });
 
-        if (!mounts || mounts.length === 0) {
+        if (mounts.length === 0) {
             return tooltipBlock(Yassm.I18n.t("title.disk"), Yassm.I18n.t("common.unavailable"));
         }
 
