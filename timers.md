@@ -32,7 +32,7 @@ Only two things are fixed: **alerts** (60 s) and **battery cycles** (1 h).
 | PSI `some`/`full` | RAM, CPU or DISK tooltip open |
 | Swap devices, zram, zswap | SWAP tooltip open |
 | Processes (CPU/RAM) | their tooltip open |
-| Disk I/O per process | DISK tooltip open |
+| Disk I/O per process (user) | DISK tooltip open |
 
 ## Fixed
 

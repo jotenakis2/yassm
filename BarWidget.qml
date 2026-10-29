@@ -1249,7 +1249,7 @@ BarWidget {
             }
 
             lines.push("");
-            lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
+            lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc_user"));
 
             if (root.diskProcesses.length === 0) {
                 lines.push(Yassm.I18n.t("common.no_io"));

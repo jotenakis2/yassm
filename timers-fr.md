@@ -33,7 +33,7 @@ batterie** (1 h).
 | PSI `some`/`full` | infobulle RAM, CPU ou DISK ouverte |
 | Périphériques de swap, zram, zswap | infobulle SWAP ouverte |
 | Processus (CPU/RAM) | leur infobulle ouverte |
-| E/S disque par processus | infobulle DISK ouverte |
+| E/S disque par processus (user) | infobulle DISK ouverte |
 
 ## Fixes
 
