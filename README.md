@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.28
+Version 1.29.29
 
 **English** | [Français](README-fr.md)
 
@@ -95,8 +95,9 @@ battery power, temperature, cycles and health.
 
 ## Colors
 
-Values change colour with the current theme's green/orange/red. Thresholds
-apply to the rounded value shown in the bar:
+When **Colors** is checked (the default), values change colour with the
+current theme's green/orange/red; when it is unchecked, everything keeps the
+normal bar colour. Thresholds apply to the rounded value shown in the bar:
 
 | Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
@@ -107,17 +108,9 @@ apply to the rounded value shown in the bar:
 | Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Temperature | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-Battery uses an inverted scale: the lower the value, the more alarming. The
-**Colors** toggle disables all of them. Thresholds are editable per family in
-Settings.
-
-## Battery icon
-
-- **on battery**: battery filled according to the level;
-- **charging**: battery with a bolt inside, green icon;
-- **plugged but not charging** (full or charge limit reached): a green plug.
-
-Every state is one glyph wide, so the bar never shifts when charging starts.
+Battery uses an inverted scale: the lower the value, the more alarming.
+Thresholds are editable per family in Settings. With Colors on, the battery
+icon turns green on mains power while the value keeps the normal bar colour.
 
 ## Alerts
 
@@ -137,6 +130,12 @@ Right-click the widget. The panel has four sections:
 - **Timers**: fast sampling (1–5 s) and slow sampling (5–30 s).
 
 Preferences are stored in `~/.config/omarchy/shell.json`.
+
+## Performance
+
+YASSM is optimized to stay light: about **0.05 % of the machine** at the
+default 1 s refresh, no resident process, and hidden modules stop sampling.
+Measurements: [performance.md](performance.md).
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.28
+Version 1.29.29
 
 [English](README.md) | **Français**
 
@@ -99,8 +99,9 @@ de la batterie.
 
 ## Couleurs
 
-Les valeurs prennent les couleurs verte/orange/rouge du thème. Les seuils
-s'appliquent à la valeur arrondie affichée :
+Quand la case **Couleurs** est cochée (par défaut), les valeurs prennent les
+couleurs verte/orange/rouge du thème ; décochée, elles gardent la couleur
+normale de la barre. Les seuils s'appliquent à la valeur arrondie affichée :
 
 | Module | Normale | Verte | Orange | Rouge |
 | --- | --- | --- | --- | --- |
@@ -112,16 +113,9 @@ s'appliquent à la valeur arrondie affichée :
 | Température | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 La batterie suit une logique inversée : plus la valeur baisse, plus la couleur
-est alarmante. Le réglage **Couleurs** les désactive toutes. Les seuils sont
-modifiables par famille dans les Réglages.
-
-## Icône de batterie
-
-- **sur batterie** : batterie remplie selon le niveau ;
-- **en charge** : batterie avec éclair à l'intérieur, icône verte ;
-- **branchée sans charge** (pleine ou seuil de charge atteint) : prise verte.
-
-Chaque état tient en un glyphe : la barre ne bouge pas au début de la charge.
+est alarmante. Les seuils sont modifiables par famille dans les Réglages. Avec
+Couleurs, l'icône de batterie passe au vert sur secteur ; la valeur garde la
+couleur normale de la barre.
 
 ## Alertes
 
@@ -141,6 +135,13 @@ Clic droit sur le widget. Le panneau a quatre sections :
 - **Intervalles** : échantillonnage rapide (1–5 s) et lent (5–30 s).
 
 Les préférences sont stockées dans `~/.config/omarchy/shell.json`.
+
+## Performances
+
+YASSM est optimisé pour rester léger : environ **0,05 % de la machine** au
+rafraîchissement par défaut (1 s), aucun processus résident, et les modules
+masqués arrêtent l'échantillonnage. Mesures :
+[performance-fr.md](performance-fr.md).
 
 ## Prérequis
 
