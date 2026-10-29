@@ -698,15 +698,17 @@ BarWidget {
         }
 
         // Thresholds use the rounded width so the value never spills over to
-        // "1000K" or "1000M" and widens the bar for a single tick.
+        // "1000K" or "1000M" and widens the bar for a single tick. The switch
+        // to an integer happens as soon as the one-decimal form would reach
+        // 10.0, otherwise "10.0M" is one character wider than "9.9M".
         if (value >= 999.5 * 1024) {
             const gib = value / 1048576;
-            return (gib >= 10 ? gib.toFixed(0) : gib.toFixed(1)).padStart(3, " ") + "G";
+            return (gib >= 9.95 ? String(Math.round(gib)) : gib.toFixed(1)).padStart(3, " ") + "G";
         }
 
         if (value >= 999.5) {
             const mib = value / 1024;
-            return (mib >= 10 ? mib.toFixed(0) : mib.toFixed(1)).padStart(3, " ") + "M";
+            return (mib >= 9.95 ? String(Math.round(mib)) : mib.toFixed(1)).padStart(3, " ") + "M";
         }
 
         return String(Math.round(value)).padStart(3, " ") + "K";
