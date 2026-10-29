@@ -16,7 +16,7 @@ bash -n check.sh alerts.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh install-
 
 if command -v shellcheck >/dev/null 2>&1; then
 	# Every script must pass all ShellCheck checks, including style ones.
-	shellcheck --enable=all check.sh alerts.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh install-date.sh proc-snapshot.sh temperature.sh wifi-freq.sh
+	shellcheck --enable=all check.sh alerts.sh alerts-view.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh install-date.sh proc-snapshot.sh temperature.sh wifi-freq.sh
 fi
 
 # ---------------------------------------------------------------- metadata

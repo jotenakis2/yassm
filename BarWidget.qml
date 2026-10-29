@@ -15,6 +15,7 @@ BarWidget {
     readonly property string detectScriptPath: decodeURIComponent(Qt.resolvedUrl("detect-gpu.sh").toString().replace("file://", ""))
     readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
     readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
+    readonly property string alertsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("alerts-view.sh").toString().replace("file://", ""))
 
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
@@ -1992,7 +1993,7 @@ BarWidget {
         }
 
         if (key === "alerts") {
-            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "journalctl", "-b", "-p", "warning", "--no-hostname", "--since=-1h"]);
+            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "bash", root.alertsViewScriptPath]);
             return;
         }
 
