@@ -2071,6 +2071,7 @@ BarWidget {
         metrics.setPressureUser(root, extended && (root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || root.hoveredSegment === "disk"));
         metrics.setCpuFreqUser(root, extended && root.showCpu && root.hoveredSegment === "cpu");
         metrics.setDiskIoUser(root, extended && root.showDisk && root.hoveredSegment === "disk");
+        metrics.setNetworkMountUser(root, root.showDisk && root.hoveredSegment === "disk");
         metrics.setSwapDetailUser(root, extended && root.showSwap && root.hoveredSegment === "swap");
         metrics.setWifiDetailUser(root, extended && root.showNet && root.hoveredSegment === "net");
     }
@@ -2090,6 +2091,7 @@ BarWidget {
         metrics.setPressureUser(root, false);
         metrics.setCpuFreqUser(root, false);
         metrics.setDiskIoUser(root, false);
+        metrics.setNetworkMountUser(root, false);
         metrics.setSwapDetailUser(root, false);
         metrics.setWifiDetailUser(root, false);
     }

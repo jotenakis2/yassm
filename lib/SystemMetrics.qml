@@ -57,6 +57,8 @@ Singleton {
     property real diskPercent: 0
     property var mounts: []
     property var networkMounts: []
+    property var networkMountUsers: []
+    readonly property bool networkMountEnabled: networkMountUsers.length > 0
     property real diskReadKib: 0
     property real diskWriteKib: 0
     property var diskIoPrevious: null
@@ -128,6 +130,21 @@ Singleton {
 
     function setDiskUser(widget, enabled) {
         metrics.diskUsers = withUser(metrics.diskUsers, widget, enabled);
+    }
+
+    function setNetworkMountUser(widget, enabled) {
+        const wasEnabled = metrics.networkMountEnabled;
+
+        metrics.networkMountUsers = withUser(metrics.networkMountUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            // Query only when the disk tooltip opens: clear the previous rows
+            // and fetch fresh ones, without a periodic network statfs.
+            metrics.networkMounts = [];
+            networkMountProcess.running = true;
+        } else if (!enabled && !metrics.networkMountEnabled) {
+            metrics.networkMounts = [];
+        }
     }
 
     function setSwapUser(widget, enabled) {
@@ -1483,7 +1500,6 @@ Singleton {
         onTriggered: {
             if (metrics.diskEnabled) {
                 mountProcess.running = true;
-                networkMountProcess.running = true;
             }
 
             if (metrics.pressureEnabled) {
