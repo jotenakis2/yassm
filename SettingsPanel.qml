@@ -1011,6 +1011,53 @@ PanelWindow {
                     visible: root.thresholdsOpen
                     spacing: Style.space(6)
 
+                    // Legend: the three colour dots, once, above the fields.
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(10)
+                        spacing: Style.space(6)
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        Item {
+                            Layout.preferredWidth: Style.space(64)
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: Style.space(6)
+                                height: width
+                                radius: width / 2
+                                color: Yassm.ThemePalette.green
+                            }
+                        }
+
+                        Item {
+                            Layout.preferredWidth: Style.space(64)
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: Style.space(6)
+                                height: width
+                                radius: width / 2
+                                color: Yassm.ThemePalette.orange
+                            }
+                        }
+
+                        Item {
+                            Layout.preferredWidth: Style.space(64)
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: Style.space(6)
+                                height: width
+                                radius: width / 2
+                                color: Yassm.ThemePalette.red
+                            }
+                        }
+                    }
+
                     ThresholdRow {
                         hostWidget: root.hostWidget
                         scrollPanel: function (deltaY) {
