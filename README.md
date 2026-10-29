@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.18
+Version 1.29.19
 
 **English** | [Français](README-fr.md)
 
@@ -113,8 +113,9 @@ The last command places the widget in the bar's `left` section; adjust
 - **battery**: the Omarchy **System** menu;
 - **alerts**: `journalctl -b -p err` in a floating terminal.
 
-A click outside the modules (or on a module whose tool is missing) keeps the
-generic target: `btop`, or Settings when `btop` is not installed.
+A click with no module under the cursor (empty widget), or on a module whose
+tool is missing, keeps the generic target: `btop`, or Settings when `btop` is
+not installed.
 **Right-click** the widget to open the Settings panel (modules, layout,
 thresholds, timers and the `shell.json` keys are documented in
 [settings.md](settings.md)).

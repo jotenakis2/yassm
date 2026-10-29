@@ -1748,7 +1748,7 @@ BarWidget {
         return "";
     }
 
-    function segmentHitAt(x, strict) {
+    function segmentHitAt(x) {
         if (!labelRow || labelRow.width <= 0) {
             return null;
         }
@@ -1772,10 +1772,6 @@ BarWidget {
                     key: child.metricKey,
                     center: origin.x + child.x + child.width / 2
                 };
-            }
-
-            if (strict) {
-                continue;
             }
 
             // The gap between two modules belongs to the nearest one: without
@@ -2308,9 +2304,7 @@ BarWidget {
         // tracker rather than from a MouseArea of ours.
         onPressed: function (buttonCode) {
             if (buttonCode === Qt.LeftButton) {
-                const hit = root.segmentHitAt(tooltipTracker.mouseX, true);
-
-                root.activateSegment(hit ? hit.key : "");
+                root.activateSegment(root.hoveredSegment);
             } else if (buttonCode === Qt.RightButton) {
                 root.togglePanel();
             }

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.18
+Version 1.29.19
 
 [English](README.md) | **Français**
 
@@ -115,8 +115,9 @@ adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 - **batterie** : le menu **Système** d'Omarchy ;
 - **alertes** : `journalctl -b -p err` dans un terminal flottant.
 
-Un clic hors des modules (ou sur un module dont l'outil manque) garde la cible
-générique : `btop`, ou Settings si `btop` n'est pas installé.
+Un clic sans module sous le curseur (widget vide, ou module dont l'outil
+manque) garde la cible générique : `btop`, ou Settings si `btop` n'est pas
+installé.
 **Clic droit** sur le widget pour ouvrir le panneau de configuration (modules,
 disposition, seuils, intervalles et clés `shell.json` sont documentés dans
 [settings-fr.md](settings-fr.md)).
