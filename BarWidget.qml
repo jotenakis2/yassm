@@ -1993,7 +1993,7 @@ BarWidget {
         }
 
         if (key === "alerts") {
-            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "bash", root.alertsViewScriptPath]);
+            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-alerts", "bash", root.alertsViewScriptPath]);
             return;
         }
 
