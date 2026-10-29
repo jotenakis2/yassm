@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.29
+Version 1.29.30
 
 [English](README.md) | **Français**
 
@@ -60,14 +60,15 @@ L'ordre et la visibilité de chaque module sont configurables.
 
 | Clic gauche sur | Ouvre |
 | --- | --- |
-| CPU, charge, GPU, RAM, swap, température, uptime | `btop` |
+| CPU, charge, GPU, RAM, swap, température, uptime | `btop`, ou `htop` si `btop` manque |
 | disque | le gestionnaire de fichiers par défaut (dossier personnel) |
 | réseau | le **Test de débit** d'Omarchy |
 | batterie | le menu **Système** d'Omarchy |
 | alertes | la dernière heure de warnings/erreurs, puis les unités systemd en échec |
 
 Le **clic droit** ouvre les **Réglages**. Un clic hors des modules garde la
-cible générique : `btop` (ou les Réglages si `btop` n'est pas installé).
+cible générique : `btop`, puis `htop` ; les Réglages si aucun des deux n'est
+installé.
 
 ## Infobulles
 
@@ -146,7 +147,7 @@ masqués arrêtent l'échantillonnage. Mesures :
 ## Prérequis
 
 Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
-`btop` (cible du clic gauche), `curl` et `ip` (adresses réseau), `iw`
+`btop` ou `htop` (cible du clic gauche), `curl` et `ip` (adresses réseau), `iw`
 (fréquence Wi-Fi), `nvidia-smi` (GPU NVIDIA), UPower et NetworkManager
 (batterie et SSID). Un outil optionnel manquant masque simplement le champ
 correspondant.

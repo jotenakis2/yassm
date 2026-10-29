@@ -84,6 +84,7 @@ BarWidget {
     property var diskIoSnapshot: null
 
     property bool hasBtop: false
+    property bool hasHtop: false
 
     property string gpuKind: "none"
     property string gpuPath: ""
@@ -2007,18 +2008,23 @@ BarWidget {
         }
     }
 
-    function launchBtop() {
+    function launchMonitor() {
         if (root.hasBtop) {
             Quickshell.execDetached(["omarchy-launch-or-focus-tui", "btop"]);
             return;
         }
 
-        // btop is not installed: keep the left click useful.
+        if (root.hasHtop) {
+            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "htop"]);
+            return;
+        }
+
+        // Neither monitor is installed: keep the left click useful.
         root.togglePanel();
     }
 
     // Left click follows the module under the cursor; the gaps and the empty
-    // area keep the generic btop target.
+    // area keep the generic monitor target.
     function activateSegment(key) {
         if (key.indexOf("net") === 0) {
             Quickshell.execDetached(["omarchy-shell", "shell", "summon", "omarchy.speedtest"]);
@@ -2040,7 +2046,7 @@ BarWidget {
             return;
         }
 
-        root.launchBtop();
+        root.launchMonitor();
     }
 
     function syncMetricsSubscriptions() {
@@ -2173,6 +2179,16 @@ BarWidget {
 
         onExited: function (exitCode, exitStatus) {
             root.hasBtop = exitCode === 0;
+        }
+    }
+
+    Process {
+        id: htopCheck
+
+        command: ["bash", "-c", "command -v htop >/dev/null 2>&1"]
+
+        onExited: function (exitCode, exitStatus) {
+            root.hasHtop = exitCode === 0;
         }
     }
 
@@ -2603,6 +2619,7 @@ BarWidget {
         root.detectGpuIfNeeded();
         root.syncMetricsSubscriptions();
         btopCheck.running = true;
+        htopCheck.running = true;
     }
     Component.onDestruction: root.releaseMetricsSubscriptions()
     onShowGpuChanged: root.detectGpuIfNeeded()
