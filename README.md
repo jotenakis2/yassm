@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.16
+Version 1.29.17
 
 **English** | [Français](README-fr.md)
 
@@ -77,7 +77,8 @@ default and configurable from 1 to 5 s in Settings.
   <https://api.ipify.org>, cached for 5 minutes and refreshed when the uplink
   or the Wi-Fi network changes).
 - `nvidia-smi` — NVIDIA GPU usage; the sysfs counter is preferred.
-- `btop` — left-click launcher; without it the left click opens Settings.
+- `btop` — left-click target for CPU, load, GPU, memory, swap, temperature
+  and uptime; without it those clicks open Settings.
 - UPower and NetworkManager — battery details and SSID over D-Bus; without
   them those fields are hidden.
 
@@ -102,10 +103,21 @@ omarchy plugin enable io.github.jotenakis2.yassm --section left
 The last command places the widget in the bar's `left` section; adjust
 `--section` (`left`, `center`, `right`) as you prefer.
 
-## Settings panel
+## Clicks
 
-Right-click the widget to open the panel. Modules, layout, thresholds, timers
-and the `shell.json` keys are documented in [settings.md](settings.md).
+**Left-click a module** to open its tool:
+
+- **CPU, load, GPU, memory, swap, temperature, uptime**: `btop`;
+- **disk**: the default file manager (home folder);
+- **network**: the Omarchy **Network Speed Test** panel;
+- **battery**: the Omarchy **System** menu;
+- **alerts**: `journalctl -b -p err` in a floating terminal.
+
+A click outside the modules (or on a module whose tool is missing) keeps the
+generic target: `btop`, or Settings when `btop` is not installed.
+**Right-click** the widget to open the Settings panel (modules, layout,
+thresholds, timers and the `shell.json` keys are documented in
+[settings.md](settings.md)).
 
 ## Tooltips
 

@@ -1973,6 +1973,32 @@ BarWidget {
         root.togglePanel();
     }
 
+    // Left click follows the module under the cursor; the gaps and the empty
+    // area keep the generic btop target.
+    function activateSegment(key) {
+        if (key.indexOf("net") === 0) {
+            Quickshell.execDetached(["omarchy-shell", "shell", "summon", "omarchy.speedtest"]);
+            return;
+        }
+
+        if (key === "disk") {
+            Quickshell.execDetached(["xdg-open", Quickshell.env("HOME")]);
+            return;
+        }
+
+        if (key === "battery") {
+            Quickshell.execDetached(["omarchy", "menu", "summon", "system"]);
+            return;
+        }
+
+        if (key === "alerts") {
+            Quickshell.execDetached(["omarchy-launch-floating-terminal-with-presentation", "journalctl", "-b", "-p", "err"]);
+            return;
+        }
+
+        root.launchBtop();
+    }
+
     function syncMetricsSubscriptions() {
         const metrics = Yassm.SystemMetrics;
         const extended = root.showExtended;
@@ -2386,6 +2412,22 @@ BarWidget {
             onEntered: Qt.callLater(root.refreshTooltip)
             onMouseXChanged: root.updateTooltip()
             onExited: root.hideSegmentTooltip()
+        }
+
+        // Left clicks are routed per segment. Only the left button is
+        // accepted, so WidgetButton still receives right clicks (Settings).
+        MouseArea {
+            id: segmentClickArea
+
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: function (mouse) {
+                const hit = root.segmentHitAt(mouse.x);
+
+                root.activateSegment(hit ? hit.key : "");
+            }
         }
 
         Item {

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.16
+Version 1.29.17
 
 [English](README.md) | **Français**
 
@@ -77,7 +77,8 @@ seule boucle rapide, 1 s par défaut et réglable de 1 à 5 s dans Settings.
   vers <https://api.ipify.org>, mise en cache 5 minutes et rafraîchie quand
   le lien ou le réseau Wi-Fi change).
 - `nvidia-smi` — usage GPU NVIDIA ; le compteur sysfs est préféré.
-- `btop` — lanceur au clic gauche ; sans lui, le clic gauche ouvre Settings.
+- `btop` — cible du clic gauche pour CPU, charge, GPU, mémoire, swap,
+  température et uptime ; sans lui, ces clics ouvrent Settings.
 - UPower et NetworkManager — détails batterie et SSID via D-Bus ; sans eux
   ces champs sont masqués.
 
@@ -104,11 +105,21 @@ omarchy plugin enable io.github.jotenakis2.yassm --section left
 La dernière commande place le widget dans la section `left` de la barre ;
 adaptez `--section` (`left`, `center`, `right`) selon votre préférence.
 
-## Panneau de configuration
+## Clics
 
-**Clic droit** sur le widget pour ouvrir le panneau. Modules, disposition,
-seuils, intervalles et clés `shell.json` sont documentés dans
-[settings-fr.md](settings-fr.md).
+**Clic gauche sur un module** pour ouvrir son outil :
+
+- **CPU, charge, GPU, mémoire, swap, température, uptime** : `btop` ;
+- **disque** : le gestionnaire de fichiers par défaut (dossier personnel) ;
+- **réseau** : le panneau **Test de débit** d'Omarchy ;
+- **batterie** : le menu **Système** d'Omarchy ;
+- **alertes** : `journalctl -b -p err` dans un terminal flottant.
+
+Un clic hors des modules (ou sur un module dont l'outil manque) garde la cible
+générique : `btop`, ou Settings si `btop` n'est pas installé.
+**Clic droit** sur le widget pour ouvrir le panneau de configuration (modules,
+disposition, seuils, intervalles et clés `shell.json` sont documentés dans
+[settings-fr.md](settings-fr.md)).
 
 ## Tooltips
 
