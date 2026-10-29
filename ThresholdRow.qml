@@ -41,6 +41,7 @@ RowLayout {
 
     Layout.fillWidth: true
     Layout.preferredHeight: Style.space(34)
+    Layout.rightMargin: Style.space(4)
     spacing: Style.space(10)
 
     // The panel scrolls instead of letting the wheel change a value.
@@ -77,6 +78,7 @@ RowLayout {
 
     NumberField {
         Layout.preferredWidth: Style.space(72)
+        Layout.preferredHeight: Style.spacing.controlHeight
         Layout.alignment: Qt.AlignVCenter
         label: ""
         from: root.fromGreen
@@ -99,7 +101,8 @@ RowLayout {
     }
 
     NumberField {
-        Layout.preferredWidth: Style.space(64)
+        Layout.preferredWidth: Style.space(72)
+        Layout.preferredHeight: Style.spacing.controlHeight
         Layout.alignment: Qt.AlignVCenter
         label: ""
         from: root.fromOrange
@@ -124,7 +127,8 @@ RowLayout {
     }
 
     NumberField {
-        Layout.preferredWidth: Style.space(64)
+        Layout.preferredWidth: Style.space(72)
+        Layout.preferredHeight: Style.spacing.controlHeight
         Layout.alignment: Qt.AlignVCenter
         label: ""
         from: root.fromRed

@@ -1015,6 +1015,7 @@ PanelWindow {
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.preferredHeight: Style.space(10)
+                        Layout.rightMargin: Style.space(4)
                         spacing: Style.space(10)
 
                         Item {
