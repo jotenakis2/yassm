@@ -692,7 +692,9 @@ Singleton {
             const flags = parseInt(fields[3], 16);
             const metric = Number(fields[6]);
 
-            if (!(flags & 1) || !Number.isFinite(metric)) {
+            // Loopback has no link of its own: a default route parked on it
+            // (VPN leftovers, partial teardown) means "offline", not "LAN".
+            if (fields[0] === "lo" || !(flags & 1) || !Number.isFinite(metric)) {
                 continue;
             }
 
@@ -719,9 +721,13 @@ Singleton {
                 continue;
             }
 
+            // The kernel keeps an "unreachable default" on lo with all
+            // RTF_* flags cleared when there is no IPv6 gateway; only an UP
+            // route is usable. Loopback is never a real uplink either.
             const metric = parseInt(fields[5], 16);
+            const flags = parseInt(fields[8], 16);
 
-            if (!Number.isFinite(metric)) {
+            if (fields[9] === "lo" || !(flags & 1) || !Number.isFinite(metric)) {
                 continue;
             }
 
@@ -748,6 +754,12 @@ Singleton {
         metrics.networkPrevious = null;
         metrics.networkRxKib = 0;
         metrics.networkTxKib = 0;
+        // Addresses belong to the previous link: drop them so the tooltip
+        // never shows the old LAN or WAN address on a new connection.
+        metrics.ifaceIpv4 = "";
+        metrics.wanIp = "";
+        metrics.wanIpUpdatedAt = 0;
+        metrics.wifiLevel = 0;
         // Session totals span the whole shell session: keep them across
         // interface changes, as documented.
     }
