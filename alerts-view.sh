@@ -6,6 +6,10 @@ set -euo pipefail
 # that are currently failed (system and user). Kept in a pager so everything
 # stays scrollable; less starts at the end, where the failed units are.
 
+# journalctl and systemctl only colorize on a tty; the report goes through a
+# file for the pager, so ask systemd for colors explicitly.
+export SYSTEMD_COLORS=1
+
 if [[ ${LANG:-} == fr* ]]; then
 	journal_title="journal : dernière heure, warning et au-dessus"
 	system_title="unités systemd en échec : système"
