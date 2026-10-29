@@ -2541,5 +2541,17 @@ BarWidget {
     onShowAlertsChanged: root.syncMetricsSubscriptions()
     onShowUptimeChanged: root.syncMetricsSubscriptions()
     onShowExtendedChanged: root.syncMetricsSubscriptions()
+    Connections {
+        target: Yassm.SystemMetrics
+
+        function onNetworkInterfaceChanged() {
+            // A tooltip left open across a link change must fetch the new
+            // LAN/WAN addresses instead of keeping the previous link's.
+            if (root.showExtended && root.hoveredSegment.indexOf("net") === 0) {
+                Yassm.SystemMetrics.refreshNetworkDetails();
+            }
+        }
+    }
+
     onHoveredSegmentChanged: root.syncMetricsSubscriptions()
 }
