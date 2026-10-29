@@ -1748,7 +1748,7 @@ BarWidget {
         return "";
     }
 
-    function segmentHitAt(x) {
+    function segmentHitAt(x, strict) {
         if (!labelRow || labelRow.width <= 0) {
             return null;
         }
@@ -1772,6 +1772,10 @@ BarWidget {
                     key: child.metricKey,
                     center: origin.x + child.x + child.width / 2
                 };
+            }
+
+            if (strict) {
+                continue;
             }
 
             // The gap between two modules belongs to the nearest one: without
@@ -2299,9 +2303,14 @@ BarWidget {
         labelVisible: false
         tooltipText: ""
 
+        // The bar dispatches clicks to WidgetButton itself (its slot owns the
+        // press), so the segment under the cursor is taken from the hover
+        // tracker rather than from a MouseArea of ours.
         onPressed: function (buttonCode) {
             if (buttonCode === Qt.LeftButton) {
-                root.launchBtop();
+                const hit = root.segmentHitAt(tooltipTracker.mouseX, true);
+
+                root.activateSegment(hit ? hit.key : "");
             } else if (buttonCode === Qt.RightButton) {
                 root.togglePanel();
             }
@@ -2412,22 +2421,6 @@ BarWidget {
             onEntered: Qt.callLater(root.refreshTooltip)
             onMouseXChanged: root.updateTooltip()
             onExited: root.hideSegmentTooltip()
-        }
-
-        // Left clicks are routed per segment. Only the left button is
-        // accepted, so WidgetButton still receives right clicks (Settings).
-        MouseArea {
-            id: segmentClickArea
-
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: function (mouse) {
-                const hit = root.segmentHitAt(mouse.x);
-
-                root.activateSegment(hit ? hit.key : "");
-            }
         }
 
         Item {
