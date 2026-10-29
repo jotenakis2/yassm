@@ -38,7 +38,8 @@ quoted in this page are the English ones; the French interface uses
 - Boxes (module frames)
 - Box border (frame border width, 1–4 px; defaults to the theme border width)
 - Box corner radius (0–12 px; default 4)
-- Colors (colored thresholds and green battery icon on mains)
+- Colors (colored thresholds and green battery icon on mains); turning it
+  off hides the whole Thresholds section
 - Extended data in tooltips (per-core CPU frequency, PSI, disk I/O, Wi-Fi, battery health)
 - Between modules (gap between modules, 0–5 spaces; default 2)
 - Between icon and value (gap between icon and value, 0–3 spaces; default 1)

@@ -147,6 +147,10 @@ PanelWindow {
     property bool thresholdsOpen: false
     property bool timersOpen: false
 
+    // Threshold colours are only used when Colors is on, so the whole section
+    // follows that toggle.
+    readonly property bool thresholdsVisible: !root.hostWidget || root.hostWidget.showColors
+
     function orderKey(settingKey) {
         return settingKey.startsWith("show") ? settingKey.charAt(4).toLowerCase() + settingKey.slice(5) : settingKey;
     }
@@ -964,6 +968,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)
                     Layout.preferredHeight: 1
+                    visible: root.thresholdsVisible
                     color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
                 }
 
@@ -971,6 +976,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(10)
                     Layout.bottomMargin: Style.space(2)
+                    visible: root.thresholdsVisible
                     spacing: Style.space(4)
 
                     Text {
@@ -1008,7 +1014,7 @@ PanelWindow {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    visible: root.thresholdsOpen
+                    visible: root.thresholdsVisible && root.thresholdsOpen
                     spacing: Style.space(6)
 
                     // Legend: the three colour dots, once, above the fields.

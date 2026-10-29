@@ -39,7 +39,8 @@ cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
 - Cadres (encadrement des modules)
 - Bordure des cadres (1–4 px ; par défaut, celle du thème)
 - Rayon des coins (0–12 px ; 4 par défaut)
-- Couleurs (seuils colorés et icône batterie verte sur secteur)
+- Couleurs (seuils colorés et icône batterie verte sur secteur) ; la
+  désactiver masque toute la section Seuils
 - Données étendues dans les infobulles (fréquence par cœur, PSI, E/S disque, Wi-Fi, santé batterie)
 - Entre les modules (espacement entre modules, 0–5 espaces ; 2 par défaut)
 - Entre l'icône et la valeur (espace icône ↔ valeur, 0–3 espaces ; 1 par défaut)
