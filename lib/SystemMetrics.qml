@@ -59,6 +59,12 @@ Singleton {
     property var networkMounts: []
     property var networkMountUsers: []
     readonly property bool networkMountEnabled: networkMountUsers.length > 0
+
+    // One ping at a time, only while a NET tooltip is open.
+    property var pingUsers: []
+    readonly property bool pingEnabled: pingUsers.length > 0
+    property real pingMs: 0
+    property bool pingMeasured: false
     property real diskReadKib: 0
     property real diskWriteKib: 0
     property var diskIoPrevious: null
@@ -130,6 +136,37 @@ Singleton {
 
     function setDiskUser(widget, enabled) {
         metrics.diskUsers = withUser(metrics.diskUsers, widget, enabled);
+    }
+
+    function setPingUser(widget, enabled) {
+        const wasEnabled = metrics.pingEnabled;
+
+        metrics.pingUsers = withUser(metrics.pingUsers, widget, enabled);
+
+        if (enabled && !wasEnabled) {
+            // Show -- until this opening's first reply.
+            metrics.pingMeasured = false;
+            metrics.pingMs = 0;
+        }
+    }
+
+    function applyPing(content) {
+        // The response line is localised ("time=" / "temps="), but the RTT
+        // summary keeps the min/avg/max/mdev layout. Use its average.
+        const match = String(content || "").match(/=\s*[0-9]+(?:[.,][0-9]+)?\/([0-9]+(?:[.,][0-9]+)?)\//);
+
+        if (match) {
+            const value = Number(match[1].replace(",", "."));
+
+            if (Number.isFinite(value) && value > 0) {
+                metrics.pingMs = value;
+                metrics.pingMeasured = true;
+                return;
+            }
+        }
+
+        metrics.pingMs = 0;
+        metrics.pingMeasured = true;
     }
 
     function setNetworkMountUser(widget, enabled) {
@@ -1605,6 +1642,34 @@ Singleton {
         onExited: function (exitCode, exitStatus) {
             if (exitCode !== 0 && exitCode !== 124) {
                 console.warn("yassm: findmnt exited with", exitCode);
+            }
+        }
+    }
+
+    Timer {
+        interval: 30000
+        running: metrics.pingEnabled
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: pingProcess.running = true
+    }
+
+    Process {
+        id: pingProcess
+
+        command: ["timeout", "3", "ping", "-c", "1", "-W", "1", "omarchy.org"]
+
+        stdout: StdioCollector {
+            id: pingOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyPing(pingOutput.text)
+        }
+
+        onExited: function (exitCode, exitStatus) {
+            if (exitCode !== 0) {
+                metrics.pingMs = 0;
+                metrics.pingMeasured = true;
             }
         }
     }

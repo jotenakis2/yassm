@@ -85,6 +85,7 @@ BarWidget {
 
     property bool hasBtop: false
     property bool hasHtop: false
+    property bool hasPing: false
 
     property string gpuKind: "none"
     property string gpuPath: ""
@@ -1565,6 +1566,14 @@ BarWidget {
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
             const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + downRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padEnd(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + upSession.padStart(sessionWidth) + ")"];
 
+            if (root.showExtended && root.hasPing) {
+                const latency = metrics.pingMeasured ? (metrics.pingMs > 0 ? Math.round(metrics.pingMs) + " ms" : "KO") : "--";
+
+                lines.push("");
+                lines.push(root.centeredMark + root.iconUptime + " " + Yassm.I18n.t("head.latency"));
+                lines.push("omarchy.org · " + latency);
+            }
+
             lines.push("");
             lines.push(root.centeredMark + ifaceIcon + " " + Yassm.I18n.t("head.interface"));
 
@@ -2073,7 +2082,8 @@ BarWidget {
         metrics.setDiskIoUser(root, extended && root.showDisk && root.hoveredSegment === "disk");
         metrics.setNetworkMountUser(root, root.showDisk && root.hoveredSegment === "disk");
         metrics.setSwapDetailUser(root, extended && root.showSwap && root.hoveredSegment === "swap");
-        metrics.setWifiDetailUser(root, extended && root.showNet && root.hoveredSegment === "net");
+        metrics.setWifiDetailUser(root, extended && root.showNet && root.hoveredSegment.indexOf("net") === 0);
+        metrics.setPingUser(root, root.hasPing && extended && root.showNet && root.hoveredSegment.indexOf("net") === 0);
     }
 
     function releaseMetricsSubscriptions() {
@@ -2094,6 +2104,7 @@ BarWidget {
         metrics.setNetworkMountUser(root, false);
         metrics.setSwapDetailUser(root, false);
         metrics.setWifiDetailUser(root, false);
+        metrics.setPingUser(root, false);
     }
 
     readonly property bool opened: settingsLoader.item !== null && settingsLoader.item.visible === true
@@ -2195,6 +2206,16 @@ BarWidget {
 
         onExited: function (exitCode, exitStatus) {
             root.hasHtop = exitCode === 0;
+        }
+    }
+
+    Process {
+        id: pingCheck
+
+        command: ["bash", "-c", "command -v ping >/dev/null 2>&1"]
+
+        onExited: function (exitCode, exitStatus) {
+            root.hasPing = exitCode === 0;
         }
     }
 
@@ -2626,6 +2647,7 @@ BarWidget {
         root.syncMetricsSubscriptions();
         btopCheck.running = true;
         htopCheck.running = true;
+        pingCheck.running = true;
     }
     Component.onDestruction: root.releaseMetricsSubscriptions()
     onShowGpuChanged: root.detectGpuIfNeeded()

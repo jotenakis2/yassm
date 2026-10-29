@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.32
+Version 1.29.33
 
 **English** | [Français](README-fr.md)
 
@@ -81,8 +81,9 @@ rows marked below.
 - **Disk**: usage per local filesystem and NFS/CIFS mounts (queried when the
   tooltip opens; a mount that does not answer within 2 s is omitted); I/O
   rates, PSI and per-process I/O (extended);
-- **Network**: rates and session totals; interface, LAN/public address,
-  Wi-Fi SSID, frequency and signal (extended);
+- **Network**: rates and session totals; a latency ping to omarchy.org
+  (extended, one every 30 s while the tooltip is open); interface,
+  LAN/public address, Wi-Fi SSID, frequency and signal (extended);
 - **Temperature**: every sensor and fan speed, hottest first;
 - **Battery**: state and time remaining; power, pack temperature, cycles and
   health (extended);
@@ -91,8 +92,8 @@ rows marked below.
   units, zombies, disk/RAM).
 
 Extended data adds per-core frequencies and PSI, disk and per-process I/O,
-swap/zram/zswap details, Wi-Fi and LAN/WAN details, the installation age, and
-battery power, temperature, cycles and health.
+swap/zram/zswap details, Wi-Fi and LAN/WAN details, the NET latency ping, the
+installation age, and battery power, temperature, cycles and health.
 
 ## Colors
 
@@ -142,8 +143,8 @@ Measurements: [performance.md](performance.md).
 
 Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
 `btop` or `htop` (left-click target), `curl` and `ip` (network addresses), `iw` (Wi-Fi
-frequency), `nvidia-smi` (NVIDIA GPU), UPower and NetworkManager (battery and
-SSID). A missing optional tool simply hides the corresponding field.
+frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU), UPower and
+NetworkManager (battery and SSID). A missing optional tool simply hides the corresponding field.
 
 The widget needs a horizontal bar; it is hidden on vertical bars.
 

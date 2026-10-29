@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.32
+Version 1.29.33
 
 [English](README.md) | **Français**
 
@@ -83,8 +83,9 @@ marquées ci-dessous.
 - **Disque** : usage par système de fichiers local et montages NFS/CIFS
   (interrogés à l'ouverture de l'infobulle ; un montage qui ne répond pas en
   2 s est omis) ; débits d'E/S, PSI et E/S par processus (étendu) ;
-- **Réseau** : débits et totaux de session ; interface, adresses LAN/publique,
-  SSID, fréquence et signal Wi-Fi (étendu) ;
+- **Réseau** : débits et totaux de session ; un ping de latence vers
+  omarchy.org (étendu, un toutes les 30 s tant que l'infobulle est ouverte) ;
+  interface, adresses LAN/publique, SSID, fréquence et signal Wi-Fi (étendu) ;
 - **Température** : tous les capteurs et ventilateurs, du plus chaud au plus
   froid ;
 - **Batterie** : état et temps restant ; puissance, température du pack,
@@ -95,9 +96,9 @@ marquées ci-dessous.
   (unités en échec, zombies, disque/RAM).
 
 Données étendues ajoute les fréquences et PSI CPU, les E/S disque et par
-processus, les détails swap/zram/zswap, le Wi-Fi et les adresses LAN/WAN,
-l'âge d'installation, et la puissance, la température, les cycles et la santé
-de la batterie.
+processus, les détails swap/zram/zswap, le Wi-Fi et les adresses LAN/WAN, le ping de
+latence NET, l'âge d'installation, et la puissance, la température, les cycles
+et la santé de la batterie.
 
 ## Couleurs
 
@@ -149,8 +150,8 @@ masqués arrêtent l'échantillonnage. Mesures :
 
 Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
 `btop` ou `htop` (cible du clic gauche), `curl` et `ip` (adresses réseau), `iw`
-(fréquence Wi-Fi), `nvidia-smi` (GPU NVIDIA), UPower et NetworkManager
-(batterie et SSID). Un outil optionnel manquant masque simplement le champ
+(fréquence Wi-Fi), `ping` (latence NET), `nvidia-smi` (GPU NVIDIA), UPower et
+NetworkManager (batterie et SSID). Un outil optionnel manquant masque simplement le champ
 correspondant.
 
 Le widget nécessite une barre horizontale ; il est masqué sur une barre
