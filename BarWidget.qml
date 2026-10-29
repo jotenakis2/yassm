@@ -345,7 +345,9 @@ BarWidget {
             segments.push(makeSegment("battery", root.batteryIcon(metrics.batteryPercent, metrics.batteryStatus, metrics.batteryPlugged), Math.round(metrics.batteryPercent), "%", "battery"));
         }
 
-        if (showAlerts && metrics.hasAlerts) {
+        // A missing required tool is a real alert: surface it even when the
+        // Alerts module is switched off.
+        if ((showAlerts && metrics.hasAlerts) || metrics.missingRequiredDeps.length > 0) {
             segments.push({
                 key: "alerts",
                 icon: iconAlert,
@@ -442,7 +444,7 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "alerts") {
-            return metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
+            return metrics.missingRequiredDeps.length > 0 || metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
 
         if (key === "netOffline") {
@@ -1693,7 +1695,17 @@ BarWidget {
             const systemUnits = metrics.failedSystemUnits || [];
             const userUnits = metrics.failedUserUnits || [];
             const zombies = metrics.zombieAlerts || [];
+            const missingDeps = metrics.missingRequiredDeps || [];
             const lines = [];
+
+            if (missingDeps.length > 0) {
+                lines.push(root.centeredMark + root.iconAlert + " " + Yassm.I18n.t("head.missing"));
+
+                for (let i = 0; i < missingDeps.length; i++) {
+                    const dep = missingDeps[i];
+                    lines.push(dep.name + " — " + Yassm.I18n.t("dep." + dep.name, dep.purpose));
+                }
+            }
 
             if (systemUnits.length > 0) {
                 lines.push(root.centeredMark + root.iconServer + " " + Yassm.I18n.t("head.systemd"));

@@ -356,6 +356,9 @@ Singleton {
 
     readonly property string depsScriptPath: decodeURIComponent(Qt.resolvedUrl("../deps.sh").toString().replace("file://", ""))
     property var missingDeps: []
+    readonly property var missingRequiredDeps: missingDeps.filter(function (dep) {
+        return dep.kind === "required";
+    })
 
     readonly property string alertsScriptPath: decodeURIComponent(Qt.resolvedUrl("../alerts.sh").toString().replace("file://", ""))
     readonly property int alertsIntervalMs: 60000

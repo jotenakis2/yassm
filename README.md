@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.34
+Version 1.29.35
 
 **English** | [Français](README-fr.md)
 
@@ -118,7 +118,8 @@ icon turns green on mains power while the value keeps the normal bar colour.
 
 The module stays hidden until something is wrong: a failed systemd unit, a
 zombie older than 60 s, the root filesystem at 95 % or more, or RAM at 95 % or
-more. Its icon shows the severity; the tooltip lists the cause.
+more. Its icon shows the severity; the tooltip lists the cause. It also
+appears when a **required tool** is missing, even if Alerts is disabled.
 
 ## Settings
 

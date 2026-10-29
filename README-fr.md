@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.34
+Version 1.29.35
 
 [English](README.md) | **Français**
 
@@ -125,7 +125,8 @@ couleur normale de la barre.
 
 Le module reste masqué tant que tout va bien : unité systemd en échec, zombie
 de plus de 60 s, racine à 95 % ou plus, ou RAM à 95 % ou plus. Son icône donne
-la gravité, l'infobulle en liste la cause.
+la gravité, l'infobulle en liste la cause. Il apparaît aussi lorsqu'un **outil
+requis** manque, même si Alertes est désactivé.
 
 ## Réglages
 
