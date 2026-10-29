@@ -660,6 +660,130 @@ PanelWindow {
                         }
 
                         HoverHandler {
+                            id: boxBorderHover
+                        }
+
+                        PanelToolTip {
+                            visible: boxBorderHover.hovered
+                            text: Yassm.I18n.t("settings.box_border_tip")
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.box_border")
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(28)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: String(Math.round(borderSlider.liveValue)) + " px"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            id: borderSlider
+
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 0
+                            maximum: 4
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.boxBorder : Style.normalBorderWidth
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("boxBorder", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: boxRadiusHover
+                        }
+
+                        PanelToolTip {
+                            visible: boxRadiusHover.hovered
+                            text: Yassm.I18n.t("settings.box_radius_tip")
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.box_radius")
+                            palette.windowText: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(28)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: String(Math.round(radiusSlider.liveValue)) + " px"
+                            color: ShellColor.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            id: radiusSlider
+
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 0
+                            maximum: 12
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.boxRadius : 4
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("boxRadius", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
                             id: modulesGapHover
                         }
 

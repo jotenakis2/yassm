@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.27.8
+Version 1.28.0
 
 [English](README.md) | **Français**
 
@@ -142,6 +142,8 @@ cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
 **Affichage**
 
 - Cadres (encadrement des modules)
+- Bordure des cadres (0–4 px ; par défaut, celle du thème)
+- Rayon des coins (0–12 px ; 4 par défaut)
 - Couleurs (seuils colorés et icône batterie bleue sur secteur)
 - Données étendues dans les infobulles (fréquence par cœur, PSI, E/S disque, Wi-Fi, santé batterie)
 - Entre les modules (espacement entre modules, 0–5 espaces ; 2 par défaut)

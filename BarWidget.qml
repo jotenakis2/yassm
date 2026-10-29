@@ -103,6 +103,24 @@ BarWidget {
     property bool showColors: setting("showColors", true)
     property bool showBoxes: setting("showBoxes", true)
 
+    // Module frame style. An absent boxBorder means "use the theme's border
+    // width"; boxRadius defaults to 4 px. Both are scaled like the rest of
+    // the shell geometry.
+    readonly property int boxBorder: {
+        const value = Math.round(Number(setting("boxBorder", -1)));
+
+        if (!Number.isFinite(value) || value < 0) {
+            return Math.min(4, Style.normalBorderWidth);
+        }
+
+        return Math.max(0, Math.min(4, value));
+    }
+    readonly property int boxRadius: {
+        const value = Math.round(Number(setting("boxRadius", 4)));
+
+        return Number.isFinite(value) ? Math.max(0, Math.min(12, value)) : 4;
+    }
+
     readonly property int moduleSpacing: {
         const value = Math.round(Number(setting("spacing", 2)));
         return Number.isFinite(value) ? Math.max(0, Math.min(5, value)) : 2;
@@ -2301,9 +2319,9 @@ BarWidget {
                     visible: root.segmentVisible(metricKey)
                     implicitWidth: segmentContent.implicitWidth + paddingX * 2
                     implicitHeight: segmentContent.implicitHeight + paddingY * 2
-                    radius: root.showBoxes ? Style.space(4) : 0
+                    radius: root.showBoxes ? Style.space(root.boxRadius) : 0
                     color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03) : "transparent"
-                    border.width: root.showBoxes ? Math.max(1, Style.normalBorderWidth) : 0
+                    border.width: root.showBoxes ? root.boxBorder : 0
                     border.color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20) : "transparent"
 
                     Row {
