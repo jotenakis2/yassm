@@ -1496,10 +1496,15 @@ BarWidget {
 
             if (metrics.hasZswap) {
                 const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
+                // Original size, arrow, compressed size behind the compression
+                // glyph, then the ratio. Both sizes keep a 10-character field
+                // so the arrow and the icon never move when a value grows.
+                const original = formatKib(metrics.zswapOriginalKb).padStart(10, " ");
+                const compressed = formatKib(metrics.zswapCompressedKb).padStart(10, " ");
 
                 lines.push("");
                 lines.push(root.centeredMark + root.iconCompress + " " + Yassm.I18n.t("head.zswap"));
-                lines.push(Yassm.I18n.tf("swap.compressed", [formatKib(metrics.zswapCompressedKb), formatKib(metrics.zswapOriginalKb)]) + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
+                lines.push(original + " → " + root.iconCompress + " " + compressed + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
