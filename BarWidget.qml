@@ -1597,36 +1597,59 @@ BarWidget {
                 return tooltipBlock(Yassm.I18n.t("title.battery"), Yassm.I18n.t("common.unavailable"));
             }
 
-            const lines = [Math.round(metrics.batteryPercent) + "% (" + batteryStateLabel(metrics.batteryStatus) + ")"];
+            const rows = [];
+            const state = batteryStateLabel(metrics.batteryStatus) + " (" + Math.round(metrics.batteryPercent) + "%)";
+
+            rows.push({
+                label: Yassm.I18n.t("battery.state"),
+                value: state
+            });
+
+            let remaining = "--";
 
             if (metrics.batteryStatus === "Charging" && metrics.batteryTimeToFull > 0) {
-                lines.push(Yassm.I18n.tf("battery.to_full", [formatDuration(metrics.batteryTimeToFull)]));
+                remaining = formatDuration(metrics.batteryTimeToFull);
             } else if (metrics.batteryTimeToEmpty > 0) {
-                lines.push(Yassm.I18n.tf("battery.remaining", [formatDuration(metrics.batteryTimeToEmpty)]));
+                remaining = formatDuration(metrics.batteryTimeToEmpty);
             }
 
-            if (root.showExtended && Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
-                const arrow = batteryPowerArrow();
-
-                if (arrow !== "") {
-                    lines.push(Math.abs(metrics.batteryPowerW).toFixed(1) + " W " + arrow);
-                }
-            }
+            rows.push({
+                label: Yassm.I18n.t("battery.remaining_time"),
+                value: remaining
+            });
 
             if (root.showExtended) {
-                const health = [];
+                let power = "--";
 
-                if (metrics.batteryHealth > 0) {
-                    health.push(Math.round(metrics.batteryHealth) + "%");
+                if (Number.isFinite(metrics.batteryPowerW) && Math.abs(metrics.batteryPowerW) >= 0.05) {
+                    const arrow = batteryPowerArrow();
+                    power = Math.abs(metrics.batteryPowerW).toFixed(1) + " W" + (arrow !== "" ? " " + arrow : "");
                 }
 
-                if (metrics.batteryCycles > 0) {
-                    health.push(metrics.batteryCycles + " " + Yassm.I18n.t("battery.cycles"));
-                }
+                rows.push({
+                    label: Yassm.I18n.t("battery.power"),
+                    value: power
+                });
+                rows.push({
+                    label: Yassm.I18n.t("battery.cycles"),
+                    value: metrics.batteryCycles > 0 ? String(metrics.batteryCycles) : "--"
+                });
+                rows.push({
+                    label: Yassm.I18n.t("battery.health"),
+                    value: metrics.batteryHealth > 0 ? Math.round(metrics.batteryHealth) + "%" : "--"
+                });
+            }
 
-                if (health.length > 0) {
-                    lines.push(Yassm.I18n.t("battery.health") + " " + health.join(" (") + (health.length > 1 ? ")" : ""));
-                }
+            let labelWidth = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                labelWidth = Math.max(labelWidth, rows[i].label.length);
+            }
+
+            const lines = [];
+
+            for (let i = 0; i < rows.length; i++) {
+                lines.push(rows[i].label.padEnd(labelWidth) + " : " + rows[i].value);
             }
 
             return tooltipBlock(Yassm.I18n.t("title.battery"), lines.join("\n"));
