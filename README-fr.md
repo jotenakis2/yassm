@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.9
+Version 1.29.10
 
 [English](README.md) | **Français**
 
@@ -245,10 +245,13 @@ L'icône suit le niveau par paliers de 10 % (icône vide à 0 % ; de 1 à 9 %,
 icône 10 %) et l'état d'alimentation :
 
 - **sur batterie** : batterie seule, remplie selon le niveau ;
-- **en charge** : batterie avec éclair, icône verte, valeur dans la couleur
-  normale de la barre ;
+- **en charge** : batterie avec l'éclair à l'intérieur du contour, icône
+  verte, valeur dans la couleur normale de la barre ;
 - **branchée sans charge** (pleine ou seuil de charge atteint) : une simple
   prise, icône verte, valeur dans la couleur normale de la barre.
+
+Chaque état tient exactement en un glyphe : la barre ne bouge donc jamais au
+branchement ni au début de la charge.
 
 L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
 simplement branchée d'une machine en train de charger. Le pourcentage, l'état

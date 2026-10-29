@@ -208,19 +208,9 @@ BarWidget {
     readonly property string iconAlert: String.fromCodePoint(0xF071)
     readonly property string iconUptime: String.fromCodePoint(0xF017)
 
-    // Nerd Fonts stores the charging levels on non-contiguous codepoints, so
-    // they cannot be derived from a single base like the plain battery icons.
-    readonly property var batteryChargingIcons: [0xF089C // charging-10
-        , 0xF0086 // charging-20
-        , 0xF0087 // charging-30
-        , 0xF0088 // charging-40
-        , 0xF089D // charging-50
-        , 0xF0089 // charging-60
-        , 0xF089E // charging-70
-        , 0xF008A // charging-80
-        , 0xF008B // charging-90
-        , 0xF0085  // charging-100
-    ]
+    // Battery with the bolt inside the outline: one compact glyph, unlike the
+    // per-level charging icons whose bolt sticks out past the cell.
+    readonly property string iconBatteryCharging: String.fromCodePoint(0xF0084)
 
     // Plain battery icons run from 0xF007A (battery-10) to 0xF0082
     // (battery-90); 0xF0079 is the complete battery.
@@ -248,14 +238,9 @@ BarWidget {
         return String.fromCodePoint(0xF0079 + level);
     }
 
-    function batteryChargingIcon(percent) {
-        const level = Math.max(1, batteryLevel(percent));
-        return String.fromCodePoint(batteryChargingIcons[level - 1]);
-    }
-
     function batteryIcon(percent, status, plugged) {
         if (status === "Charging") {
-            return batteryChargingIcon(percent);
+            return iconBatteryCharging;
         }
 
         // On mains but not charging (full or charge threshold reached), a
