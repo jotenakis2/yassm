@@ -148,6 +148,32 @@ BarWidget {
     readonly property int temperatureHot: Math.max(temperatureWarm + 1, Math.min(130, Math.round(Number(setting("tempHot", 50)) || 50)))
     readonly property int temperatureCritical: Math.max(temperatureHot + 1, Math.min(140, Math.round(Number(setting("tempCritical", 60)) || 60)))
 
+    // Colour thresholds for the other families. Ascending families need
+    // green < orange < red; the battery is inverted (normal high, red low).
+    // Everything is applied to the rounded value shown in the bar.
+    function thresholdValue(key, fallback, minimum, maximum) {
+        const raw = Number(setting(key, fallback));
+        const value = Number.isFinite(raw) ? Math.round(raw) : fallback;
+
+        return Math.max(minimum, Math.min(maximum, value));
+    }
+
+    readonly property int percentGreen: thresholdValue("percentGreen", 10, 1, 98)
+    readonly property int percentOrange: thresholdValue("percentOrange", 33, percentGreen + 1, 99)
+    readonly property int percentRed: thresholdValue("percentRed", 66, percentOrange + 1, 100)
+    readonly property int diskGreen: thresholdValue("diskGreen", 20, 1, 98)
+    readonly property int diskOrange: thresholdValue("diskOrange", 33, diskGreen + 1, 99)
+    readonly property int diskRed: thresholdValue("diskRed", 90, diskOrange + 1, 100)
+    readonly property int loadGreen: thresholdValue("loadGreen", 10, 0, 198)
+    readonly property int loadOrange: thresholdValue("loadOrange", 50, loadGreen + 1, 199)
+    readonly property int loadRed: thresholdValue("loadRed", 90, loadOrange + 1, 200)
+    readonly property int netGreen: thresholdValue("netGreen", 10, 1, 9998)
+    readonly property int netOrange: thresholdValue("netOrange", 500, netGreen + 1, 9999)
+    readonly property int netRed: thresholdValue("netRed", 1000, netOrange + 1, 10000)
+    readonly property int batteryGreen: thresholdValue("batteryGreen", 50, 2, 100)
+    readonly property int batteryOrange: thresholdValue("batteryOrange", 20, 1, batteryGreen - 1)
+    readonly property int batteryRed: thresholdValue("batteryRed", 10, 0, batteryOrange - 1)
+
     readonly property int maxProcesses: {
         const value = Math.round(Number(setting("maxProcesses", 10)));
         return Number.isFinite(value) ? Math.max(1, Math.min(20, value)) : 10;
@@ -498,15 +524,15 @@ BarWidget {
     }
 
     function percentColor(value) {
-        if (!Number.isFinite(value) || value < 10) {
+        if (!Number.isFinite(value) || value < root.percentGreen) {
             return button.foreground;
         }
 
-        if (value < 33) {
+        if (value < root.percentOrange) {
             return Yassm.ThemePalette.green;
         }
 
-        if (value < 66) {
+        if (value < root.percentRed) {
             return Yassm.ThemePalette.orange;
         }
 
@@ -514,17 +540,16 @@ BarWidget {
     }
 
     function diskColor(value) {
-        // Disks fill slowly: 20 % full is ordinary. Keep the orange/red
-        // boundaries shared with the other percentage modules.
-        if (!Number.isFinite(value) || value < 21) {
+        // Disks fill slowly: the green boundary is higher than for RAM/CPU.
+        if (!Number.isFinite(value) || value < root.diskGreen) {
             return button.foreground;
         }
 
-        if (value < 33) {
+        if (value < root.diskOrange) {
             return Yassm.ThemePalette.green;
         }
 
-        if (value < 90) {
+        if (value < root.diskRed) {
             return Yassm.ThemePalette.orange;
         }
 
@@ -548,37 +573,33 @@ BarWidget {
     function loadColor(value) {
         // Load is not a utilization ratio: it is the run-queue length, so it
         // may legitimately exceed 100 % on an oversubscribed machine.
-        if (!Number.isFinite(value)) {
+        if (!Number.isFinite(value) || value < root.loadGreen) {
             return button.foreground;
         }
 
-        if (value > 90) {
-            return Yassm.ThemePalette.red;
-        }
-
-        if (value > 50) {
-            return Yassm.ThemePalette.orange;
-        }
-
-        if (value > 10) {
+        if (value < root.loadOrange) {
             return Yassm.ThemePalette.green;
         }
 
-        return button.foreground;
+        if (value < root.loadRed) {
+            return Yassm.ThemePalette.orange;
+        }
+
+        return Yassm.ThemePalette.red;
     }
 
     function networkColor(value) {
         const kib = Number(value);
 
-        if (!Number.isFinite(kib) || kib < 10) {
+        if (!Number.isFinite(kib) || kib < root.netGreen) {
             return button.foreground;
         }
 
-        if (kib < 500) {
+        if (kib < root.netOrange) {
             return Yassm.ThemePalette.green;
         }
 
-        if (kib <= 1000) {
+        if (kib < root.netRed) {
             return Yassm.ThemePalette.orange;
         }
 
@@ -594,15 +615,15 @@ BarWidget {
             return button.foreground;
         }
 
-        if (value <= 10) {
+        if (value <= root.batteryRed) {
             return Yassm.ThemePalette.red;
         }
 
-        if (value < 20) {
+        if (value < root.batteryOrange) {
             return Yassm.ThemePalette.orange;
         }
 
-        if (value < 50) {
+        if (value < root.batteryGreen) {
             return Yassm.ThemePalette.green;
         }
 
@@ -1940,6 +1961,21 @@ BarWidget {
         entry.tempWarm = root.temperatureWarm;
         entry.tempHot = root.temperatureHot;
         entry.tempCritical = root.temperatureCritical;
+        entry.percentGreen = root.percentGreen;
+        entry.percentOrange = root.percentOrange;
+        entry.percentRed = root.percentRed;
+        entry.diskGreen = root.diskGreen;
+        entry.diskOrange = root.diskOrange;
+        entry.diskRed = root.diskRed;
+        entry.loadGreen = root.loadGreen;
+        entry.loadOrange = root.loadOrange;
+        entry.loadRed = root.loadRed;
+        entry.netGreen = root.netGreen;
+        entry.netOrange = root.netOrange;
+        entry.netRed = root.netRed;
+        entry.batteryGreen = root.batteryGreen;
+        entry.batteryOrange = root.batteryOrange;
+        entry.batteryRed = root.batteryRed;
         entry[name] = value;
 
         root.settings = entry;

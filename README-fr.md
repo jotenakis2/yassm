@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.28.2
+Version 1.29.0
 
 [English](README.md) | **Français**
 
@@ -152,13 +152,17 @@ cités dans cette page restent ceux de l'interface anglaise (`NET`, `SENSORS`,
 
 **Seuils**
 
-- Vert (défaut 40 °C)
-- Orange (défaut 50 °C)
-- Rouge (défaut 60 °C)
+- Utilisation (%) — CPU, RAM, swap et GPU
+- Disque (%)
+- Charge (%)
+- Réseau (KiB/s)
+- Batterie (%) — échelle inversée, survoler son titre pour l'explication
+- Température (°C)
 
-Les trois limites sont des champs numériques : saisir une valeur ou utiliser
-les flèches, par pas d'un degré ; l'ordre croissant est toujours conservé.
-Survoler l'étiquette Vert, Orange ou Rouge rappelle ce que change ce seuil.
+Chaque famille a trois champs numériques (vert, orange, rouge) : saisir une
+valeur ou utiliser les flèches. L'ordre est toujours conservé, et l'échelle de
+la batterie est inversée : normal au-dessus de Vert, puis vert, orange et
+rouge à mesure que la valeur baisse.
 
 **Intervalles**
 
@@ -339,20 +343,19 @@ valeur arrondie affichée :
 | Module | Normale | Verte | Orange | Rouge |
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
-| Disque | < 21 % | 21–32 % | 33–89 % | ≥ 90 % |
-| Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
-| Réseau | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
+| Disque | < 20 % | 20–32 % | 33–89 % | ≥ 90 % |
+| Load | < 10 % | 10–49 % | 50–89 % | ≥ 90 % |
+| Réseau | < 10 KiB/s | 10–499 KiB/s | 500–999 KiB/s | ≥ 1000 KiB/s |
 | Batterie | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Températures (défauts) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
 La valeur du disque passe au rouge à 90 % ; le module **Alertes** ne se
-déclenche qu'à 95 % (disque ou RAM). Les seuils de température sont des
-défauts ; les trois champs numériques de Settings → Seuils règlent les
-limites verte, orange et rouge, au degré près. Le LOAD n'est pas
-plafonné : il peut dépasser 100 % lorsque la file d'attente
-est plus longue que le nombre de CPU. La batterie suit une logique inversée,
-plus la valeur est basse, plus la couleur est alarmante. Les débits réseau
-descendant et montant sont colorés indépendamment.
+déclenche qu'à 95 % (disque ou RAM). Tous les seuils de couleur sont des
+défauts et se règlent dans Settings → Seuils, famille par famille. Le LOAD
+n'est pas plafonné : il peut dépasser 100 % lorsque la file d'attente est plus
+longue que le nombre de CPU. La batterie suit une logique inversée, plus la
+valeur est basse, plus la couleur est alarmante. Les débits réseau descendant
+et montant sont colorés indépendamment.
 
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
 courant. Les icônes conservent la couleur normale de la barre, sauf l'icône de

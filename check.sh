@@ -94,7 +94,7 @@ fi
 # those categories; anything else is a real issue and fails the check.
 lint_log=${qml_root}/bar-widget.log
 "${QML_LINT}" -I "${qml_root}" -I /usr/lib/qt6/qml \
-	BarWidget.qml SettingsPanel.qml >"${lint_log}" 2>&1 || true
+	BarWidget.qml SettingsPanel.qml ThresholdRow.qml >"${lint_log}" 2>&1 || true
 
 expected='Member "[A-Za-z]+" not found on type "QObject"|Could not find property "(window|adjustment|edges|gravity)"|unknown grouped property scope rect|Type rect is used but it is not resolved|no matching signal found for handler "onAnchoring"|id declarations are only allowed in objects'
 unexpected=$(grep '^Warning:' "${lint_log}" | grep -vE "${expected}" || true)
@@ -105,5 +105,5 @@ if [[ -n ${unexpected} ]]; then
 fi
 
 warning_count=$(grep -c '^Warning:' "${lint_log}" || true)
-printf 'qmllint: %s expected advisory warning(s) in BarWidget.qml/SettingsPanel.qml (Quickshell qmltypes unavailable)\n' \
+printf 'qmllint: %s expected advisory warning(s) in the widgets (Quickshell qmltypes unavailable)\n' \
 	"${warning_count}"

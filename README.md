@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.28.2
+Version 1.29.0
 
 **English** | [Français](README-fr.md)
 
@@ -149,13 +149,17 @@ quoted in this page are the English ones; the French interface uses
 
 **Thresholds**
 
-- Green from (default 40 °C)
-- Orange from (default 50 °C)
-- Red from (default 60 °C)
+- Usage (%) — CPU, RAM, swap and GPU
+- Disk (%)
+- Load (%)
+- Network (KiB/s)
+- Battery (%) — inverted scale, hover its title for the explanation
+- Temperature (°C)
 
-The three limits are editable number fields: type a value or use the arrows,
-with one-degree steps; they are always kept in ascending order. Hover the
-Green, Orange or Red label to read what that threshold changes.
+Each family has three editable number fields (green, orange, red); type a
+value or use the arrows. The order is always preserved, and the battery scale
+is reversed: normal at or above Green, then green, orange and red as the
+value drops.
 
 **Timers**
 
@@ -330,15 +334,17 @@ value:
 | Module | Normal | Green | Orange | Red |
 | --- | --- | --- | --- | --- |
 | CPU, RAM, Swap, GPU | < 10 % | 10–32 % | 33–65 % | ≥ 66 % |
-| Disk | < 21 % | 21–32 % | 33–89 % | ≥ 90 % |
-| Load | ≤ 10 % | 11–50 % | 51–90 % | > 90 % |
-| Network | < 10 KiB/s | 10–499 KiB/s | 500–1000 KiB/s | > 1000 KiB/s |
+| Disk | < 20 % | 20–32 % | 33–89 % | ≥ 90 % |
+| Load | < 10 % | 10–49 % | 50–89 % | ≥ 90 % |
+| Network | < 10 KiB/s | 10–499 KiB/s | 500–999 KiB/s | ≥ 1000 KiB/s |
 | Battery | ≥ 50 % | 20–49 % | 11–19 % | ≤ 10 % |
 | Temperatures (defaults) | < 40 °C | 40–49 °C | 50–59 °C | ≥ 60 °C |
 
-Load is not capped: it can exceed 100 % when the run queue is longer than the
-CPU count. Battery uses inverted logic: the lower the value, the more alarming
-the color. Network download and upload rates are colored independently.
+These are the defaults; every family is configurable in Settings →
+Thresholds. Load is not capped: it can exceed 100 % when the run queue is
+longer than the CPU count. Battery uses inverted logic: the lower the value,
+the more alarming the color. Network download and upload rates are colored
+independently.
 
 The green/orange/red colors come from the current Omarchy theme's
 `colors.toml`. Icons keep the normal bar color, except for the battery icon:
@@ -347,9 +353,8 @@ threshold), the icon turns theme blue while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
 The disk value turns red at 90 %; the **Alerts** module only triggers at
-95 % (disk or RAM). The temperature thresholds are defaults; the three
-number fields in Settings → Thresholds change the green, orange and red
-limits, to the degree. The **Colors** toggle
+95 % (disk or RAM). All colour thresholds are defaults and can be changed in
+Settings → Thresholds, per family. The **Colors** toggle
 disables all these colors: values and the blue
 battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).

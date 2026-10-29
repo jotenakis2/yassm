@@ -144,7 +144,7 @@ PanelWindow {
     // Section disclosure state, kept for the session only.
     property bool modulesOpen: true
     property bool layoutOpen: false
-    property bool temperatureOpen: false
+    property bool thresholdsOpen: false
     property bool timersOpen: false
 
     function orderKey(settingKey) {
@@ -978,7 +978,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.temperatureOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.thresholdsOpen ? 0xF0140 : 0xF0142)
                         color: temperatureChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -991,7 +991,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: root.temperatureOpen = !root.temperatureOpen
+                            onClicked: root.thresholdsOpen = !root.thresholdsOpen
                         }
                     }
 
@@ -1006,201 +1006,293 @@ PanelWindow {
                     }
                 }
 
-                Item {
-                    id: tempBlock
-
-                    visible: root.temperatureOpen
-
-                    property string tipText: tempWarmArea.containsMouse ? tempWarmArea.tip : tempHotArea.containsMouse ? tempHotArea.tip : tempCriticalArea.containsMouse ? tempCriticalArea.tip : ""
-
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Style.space(50)
+                    visible: root.thresholdsOpen
+                    spacing: Style.space(6)
 
-                    RowLayout {
-                        anchors.fill: parent
-                        spacing: Style.space(8)
+                    ThresholdRow {
+                        hostWidget: root.hostWidget
+                        title: Yassm.I18n.t("settings.thresholds_percent")
+                        prefix: "percent"
+                        defaultGreen: 10
+                        defaultOrange: 33
+                        defaultRed: 66
+                        fromGreen: 0
+                        toGreen: 100
+                        fromOrange: 0
+                        toOrange: 100
+                        fromRed: 0
+                        toRed: 100
+                    }
 
-                        WheelHandler {
-                            acceptedDevices: PointerDevice.Mouse
+                    ThresholdRow {
+                        hostWidget: root.hostWidget
+                        title: Yassm.I18n.t("settings.thresholds_disk")
+                        prefix: "disk"
+                        defaultGreen: 20
+                        defaultOrange: 33
+                        defaultRed: 90
+                        fromGreen: 0
+                        toGreen: 100
+                        fromOrange: 0
+                        toOrange: 100
+                        fromRed: 0
+                        toRed: 100
+                    }
 
-                            onWheel: function (event) {
-                                root.scrollPanel(event.angleDelta.y);
-                                event.accepted = true;
-                            }
-                        }
+                    ThresholdRow {
+                        hostWidget: root.hostWidget
+                        title: Yassm.I18n.t("settings.thresholds_load")
+                        prefix: "load"
+                        defaultGreen: 10
+                        defaultOrange: 50
+                        defaultRed: 90
+                        fromGreen: 0
+                        toGreen: 200
+                        fromOrange: 0
+                        toOrange: 200
+                        fromRed: 0
+                        toRed: 200
+                    }
 
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                    ThresholdRow {
+                        hostWidget: root.hostWidget
+                        title: Yassm.I18n.t("settings.thresholds_network")
+                        prefix: "net"
+                        stepSize: 10
+                        defaultGreen: 10
+                        defaultOrange: 500
+                        defaultRed: 1000
+                        fromGreen: 0
+                        toGreen: 10000
+                        fromOrange: 0
+                        toOrange: 10000
+                        fromRed: 0
+                        toRed: 10000
+                    }
 
-                            Column {
-                                width: Style.space(64)
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: Style.spacing.xs
+                    ThresholdRow {
+                        hostWidget: root.hostWidget
+                        title: Yassm.I18n.t("settings.thresholds_battery")
+                        tooltip: Yassm.I18n.t("settings.battery_inverted_tip")
+                        prefix: "battery"
+                        inverted: true
+                        defaultGreen: 50
+                        defaultOrange: 20
+                        defaultRed: 10
+                        fromGreen: 0
+                        toGreen: 100
+                        fromOrange: 0
+                        toOrange: 100
+                        fromRed: 0
+                        toRed: 100
+                    }
 
-                                // The whole strip above the field is the hover
-                                // target: the 4-letter label is too small to
-                                // aim at, and the field itself stays tooltip-free.
-                                Item {
-                                    id: tempWarmLabelBox
+                    Label {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Style.space(2)
+                        text: Yassm.I18n.t("settings.thresholds_temperature")
+                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.bodySmall
+                        font.bold: true
+                    }
 
-                                    width: Style.space(64)
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    height: Style.space(16)
-                                    Label {
-                                        anchors.centerIn: parent
-                                        text: Yassm.I18n.t("settings.green")
-                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
-                                        font.family: Style.font.family
-                                        font.pixelSize: Style.font.bodySmall
-                                    }
+                    Item {
+                        id: tempBlock
 
-                                    MouseArea {
-                                        id: tempWarmArea
+                        property string tipText: tempWarmArea.containsMouse ? tempWarmArea.tip : tempHotArea.containsMouse ? tempHotArea.tip : tempCriticalArea.containsMouse ? tempCriticalArea.tip : ""
 
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.ArrowCursor
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(50)
 
-                                        property string tip: Yassm.I18n.t("settings.green_tip")
-                                    }
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: Style.space(8)
+
+                            WheelHandler {
+                                acceptedDevices: PointerDevice.Mouse
+
+                                onWheel: function (event) {
+                                    root.scrollPanel(event.angleDelta.y);
+                                    event.accepted = true;
                                 }
+                            }
 
-                                NumberField {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    label: ""
-                                    from: 20
-                                    to: 80
-                                    stepSize: 1
-                                    value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
-                                    fieldWidth: Style.space(64)
-                                    foreground: ShellColor.popups.text
-                                    fontFamily: Style.font.family
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
 
-                                    onModified: function (value) {
-                                        if (root.hostWidget) {
-                                            root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                                Column {
+                                    width: Style.space(64)
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Style.spacing.xs
+
+                                    // The whole strip above the field is the hover
+                                    // target: the 4-letter label is too small to
+                                    // aim at, and the field itself stays tooltip-free.
+                                    Item {
+                                        id: tempWarmLabelBox
+
+                                        width: Style.space(64)
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        height: Style.space(16)
+                                        Label {
+                                            anchors.centerIn: parent
+                                            text: Yassm.I18n.t("settings.green")
+                                            palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                            font.family: Style.font.family
+                                            font.pixelSize: Style.font.bodySmall
+                                        }
+
+                                        MouseArea {
+                                            id: tempWarmArea
+
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.ArrowCursor
+
+                                            property string tip: Yassm.I18n.t("settings.green_tip")
+                                        }
+                                    }
+
+                                    NumberField {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        label: ""
+                                        from: 20
+                                        to: 80
+                                        stepSize: 1
+                                        value: root.hostWidget ? root.hostWidget.temperatureWarm : 40
+                                        fieldWidth: Style.space(64)
+                                        foreground: ShellColor.popups.text
+                                        fontFamily: Style.font.family
+
+                                        onModified: function (value) {
+                                            if (root.hostWidget) {
+                                                root.hostWidget.updateSetting("tempWarm", Math.min(Math.round(value), root.hostWidget.temperatureHot - 1));
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
 
-                            Column {
-                                width: Style.space(64)
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: Style.spacing.xs
-
-                                // The whole strip above the field is the hover
-                                // target: the 4-letter label is too small to
-                                // aim at, and the field itself stays tooltip-free.
-                                Item {
-                                    id: tempHotLabelBox
-
+                                Column {
                                     width: Style.space(64)
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    height: Style.space(16)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Style.spacing.xs
 
-                                    Label {
-                                        anchors.centerIn: parent
-                                        text: Yassm.I18n.t("settings.orange")
-                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
-                                        font.family: Style.font.family
-                                        font.pixelSize: Style.font.bodySmall
+                                    // The whole strip above the field is the hover
+                                    // target: the 4-letter label is too small to
+                                    // aim at, and the field itself stays tooltip-free.
+                                    Item {
+                                        id: tempHotLabelBox
+
+                                        width: Style.space(64)
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        height: Style.space(16)
+
+                                        Label {
+                                            anchors.centerIn: parent
+                                            text: Yassm.I18n.t("settings.orange")
+                                            palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                            font.family: Style.font.family
+                                            font.pixelSize: Style.font.bodySmall
+                                        }
+
+                                        MouseArea {
+                                            id: tempHotArea
+
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.ArrowCursor
+
+                                            property string tip: Yassm.I18n.t("settings.orange_tip")
+                                        }
                                     }
 
-                                    MouseArea {
-                                        id: tempHotArea
+                                    NumberField {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        label: ""
+                                        from: 21
+                                        to: 100
+                                        stepSize: 1
+                                        value: root.hostWidget ? root.hostWidget.temperatureHot : 50
+                                        fieldWidth: Style.space(64)
+                                        foreground: ShellColor.popups.text
+                                        fontFamily: Style.font.family
 
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.ArrowCursor
-
-                                        property string tip: Yassm.I18n.t("settings.orange_tip")
-                                    }
-                                }
-
-                                NumberField {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    label: ""
-                                    from: 21
-                                    to: 100
-                                    stepSize: 1
-                                    value: root.hostWidget ? root.hostWidget.temperatureHot : 50
-                                    fieldWidth: Style.space(64)
-                                    foreground: ShellColor.popups.text
-                                    fontFamily: Style.font.family
-
-                                    onModified: function (value) {
-                                        if (root.hostWidget) {
-                                            const low = root.hostWidget.temperatureWarm + 1;
-                                            const high = root.hostWidget.temperatureCritical - 1;
-                                            root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                                        onModified: function (value) {
+                                            if (root.hostWidget) {
+                                                const low = root.hostWidget.temperatureWarm + 1;
+                                                const high = root.hostWidget.temperatureCritical - 1;
+                                                root.hostWidget.updateSetting("tempHot", Math.max(low, Math.min(Math.round(value), high)));
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
 
-                            Column {
-                                width: Style.space(64)
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: Style.spacing.xs
-
-                                // The whole strip above the field is the hover
-                                // target: the 4-letter label is too small to
-                                // aim at, and the field itself stays tooltip-free.
-                                Item {
-                                    id: tempCriticalLabelBox
-
+                                Column {
                                     width: Style.space(64)
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    height: Style.space(16)
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Style.spacing.xs
 
-                                    Label {
-                                        anchors.centerIn: parent
-                                        text: Yassm.I18n.t("settings.red")
-                                        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
-                                        font.family: Style.font.family
-                                        font.pixelSize: Style.font.bodySmall
+                                    // The whole strip above the field is the hover
+                                    // target: the 4-letter label is too small to
+                                    // aim at, and the field itself stays tooltip-free.
+                                    Item {
+                                        id: tempCriticalLabelBox
+
+                                        width: Style.space(64)
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        height: Style.space(16)
+
+                                        Label {
+                                            anchors.centerIn: parent
+                                            text: Yassm.I18n.t("settings.red")
+                                            palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+                                            font.family: Style.font.family
+                                            font.pixelSize: Style.font.bodySmall
+                                        }
+
+                                        MouseArea {
+                                            id: tempCriticalArea
+
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.ArrowCursor
+
+                                            property string tip: Yassm.I18n.t("settings.red_tip")
+                                        }
                                     }
 
-                                    MouseArea {
-                                        id: tempCriticalArea
+                                    NumberField {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        label: ""
+                                        from: 22
+                                        to: 120
+                                        stepSize: 1
+                                        value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
+                                        fieldWidth: Style.space(64)
+                                        foreground: ShellColor.popups.text
+                                        fontFamily: Style.font.family
 
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.ArrowCursor
-
-                                        property string tip: Yassm.I18n.t("settings.red_tip")
-                                    }
-                                }
-
-                                NumberField {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    label: ""
-                                    from: 22
-                                    to: 120
-                                    stepSize: 1
-                                    value: root.hostWidget ? root.hostWidget.temperatureCritical : 60
-                                    fieldWidth: Style.space(64)
-                                    foreground: ShellColor.popups.text
-                                    fontFamily: Style.font.family
-
-                                    onModified: function (value) {
-                                        if (root.hostWidget) {
-                                            root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                                        onModified: function (value) {
+                                            if (root.hostWidget) {
+                                                root.hostWidget.updateSetting("tempCritical", Math.max(root.hostWidget.temperatureHot + 1, Math.round(value)));
+                                            }
                                         }
                                     }
                                 }
@@ -1409,7 +1501,7 @@ PanelWindow {
 
                 return Math.min(tempTip.anchorY + tempBlock.height + Style.space(2), settingsPanel.height - tempTip.height - root.panelPadding);
             }
-            visible: tempBlock.tipText !== "" && tempBlock.visible
+            visible: tempBlock.tipText !== "" && root.thresholdsOpen
             z: 3
             radius: Style.cornerRadius
             color: ShellColor.tooltip.background
