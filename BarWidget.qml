@@ -650,6 +650,25 @@ BarWidget {
         return String.fromCodePoint(0x1F1E6 + value.charCodeAt(0) - 65, 0x1F1E6 + value.charCodeAt(1) - 65);
     }
 
+    // A rate is split into a 6-character number and a 5-character unit, so
+    // the decimal point and the unit stay in the same columns. The widest
+    // number is "1023.9" (MiB/s and GiB/s keep one decimal).
+    function formatRateField(kib) {
+        const text = formatRateLong(kib);
+        const space = text.indexOf(" ");
+
+        return (text.slice(0, space).padStart(6, " ") + " " + text.slice(space + 1)).padEnd(12, " ");
+    }
+
+    // Same idea for the session totals: 2 decimals, a 7-character number and
+    // a 3-character unit.
+    function formatSessionField(kib) {
+        const text = formatKibAsSize(kib);
+        const space = text.indexOf(" ");
+
+        return text.slice(0, space).padStart(7, " ") + " " + text.slice(space + 1).padEnd(3, " ");
+    }
+
     function formatLoad(value) {
         const number = Number(value);
         return (Number.isFinite(number) ? number : 0).toFixed(2).padStart(6, " ");
@@ -660,11 +679,14 @@ BarWidget {
         return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
     }
 
+    // Session totals keep 2 decimals and a 3-character unit at every size,
+    // KiB included: the number never leaves its 7-character field and the
+    // closing parenthesis never moves.
     function formatKibAsSize(kilobytes) {
         const value = Number(kilobytes);
 
         if (!Number.isFinite(value) || value <= 0) {
-            return "0 B";
+            return "0.00 KiB";
         }
 
         if (value >= 1073741824) {
@@ -679,7 +701,7 @@ BarWidget {
             return (value / 1024).toFixed(2) + " MiB";
         }
 
-        return Math.round(value * 1024) + " B";
+        return value.toFixed(2) + " KiB";
     }
 
     // Compact 4-character rate for the bar (KiB/s): "  0K" … "999K", "1.0M",
@@ -1257,7 +1279,7 @@ BarWidget {
         if (root.showExtended) {
             lines.push("");
             lines.push(root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"));
-            lines.push("R " + formatRateLong(metrics.diskReadKib) + "  W " + formatRateLong(metrics.diskWriteKib));
+            lines.push("R" + formatRateField(metrics.diskReadKib) + "  W" + formatRateField(metrics.diskWriteKib));
             lines.push("");
             lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
@@ -1271,9 +1293,9 @@ BarWidget {
             lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc_user"));
 
             const nameWidth = 15;
-            // "999.9 MiB/s" is the widest rate (11 chars); a 10-wide field
-            // let 100+ MiB/s values widen the whole tooltip.
-            const rateWidth = 11;
+            // Same fixed 12-character rate field as the NET tooltip, so the
+            // unit stays put when a process crosses a unit or gains a digit.
+            const rateWidth = 12;
             // name + "  R" + rate + "  W" + rate.
             const processWidth = nameWidth + rateWidth * 2 + 6;
 
@@ -1287,7 +1309,7 @@ BarWidget {
                     const entry = root.diskProcesses[i];
                     const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
 
-                    lines.push(name.padEnd(nameWidth) + "  R" + formatRateLong(entry.read / 1024).padStart(rateWidth) + "  W" + formatRateLong(entry.write / 1024).padStart(rateWidth));
+                    lines.push(name.padEnd(nameWidth) + "  R" + formatRateField(entry.read / 1024) + "  W" + formatRateField(entry.write / 1024));
                 }
             }
         }
@@ -1571,16 +1593,8 @@ BarWidget {
                 return tooltipBlock(Yassm.I18n.t("title.net"), Yassm.I18n.t("common.unavailable"));
             }
 
-            const downRate = formatRateLong(metrics.networkRxKib);
-            const upRate = formatRateLong(metrics.networkTxKib);
-            const downSession = formatKibAsSize(metrics.networkRxSessionKb);
-            const upSession = formatKibAsSize(metrics.networkTxSessionKb);
-            // Fixed columns: the session values must not move when a rate
-            // crosses a unit or gains a digit.
-            const rateWidth = 12;
-            const sessionWidth = 11;
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
-            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + downRate.padStart(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + downSession.padStart(sessionWidth) + ")", "↑ " + upRate.padStart(rateWidth) + "  (" + Yassm.I18n.t("common.session") + " " + upSession.padStart(sessionWidth) + ")"];
+            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + formatRateField(metrics.networkRxKib) + "  (" + Yassm.I18n.t("common.session") + " " + formatSessionField(metrics.networkRxSessionKb) + ")", "↑ " + formatRateField(metrics.networkTxKib) + "  (" + Yassm.I18n.t("common.session") + " " + formatSessionField(metrics.networkTxSessionKb) + ")"];
 
             if (root.showExtended && root.hasPing) {
                 const latency = metrics.pingMeasured ? (metrics.pingMs > 0 ? Math.round(metrics.pingMs) + " ms" : "KO") : "--";
