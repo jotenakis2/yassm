@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.38
+Version 1.29.39
 
 [English](README.md) | **Français**
 
@@ -84,9 +84,9 @@ marquées ci-dessous.
   (interrogés à l'ouverture de l'infobulle ; un montage qui ne répond pas en
   2 s est omis) ; débits d'E/S, PSI et E/S par processus (étendu) ;
 - **Réseau** : débits et totaux de session ; interface, IP LAN et SSID ; les
-  données étendues ajoutent l'IP WAN, la puissance et la fréquence Wi-Fi, ainsi
-  qu'un ping de latence vers omarchy.org (à l'ouverture puis à chaque
-  intervalle lent tant que l'infobulle reste ouverte) ;
+  données étendues ajoutent l'IP Gateway, l'IP WAN, la puissance et la
+  fréquence Wi-Fi, ainsi qu'un ping de latence vers omarchy.org (à l'ouverture
+  puis à chaque intervalle lent tant que l'infobulle reste ouverte) ;
 - **Température** : tous les capteurs et ventilateurs, du plus chaud au plus
   froid ;
 - **Batterie** : état et temps restant ; puissance, température du pack,
@@ -97,9 +97,9 @@ marquées ci-dessous.
   (unités en échec, zombies, disque/RAM).
 
 Données étendues ajoute les fréquences et PSI CPU, les E/S disque et par
-processus, les détails swap/zram/zswap, la puissance et la fréquence Wi-Fi, l'IP WAN, le
-ping de latence NET, l'âge d'installation, et la puissance, la température, les
-cycles et la santé de la batterie.
+processus, les détails swap/zram/zswap, la puissance et la fréquence Wi-Fi, les IP
+Gateway et WAN, le ping de latence NET, l'âge d'installation, et la puissance,
+la température, les cycles et la santé de la batterie.
 
 ## Couleurs
 

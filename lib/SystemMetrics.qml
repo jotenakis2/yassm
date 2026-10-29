@@ -287,6 +287,7 @@ Singleton {
 
     property string networkInterface: ""
     property string networkRouteV4: ""
+    property string gatewayV4: ""
     property string networkRouteV6: ""
     property real networkRxKib: 0
     property real networkTxKib: 0
@@ -735,10 +736,28 @@ Singleton {
         metrics.load15 = Number(fields[2]) || 0;
     }
 
+    // /proc/net/route stores the gateway as little-endian hex.
+    function gatewayFromHex(hex) {
+        const value = String(hex || "");
+
+        if (!/^[0-9a-fA-F]{8}$/.test(value) || value === "00000000") {
+            return "";
+        }
+
+        const bytes = [];
+
+        for (let i = 6; i >= 0; i -= 2) {
+            bytes.push(parseInt(value.slice(i, i + 2), 16));
+        }
+
+        return bytes.join(".");
+    }
+
     // The default route's interface avoids counting VPN/virtual traffic twice.
     function applyNetRoute(content) {
         const lines = content.split("\n");
         let iface = "";
+        let gateway = "";
         let bestMetric = Infinity;
 
         for (let i = 1; i < lines.length; i++) {
@@ -762,10 +781,12 @@ Singleton {
             if (metric < bestMetric) {
                 bestMetric = metric;
                 iface = fields[0];
+                gateway = fields[2];
             }
         }
 
         metrics.networkRouteV4 = iface;
+        metrics.gatewayV4 = iface !== "" ? metrics.gatewayFromHex(gateway) : "";
         applyNetworkRoute();
     }
 

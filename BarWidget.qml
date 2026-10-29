@@ -1316,7 +1316,7 @@ BarWidget {
 
             for (let i = 0; i < loads.length; i++) {
                 const percent = Math.round(100 * Number(loads[i]) / cores);
-                lines.push(labels[i] + formatLoad(loads[i]) + " (" + String(percent).padStart(3, " ") + "%)");
+                lines.push(labels[i] + formatLoad(loads[i]) + " → " + String(percent).padStart(3, " ") + "%");
             }
 
             return tooltipBlock(Yassm.I18n.t("title.load"), lines.join("\n"));
@@ -1588,6 +1588,10 @@ BarWidget {
 
             if (root.showExtended) {
                 ifaceRows.push({
+                    label: Yassm.I18n.t("net.gateway"),
+                    value: metrics.gatewayV4 !== "" ? metrics.gatewayV4 : "--"
+                });
+                ifaceRows.push({
                     label: Yassm.I18n.t("net.wan_ip"),
                     value: metrics.wanIp !== "" ? metrics.wanIp : "--"
                 });
@@ -1617,7 +1621,7 @@ BarWidget {
             }
 
             // Keep the colon column stable when extended data is toggled.
-            const ifaceLabels = [Yassm.I18n.t("net.lan_ip"), Yassm.I18n.t("net.wan_ip"), Yassm.I18n.t("net.iface"), Yassm.I18n.t("net.ssid"), Yassm.I18n.t("net.signal"), Yassm.I18n.t("net.frequency")];
+            const ifaceLabels = [Yassm.I18n.t("net.lan_ip"), Yassm.I18n.t("net.gateway"), Yassm.I18n.t("net.wan_ip"), Yassm.I18n.t("net.iface"), Yassm.I18n.t("net.ssid"), Yassm.I18n.t("net.signal"), Yassm.I18n.t("net.frequency")];
             let ifaceLabelWidth = 0;
 
             for (let i = 0; i < ifaceLabels.length; i++) {
