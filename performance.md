@@ -121,7 +121,7 @@ On demand only:
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
 | `wifi-freq.sh` | 6 ms | NET tooltip open, Fast (wireless) |
 | `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
-| `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, at most every 5 min |
+| `curl https://api.ipify.org` | one HTTPS request | NET tooltip open, cache 5 min or uplink change |
 | `install-date.sh` | 3 ms | once at startup (Uptime tooltip) |
 | `deps.sh` | 5 ms | once at startup (Settings warning) |
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.15
+Version 1.29.16
 
 **English** | [Français](README-fr.md)
 
@@ -74,7 +74,8 @@ default and configurable from 1 to 5 s in Settings.
   omitted.
 - `ip` (iproute2) — LAN address in the extended NET tooltip.
 - `curl` — public address in the extended NET tooltip (one HTTPS request to
-  <https://api.ipify.org> at most every 5 minutes).
+  <https://api.ipify.org>, cached for 5 minutes and refreshed when the uplink
+  or the Wi-Fi network changes).
 - `nvidia-smi` — NVIDIA GPU usage; the sysfs counter is preferred.
 - `btop` — left-click launcher; without it the left click opens Settings.
 - UPower and NetworkManager — battery details and SSID over D-Bus; without
@@ -328,7 +329,7 @@ Short-lived scripts (CPU time per run, 10 runs each; none stays alive):
 On demand only: `cpu-freq.sh` (3 ms) while the CPU tooltip is open,
 `proc-snapshot.sh` (11 ms) while it is open, `ps` (~15 ms) while the RAM
 tooltip is open, `ip` (3 ms) each time the NET tooltip opens, and the public
-IP lookup at most every 5 minutes.
+IP lookup when the 5-minute cache expires or the link changes.
 
 **Total idle cost ≈ 0.8 % of one core (≈0.07 % of the machine), no resident
 process.** Module-aware sampling stops the reads and timers of hidden modules,

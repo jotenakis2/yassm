@@ -2551,6 +2551,12 @@ BarWidget {
                 Yassm.SystemMetrics.refreshNetworkDetails();
             }
         }
+
+        function onNetworkDetailsInvalidated() {
+            if (root.showExtended && root.hoveredSegment.indexOf("net") === 0) {
+                Yassm.SystemMetrics.refreshNetworkDetails();
+            }
+        }
     }
 
     onHoveredSegmentChanged: root.syncMetricsSubscriptions()

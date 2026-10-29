@@ -282,6 +282,9 @@ Singleton {
     property string wanIp: ""
     property real wanIpUpdatedAt: 0
 
+    // Emitted when the cached addresses no longer describe the current link.
+    signal networkDetailsInvalidated
+
     readonly property string temperatureScriptPath: decodeURIComponent(Qt.resolvedUrl("../temperature.sh").toString().replace("file://", ""))
     property bool hasTemperature: false
     property real temperatureC: 0
@@ -1707,6 +1710,20 @@ Singleton {
         triggeredOnStart: true
 
         onTriggered: alertsProcess.running = true
+    }
+
+    // Same uplink, different network: the cached LAN and public addresses
+    // belong to the previous Wi-Fi network, so drop them without waiting for
+    // the five-minute TTL.
+    onWifiSsidChanged: {
+        if (!metrics.activeWifi) {
+            return;
+        }
+
+        metrics.ifaceIpv4 = "";
+        metrics.wanIp = "";
+        metrics.wanIpUpdatedAt = 0;
+        metrics.networkDetailsInvalidated();
     }
 
     Component.onCompleted: {

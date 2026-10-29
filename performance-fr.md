@@ -121,7 +121,7 @@ Aucun de ces processus ne survit entre deux exécutions.
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
 | `wifi-freq.sh` | 6 ms | tooltip NET ouvert, Fast (sans fil) |
 | `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, Fast (sans fil) |
-| `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, au plus toutes les 5 min |
+| `curl https://api.ipify.org` | une requête HTTPS | tooltip NET ouvert, cache 5 min ou changement de lien |
 | `install-date.sh` | 3 ms | une fois au démarrage |
 | `deps.sh` | 5 ms | une fois au démarrage (avertissement Settings) |
 
