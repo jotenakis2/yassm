@@ -1063,7 +1063,9 @@ BarWidget {
             const mhz = Number(frequency);
             const text = Number.isFinite(mhz) && mhz > 0 ? String(Math.round(mhz)).padStart(frequencyWidth) : "--".padStart(frequencyWidth);
 
-            entry += " (" + text + "MHz)";
+            // No parentheses: two spaces then the MHz value, right-aligned in
+            // a shared field so the "MHz" column stays put on every core.
+            entry += "  " + text + " MHz";
         }
 
         return entry;
