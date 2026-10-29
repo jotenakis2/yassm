@@ -200,7 +200,9 @@ BarWidget {
     readonly property string iconTemp: String.fromCodePoint(0xF050F)
     readonly property string iconFan: String.fromCodePoint(0xF0210)
     readonly property string iconProc: String.fromCodePoint(0xF018D)
-    readonly property string iconCompress: String.fromCodePoint(0xF066)
+    // Material "zip-box": a box with a zipper, used to mark the compressed
+    // size in the swap tooltip.
+    readonly property string iconZip: String.fromCodePoint(0xF05C4)
     readonly property string iconServer: String.fromCodePoint(0xF233)
     readonly property string iconUser: String.fromCodePoint(0xF007)
     readonly property string iconGhost: String.fromCodePoint(0xEEFE)
@@ -1071,6 +1073,17 @@ BarWidget {
         return entry;
     }
 
+    // "original -> <zip icon> compressed (ratio)", starting at the left edge
+    // of the tooltip. Both sizes keep a 9-character field so the arrow, the
+    // icon and the ratio stay in their columns when a value grows.
+    function compressionLine(originalKb, compressedKb) {
+        const original = Number(originalKb) || 0;
+        const compressed = Number(compressedKb) || 0;
+        const ratio = compressed > 0 ? original / compressed : 0;
+
+        return formatKib(original).padEnd(9, " ") + " → " + root.iconZip + " " + formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
+    }
+
     function batteryStateLabel(status) {
         switch (status) {
         case "Charging":
@@ -1473,11 +1486,9 @@ BarWidget {
                     continue;
                 }
 
-                const ratio = stats.compressedKb > 0 ? stats.originalKb / stats.compressedKb : 0;
-
                 zramEntries.push({
                     name: base,
-                    text: Yassm.I18n.tf("swap.compressed", [formatKib(stats.compressedKb), formatKib(stats.originalKb)]) + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "") + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)])
+                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)])
                 });
             }
 
@@ -1495,16 +1506,9 @@ BarWidget {
             }
 
             if (metrics.hasZswap) {
-                const ratio = metrics.zswapCompressedKb > 0 ? metrics.zswapOriginalKb / metrics.zswapCompressedKb : 0;
-                // Original size, arrow, compressed size behind the compression
-                // glyph, then the ratio. Both sizes keep a 10-character field
-                // so the arrow and the icon never move when a value grows.
-                const original = formatKib(metrics.zswapOriginalKb).padStart(10, " ");
-                const compressed = formatKib(metrics.zswapCompressedKb).padStart(10, " ");
-
                 lines.push("");
-                lines.push(root.centeredMark + root.iconCompress + " " + Yassm.I18n.t("head.zswap"));
-                lines.push(original + " → " + root.iconCompress + " " + compressed + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : ""));
+                lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
+                lines.push(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
