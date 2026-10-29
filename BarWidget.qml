@@ -1076,6 +1076,16 @@ BarWidget {
     // "original -> <zip icon> compressed (ratio)", starting at the left edge
     // of the tooltip. Both sizes keep a 9-character field so the arrow, the
     // icon and the ratio stay in their columns when a value grows.
+    // Sensor labels often end with "Temp"/"Temperature", which the value
+    // column already says in °C. Drop that word (and a leading one), but keep
+    // the raw label when nothing meaningful is left ("temp", "temp1").
+    function cleanSensorName(name) {
+        const original = String(name || "").trim();
+        const stripped = original.replace(/[\s_\-.]+(temperatures?|temps?)$/i, "").replace(/^(temperatures?|temps?)[\s_\-.]+/i, "").trim();
+
+        return stripped === "" || /^[0-9]+$/.test(stripped) ? original : stripped;
+    }
+
     function compressionLine(originalKb, compressedKb) {
         const original = Number(originalKb) || 0;
         const compressed = Number(compressedKb) || 0;
@@ -1850,33 +1860,56 @@ BarWidget {
                 return tooltipBlock(Yassm.I18n.t("title.sensors"), Yassm.I18n.t("common.unavailable"));
             }
 
+            // One "name : value unit" grid shared by both sections: the colon
+            // and the numbers line up from the first sensor to the last fan.
+            const tempRows = [];
+            const fanRows = [];
+            let nameWidth = 0;
+            let valueWidth = 0;
+
+            for (let i = 0; i < temperatures.length; i++) {
+                const name = root.cleanSensorName(temperatures[i].sensor);
+                const value = temperatures[i].celsius.toFixed(1);
+
+                nameWidth = Math.max(nameWidth, name.length);
+                valueWidth = Math.max(valueWidth, value.length);
+                tempRows.push({
+                    name: name,
+                    value: value
+                });
+            }
+
+            for (let i = 0; i < fans.length; i++) {
+                const name = String(fans[i].name);
+                const value = String(Math.round(fans[i].rpm));
+
+                nameWidth = Math.max(nameWidth, name.length);
+                valueWidth = Math.max(valueWidth, value.length);
+                fanRows.push({
+                    name: name,
+                    value: value
+                });
+            }
+
             const lines = [];
 
-            if (temperatures.length > 0) {
+            if (tempRows.length > 0) {
                 lines.push(root.centeredMark + root.iconTemp + " " + Yassm.I18n.t("head.temperatures"));
 
-                for (let i = 0; i < temperatures.length; i++) {
-                    lines.push(temperatures[i].celsius.toFixed(1).padStart(4, " ") + " °C (" + temperatures[i].sensor + ")");
+                for (let i = 0; i < tempRows.length; i++) {
+                    lines.push(tempRows[i].name.padEnd(nameWidth) + " : " + tempRows[i].value.padStart(valueWidth) + " °C");
                 }
             }
 
-            if (fans.length > 0) {
-                let nameWidth = 0;
-                let rpmWidth = 0;
-
-                for (let i = 0; i < fans.length; i++) {
-                    nameWidth = Math.max(nameWidth, fans[i].name.length);
-                    rpmWidth = Math.max(rpmWidth, String(Math.round(fans[i].rpm)).length);
-                }
-
+            if (fanRows.length > 0) {
                 if (lines.length > 0) {
                     lines.push("");
                 }
 
                 lines.push(root.centeredMark + root.iconFan + " " + Yassm.I18n.t("head.fans"));
 
-                for (let i = 0; i < fans.length; i++) {
-                    lines.push(fans[i].name.padEnd(nameWidth) + "  " + String(Math.round(fans[i].rpm)).padStart(rpmWidth) + " rpm");
+                for (let i = 0; i < fanRows.length; i++) {
+                    lines.push(fanRows[i].name.padEnd(nameWidth) + " : " + fanRows[i].value.padStart(valueWidth) + " rpm");
                 }
             }
 
