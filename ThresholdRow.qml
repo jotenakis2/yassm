@@ -86,6 +86,10 @@ RowLayout {
         stepSize: root.stepSize
         value: root.greenValue
         fieldWidth: Style.space(72)
+
+        // Threshold values are read as raw numbers: the locale group
+        // separator (a narrow no-break space in French) breaks the baseline.
+        Component.onCompleted: field.locale = Qt.locale("C")
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 
@@ -110,6 +114,8 @@ RowLayout {
         stepSize: root.stepSize
         value: root.orangeValue
         fieldWidth: Style.space(72)
+
+        Component.onCompleted: field.locale = Qt.locale("C")
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 
@@ -136,6 +142,8 @@ RowLayout {
         stepSize: root.stepSize
         value: root.redValue
         fieldWidth: Style.space(72)
+
+        Component.onCompleted: field.locale = Qt.locale("C")
         foreground: ShellColor.popups.text
         fontFamily: Style.font.family
 
