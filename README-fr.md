@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.25
+Version 1.29.26
 
 [English](README.md) | **Français**
 
@@ -192,8 +192,9 @@ Le survol d'un module affiche une infobulle contextuelle :
   (`Fan 1  0 rpm`), y compris les ventilateurs à l'arrêt à 0 ;
 - **Battery** : pourcentage, état, temps restant ou temps de charge.
   Extended data ajoute la puissance instantanée quand UPower la fournit, avec
-  sa direction sous forme de flèche (↓ en décharge, ↑ en charge), ainsi que la
-  santé de la batterie et le nombre de cycles ;
+  sa direction sous forme de flèche (↓ en décharge, ↑ en charge), la
+  température du pack quand un capteur contient `batt`, ainsi que la santé de
+  la batterie et le nombre de cycles ;
 - **CPU** : pourcentage courant. Le tooltip s'ouvre sur un titre `cores`
   centré, puis le pourcentage par cœur sur deux colonnes (réparties par
   moitié ; trois colonnes ou plus au-delà de 20 cœurs, 10 lignes maximum). Un

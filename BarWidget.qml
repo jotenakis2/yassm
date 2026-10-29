@@ -1630,6 +1630,26 @@ BarWidget {
                     label: Yassm.I18n.t("battery.power"),
                     value: power
                 });
+
+                // Asahi exposes the pack temperature as macsmc_battery; other
+                // machines may name the sensor BAT0/battery. Use the hottest
+                // sensor whose name mentions "batt".
+                let batteryTemperature = null;
+
+                for (let i = 0; i < metrics.temperatures.length; i++) {
+                    if (metrics.temperatures[i].sensor.toLowerCase().indexOf("batt") >= 0) {
+                        batteryTemperature = metrics.temperatures[i];
+                        break;
+                    }
+                }
+
+                if (batteryTemperature !== null) {
+                    rows.push({
+                        label: Yassm.I18n.t("battery.temperature"),
+                        value: Math.round(batteryTemperature.celsius) + "°C"
+                    });
+                }
+
                 rows.push({
                     label: Yassm.I18n.t("battery.cycles"),
                     value: metrics.batteryCycles > 0 ? String(metrics.batteryCycles) : "--"
@@ -2027,7 +2047,9 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
         const extended = root.showExtended;
 
-        metrics.setTemperatureUser(root, root.showTemp);
+        // Battery temperature comes from the same sampler as the Temperature
+        // module; keep it running when only Battery (extended) is shown.
+        metrics.setTemperatureUser(root, root.showTemp || (root.showExtended && root.showBattery));
         metrics.setDiskUser(root, root.showDisk);
         metrics.setSwapUser(root, root.showSwap);
         metrics.setAlertsUser(root, root.showAlerts);

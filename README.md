@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.25
+Version 1.29.26
 
 **English** | [Français](README-fr.md)
 
@@ -185,8 +185,8 @@ Hovering a module shows a contextual tooltip:
   0;
 - **Battery**: percentage, state, time remaining or time to full. Extended
   data adds the instantaneous power when UPower provides it, with an arrow
-  (↓ while discharging, ↑ while charging), plus battery health and charge
-  cycles;
+  (↓ while discharging, ↑ while charging), the pack temperature when a sensor
+  name contains `batt`, plus battery health and charge cycles;
 - **CPU**: current percentage. The tooltip opens with a centered `cores`
   heading, then per-core percentages in two columns (split in half; three or
   more columns past 20 cores, at most 10 rows tall). A centered `proc`
