@@ -258,11 +258,10 @@ BarWidget {
             return batteryChargingIcon(percent);
         }
 
-        const icon = batteryLevelIcon(percent);
-
-        // A plug next to the battery distinguishes "plugged in but idle"
-        // (full or charge threshold reached) from running on battery.
-        return plugged ? icon + iconBatteryPlug : icon;
+        // On mains but not charging (full or charge threshold reached), a
+        // single plug glyph says it, macOS style. Appending a plug to the
+        // battery icon made the segment one cell wider and shifted the bar.
+        return plugged ? iconBatteryPlug : batteryLevelIcon(percent);
     }
 
     function makeSegment(key, icon, value, suffix, kind) {

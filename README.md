@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.8
+Version 1.29.9
 
 **English** | [Français](README-fr.md)
 
@@ -242,8 +242,8 @@ The icon follows the level in 10 % steps (empty icon at 0 %; 1–9 % shows the
 
 - **on battery**: battery alone, filled according to the level;
 - **charging**: battery with a bolt, green icon, value in the normal bar color;
-- **plugged but not charging** (full or charge threshold reached): battery
-  followed by a plug, green icon, value in the normal bar color.
+- **plugged but not charging** (full or charge threshold reached): a single
+  plug icon, green, value in the normal bar color.
 
 The "plugged" state comes from `UPower.onBattery`, which distinguishes a
 machine that is merely plugged in from one that is charging. Percentage,
