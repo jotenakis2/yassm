@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.5
+Version 1.29.6
 
 **English** | [Français](README-fr.md)
 
@@ -225,13 +225,13 @@ independently.
 The green/orange/red colors come from the current Omarchy theme's
 `colors.toml`. Icons keep the normal bar color, except for the battery icon:
 as soon as the machine is on mains power (charging or held at a charge
-threshold), the icon turns theme blue while the value keeps the normal bar
+threshold), the icon turns theme green while the value keeps the normal bar
 color. On battery, the value follows the thresholds above.
 
 The disk value turns red at 90 %; the **Alerts** module only triggers at
 95 % (disk or RAM). All colour thresholds are defaults and can be changed in
 Settings → Thresholds, per family. The **Colors** toggle
-disables all these colors: values and the blue
+disables all these colors: values and the green
 battery icon return to the normal bar color. It maps to `showColors` in
 `shell.json` (enabled by default).
 
@@ -241,9 +241,9 @@ The icon follows the level in 10 % steps (empty icon at 0 %; 1–9 % shows the
 10 % icon) and the power state:
 
 - **on battery**: battery alone, filled according to the level;
-- **charging**: battery with a bolt, blue icon, value in the normal bar color;
+- **charging**: battery with a bolt, green icon, value in the normal bar color;
 - **plugged but not charging** (full or charge threshold reached): battery
-  followed by a plug, blue icon, value in the normal bar color.
+  followed by a plug, green icon, value in the normal bar color.
 
 The "plugged" state comes from `UPower.onBattery`, which distinguishes a
 machine that is merely plugged in from one that is charging. Percentage,

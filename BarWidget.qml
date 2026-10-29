@@ -467,9 +467,9 @@ BarWidget {
         }
 
         // On mains power, charging or held at a charge threshold, the battery
-        // icon uses the theme blue. The value stays in the normal bar color.
+        // icon uses the theme green. The value stays in the normal bar color.
         if (metrics.batteryPlugged) {
-            return Yassm.ThemePalette.blue;
+            return Yassm.ThemePalette.green;
         }
 
         return button.foreground;

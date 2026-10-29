@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.5
+Version 1.29.6
 
 [English](README.md) | **Français**
 
@@ -232,11 +232,11 @@ et montant sont colorés indépendamment.
 Les couleurs verte/orange/rouge proviennent du `colors.toml` du thème Omarchy
 courant. Les icônes conservent la couleur normale de la barre, sauf l'icône de
 batterie : dès que la machine est sur secteur (en charge ou seuil de charge
-atteint), l'icône passe au bleu du thème tandis que la valeur conserve la
+atteint), l'icône passe au vert du thème tandis que la valeur conserve la
 couleur normale de la barre. Sur batterie, la valeur suit les seuils ci-dessus.
 
 Le toggle **Colors** du panneau désactive toutes ces couleurs : les valeurs
-et l'icône bleue de la batterie reviennent à la couleur normale de la barre.
+et l'icône verte de la batterie reviennent à la couleur normale de la barre.
 Il correspond à `showColors` dans `shell.json` (activé par défaut).
 
 ## Icône de batterie
@@ -245,10 +245,10 @@ L'icône suit le niveau par paliers de 10 % (icône vide à 0 % ; de 1 à 9 %,
 icône 10 %) et l'état d'alimentation :
 
 - **sur batterie** : batterie seule, remplie selon le niveau ;
-- **en charge** : batterie avec éclair, icône bleue, valeur dans la couleur
+- **en charge** : batterie avec éclair, icône verte, valeur dans la couleur
   normale de la barre ;
 - **branchée sans charge** (pleine ou seuil de charge atteint) : batterie
-  suivie d'une prise, icône bleue, valeur dans la couleur normale de la barre.
+  suivie d'une prise, icône verte, valeur dans la couleur normale de la barre.
 
 L'état « branché » vient de `UPower.onBattery`, ce qui distingue une machine
 simplement branchée d'une machine en train de charger. Le pourcentage, l'état
