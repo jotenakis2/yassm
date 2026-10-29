@@ -14,7 +14,7 @@ checks=(
 	"required|stat|installation date"
 	"required|systemctl|Alerts module"
 	"required|timeout|command guards"
-	"optional|curl|public address in the NET tooltip"
+	"optional|curl|public address and country flag in the NET tooltip"
 	"optional|ip|LAN address in the NET tooltip"
 	"optional|nmcli|Wi-Fi frequency in the NET tooltip"
 )

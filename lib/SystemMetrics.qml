@@ -333,9 +333,11 @@ Singleton {
     property real wifiFreqMhz: 0
 
     // Interface addresses are only fetched while the NET tooltip is open:
-    // the LAN address from iproute2, the public one from ipify (cached).
+    // the LAN address from iproute2, the public address and country from
+    // ipinfo.io (cached).
     property string ifaceIpv4: ""
     property string wanIp: ""
+    property string wanCountry: ""
     property real wanIpUpdatedAt: 0
 
     // Emitted when the cached addresses no longer describe the current link.
@@ -840,6 +842,7 @@ Singleton {
         // never shows the old LAN or WAN address on a new connection.
         metrics.ifaceIpv4 = "";
         metrics.wanIp = "";
+        metrics.wanCountry = "";
         metrics.wanIpUpdatedAt = 0;
         metrics.wifiLevel = 0;
         // Session totals span the whole shell session: keep them across
@@ -1299,12 +1302,27 @@ Singleton {
     }
 
     function applyWanIp(content) {
-        const value = String(content || "").trim();
+        const text = String(content || "").trim();
+        let ip = text;
+        let country = "";
+
+        // ipinfo.io/json returns {"ip": "...", "country": "FR", ...}; keep a
+        // plain-text fallback in case the provider changes.
+        if (text.startsWith("{")) {
+            try {
+                const data = JSON.parse(text);
+                ip = String(data.ip || "");
+                country = String(data.country || "");
+            } catch (error) {
+                ip = "";
+            }
+        }
 
         // Keep the previous address on a failed lookup, drop anything that is
         // not shaped like an IP (error pages, empty output).
-        if (/^[0-9a-fA-F:.]{3,45}$/.test(value)) {
-            metrics.wanIp = value;
+        if (/^[0-9a-fA-F:.]{3,45}$/.test(ip)) {
+            metrics.wanIp = ip;
+            metrics.wanCountry = country;
         }
     }
 
@@ -1786,7 +1804,7 @@ Singleton {
     Process {
         id: wanIpProcess
 
-        command: ["timeout", "6", "curl", "-fsS", "--max-time", "5", "https://api.ipify.org"]
+        command: ["timeout", "6", "curl", "-fsS", "--max-time", "5", "https://ipinfo.io/json"]
 
         stdout: StdioCollector {
             id: wanIpOutput
@@ -1872,6 +1890,7 @@ Singleton {
 
         metrics.ifaceIpv4 = "";
         metrics.wanIp = "";
+        metrics.wanCountry = "";
         metrics.wanIpUpdatedAt = 0;
         metrics.networkDetailsInvalidated();
     }

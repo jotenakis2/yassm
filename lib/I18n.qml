@@ -148,7 +148,7 @@ QtObject {
             "dep.stat": "installation date",
             "dep.systemctl": "Alerts module",
             "dep.timeout": "command guards",
-            "dep.curl": "public address in the NET tooltip",
+            "dep.curl": "public address and country flag in the NET tooltip",
             "dep.ip": "LAN address in the NET tooltip",
             "dep.nmcli": "Wi-Fi frequency in the NET tooltip"
         })
@@ -290,7 +290,7 @@ QtObject {
             "dep.stat": "date d'installation",
             "dep.systemctl": "module Alertes",
             "dep.timeout": "garde-fous des commandes",
-            "dep.curl": "adresse publique dans l'infobulle NET",
+            "dep.curl": "adresse publique et drapeau du pays dans l'infobulle NET",
             "dep.ip": "adresse LAN dans l'infobulle NET",
             "dep.nmcli": "fréquence Wi-Fi dans l'infobulle NET"
         })

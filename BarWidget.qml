@@ -640,6 +640,16 @@ BarWidget {
         return String(value).padStart(3, " ");
     }
 
+    function countryFlag(code) {
+        const value = String(code || "").toUpperCase();
+
+        if (!/^[A-Z]{2}$/.test(value)) {
+            return "";
+        }
+
+        return String.fromCodePoint(0x1F1E6 + value.charCodeAt(0) - 65, 0x1F1E6 + value.charCodeAt(1) - 65);
+    }
+
     function formatLoad(value) {
         const number = Number(value);
         return (Number.isFinite(number) ? number : 0).toFixed(2).padStart(6, " ");
@@ -1591,9 +1601,11 @@ BarWidget {
                     label: Yassm.I18n.t("net.gateway"),
                     value: metrics.gatewayV4 !== "" ? metrics.gatewayV4 : "--"
                 });
+                const wanFlag = root.countryFlag(metrics.wanCountry);
+
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.wan_ip"),
-                    value: metrics.wanIp !== "" ? metrics.wanIp : "--"
+                    value: metrics.wanIp !== "" ? metrics.wanIp + (wanFlag !== "" ? " " + wanFlag : "") : "--"
                 });
             }
 
