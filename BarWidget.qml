@@ -35,6 +35,10 @@ BarWidget {
     readonly property string sectionMark: "\u0001"
     readonly property string centeredMark: "\u0002"
     readonly property string boldMark: "\u0003"
+    // Runs between these two control characters are drawn dimmer than the
+    // rest of their line: the per-core frequency, for example.
+    readonly property string dimMark: "\u0004"
+    readonly property string dimEndMark: "\u0005"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
@@ -1057,6 +1061,54 @@ BarWidget {
         }
     }
 
+    // Split a line on the dim markers so the tooltip can draw the plain and
+    // dimmed runs side by side without losing the monospace column layout.
+    function splitDimRuns(text) {
+        const parts = String(text || "").split(root.dimMark);
+        const runs = [];
+
+        for (let i = 0; i < parts.length; i++) {
+            const chunk = parts[i];
+
+            if (i === 0) {
+                if (chunk !== "") {
+                    runs.push({
+                        text: chunk,
+                        dim: false
+                    });
+                }
+
+                continue;
+            }
+
+            const end = chunk.indexOf(root.dimEndMark);
+
+            if (end < 0) {
+                runs.push({
+                    text: chunk,
+                    dim: true
+                });
+                continue;
+            }
+
+            if (end > 0) {
+                runs.push({
+                    text: chunk.slice(0, end),
+                    dim: true
+                });
+            }
+
+            if (chunk.length > end + 1) {
+                runs.push({
+                    text: chunk.slice(end + 1),
+                    dim: false
+                });
+            }
+        }
+
+        return runs;
+    }
+
     function coreEntry(label, value, labelWidth, frequency, frequencyWidth) {
         const percent = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
         let entry = String(label).padStart(labelWidth || 2, " ") + " " + String(percent).padStart(3, " ") + "%";
@@ -1066,8 +1118,9 @@ BarWidget {
             const text = Number.isFinite(mhz) && mhz > 0 ? String(Math.round(mhz)).padStart(frequencyWidth) : "--".padStart(frequencyWidth);
 
             // No parentheses: two spaces then the MHz value, right-aligned in
-            // a shared field so the "MHz" column stays put on every core.
-            entry += "  " + text + " MHz";
+            // a shared field so the "MHz" column stays put on every core. The
+            // clock is secondary information, so it is drawn dimmer.
+            entry += root.dimMark + "  " + text + " MHz" + root.dimEndMark;
         }
 
         return entry;
@@ -2723,18 +2776,56 @@ BarWidget {
                 Repeater {
                     model: tooltipLineModel
 
-                    Text {
+                    Item {
+                        id: tooltipLine
+
                         required property string lineText
                         required property bool lineHeading
                         required property bool lineBold
 
-                        textFormat: Text.PlainText
-                        text: lineText
-                        color: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
-                        font.family: button.fontFamily
-                        font.pixelSize: Style.font.body
-                        font.weight: lineHeading || lineBold ? Font.Bold : Font.Normal
-                        renderType: Text.NativeRendering
+                        // Lines with a dim run are drawn as several Texts in a
+                        // Row; plain lines stay one Text.
+                        readonly property bool split: lineText.indexOf(root.dimMark) >= 0
+                        readonly property color textColor: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
+                        readonly property var runs: split ? root.splitDimRuns(lineText) : []
+
+                        implicitWidth: split ? runRow.implicitWidth : plainLine.implicitWidth
+                        implicitHeight: split ? runRow.implicitHeight : plainLine.implicitHeight
+
+                        Text {
+                            id: plainLine
+
+                            visible: !tooltipLine.split
+                            textFormat: Text.PlainText
+                            text: tooltipLine.lineText
+                            color: tooltipLine.textColor
+                            font.family: button.fontFamily
+                            font.pixelSize: Style.font.body
+                            font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
+                            renderType: Text.NativeRendering
+                        }
+
+                        Row {
+                            id: runRow
+
+                            visible: tooltipLine.split
+
+                            Repeater {
+                                model: tooltipLine.runs
+
+                                Text {
+                                    required property var modelData
+
+                                    textFormat: Text.PlainText
+                                    text: modelData.text
+                                    color: modelData.dim ? Qt.rgba(tooltipLine.textColor.r, tooltipLine.textColor.g, tooltipLine.textColor.b, 0.45) : tooltipLine.textColor
+                                    font.family: button.fontFamily
+                                    font.pixelSize: Style.font.body
+                                    font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
+                                    renderType: Text.NativeRendering
+                                }
+                            }
+                        }
                     }
                 }
             }
