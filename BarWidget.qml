@@ -1567,7 +1567,10 @@ BarWidget {
 
                 zramEntries.push({
                     name: base,
-                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)])
+                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)]),
+                    // Nothing stored in zram yet: the sizes are zeros, so the
+                    // row is dimmed like the other empty readings.
+                    dim: !(Number(stats.compressedKb) > 0)
                 });
             }
 
@@ -1579,15 +1582,17 @@ BarWidget {
                     // With a single zram the name adds nothing; keep it only
                     // when several devices need to be told apart.
                     const prefix = zramEntries.length > 1 ? zramEntries[i].name + ": " : "";
+                    const text = prefix + zramEntries[i].text;
 
-                    lines.push(prefix + zramEntries[i].text);
+                    lines.push(zramEntries[i].dim ? root.dimMark + text + root.dimEndMark : text);
                 }
             }
 
             if (metrics.hasZswap) {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
-                lines.push(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb));
+                // zswap enabled but nothing compressed: dim the zero line.
+                lines.push(root.dimWhenEmpty(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(Number(metrics.zswapCompressedKb) > 0)));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
