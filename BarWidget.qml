@@ -39,6 +39,8 @@ BarWidget {
     // rest of their line: the per-core frequency, for example.
     readonly property string dimMark: "\u0004"
     readonly property string dimEndMark: "\u0005"
+    // Marks a whole line rendered in a smaller font: a column caption.
+    readonly property string smallMark: "\u0006"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
@@ -61,11 +63,14 @@ BarWidget {
                 const line = raw[i];
                 const heading = line.startsWith(root.sectionMark) || line.startsWith(root.centeredMark);
                 const bold = !heading && line.startsWith(root.boldMark);
+                const small = !heading && !bold && line.startsWith(root.smallMark);
+                const trimmed = heading || bold || small ? line.slice(1) : line;
 
                 lines.push({
-                    text: heading || bold ? line.slice(1).replace(/\u00A0+$/, "") : line,
+                    text: heading || bold ? trimmed.replace(/\u00A0+$/, "") : trimmed,
                     heading: heading,
-                    bold: bold
+                    bold: bold,
+                    small: small
                 });
             }
         }
@@ -1421,13 +1426,15 @@ BarWidget {
                 tooltipLineModel.append({
                     lineText: "",
                     lineHeading: false,
-                    lineBold: false
+                    lineBold: false,
+                    lineSmall: false
                 });
             }
 
             tooltipLineModel.setProperty(i, "lineText", lines[i].text);
             tooltipLineModel.setProperty(i, "lineHeading", lines[i].heading);
             tooltipLineModel.setProperty(i, "lineBold", lines[i].bold);
+            tooltipLineModel.setProperty(i, "lineSmall", lines[i].small === true);
         }
     }
 
@@ -1477,6 +1484,14 @@ BarWidget {
             // Cached and SReclaimable, then adds Shmem back. Shows next to the
             // kernel's "used" figure so the two definitions can be compared.
             const htopUsedKb = Math.max(0, metrics.memoryTotalKb - metrics.memoryFreeKb - metrics.memoryCacheKb - metrics.memoryBuffersKb + metrics.memorySharedKb);
+
+            if (root.showExtended) {
+                // Tiny caption over the extra column, right-aligned on the
+                // values below so it does not widen the bubble.
+                const columnEnd = nameWidth + 2 + valueWidth * 2 + 2;
+
+                lines.push(root.smallMark + root.dimMark + "".padEnd(columnEnd - 4) + "htop" + root.dimEndMark);
+            }
 
             for (let i = 0; i < labels.length; i++) {
                 const extra = root.showExtended && i === 1 ? formatKibAsGib(htopUsedKb).padStart(valueWidth) : "";
@@ -2831,12 +2846,14 @@ BarWidget {
                         required property string lineText
                         required property bool lineHeading
                         required property bool lineBold
+                        required property bool lineSmall
 
                         // Lines with a dim run are drawn as several Texts in a
                         // Row; plain lines stay one Text.
                         readonly property bool split: lineText.indexOf(root.dimMark) >= 0
                         readonly property color textColor: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
                         readonly property var runs: split ? root.splitDimRuns(lineText) : []
+                        readonly property real pixelSize: lineSmall ? Style.font.body * 0.78 : Style.font.body
 
                         implicitWidth: split ? runRow.implicitWidth : plainLine.implicitWidth
                         implicitHeight: split ? runRow.implicitHeight : plainLine.implicitHeight
@@ -2849,7 +2866,7 @@ BarWidget {
                             text: tooltipLine.lineText
                             color: tooltipLine.textColor
                             font.family: button.fontFamily
-                            font.pixelSize: Style.font.body
+                            font.pixelSize: tooltipLine.pixelSize
                             font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
                             renderType: Text.NativeRendering
                         }
@@ -2869,7 +2886,7 @@ BarWidget {
                                     text: modelData.text
                                     color: modelData.dim ? Qt.rgba(tooltipLine.textColor.r, tooltipLine.textColor.g, tooltipLine.textColor.b, 0.45) : tooltipLine.textColor
                                     font.family: button.fontFamily
-                                    font.pixelSize: Style.font.body
+                                    font.pixelSize: tooltipLine.pixelSize
                                     font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
                                     renderType: Text.NativeRendering
                                 }
