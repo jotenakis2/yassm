@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.64
+Version 1.29.65
 
 [English](README.md) | **Français**
 
@@ -103,10 +103,11 @@ Gateway et WAN (avec leur drapeau), le ping de latence NET, les dates
 d'installation et de dernière mise à jour, et la puissance, la température,
 les cycles et la santé de la batterie.
 
-La petite valeur `htop` de l'infobulle RAM est la définition d'htop de la
-mémoire utilisée — `MemTotal - MemFree - Buffers - Cache + Shmem` — et non
-`MemAvailable` du noyau : elle est donc un peu plus basse et correspond à ce
-qu'affiche htop.
+La petite valeur `htop` de l'infobulle RAM applique la définition d'htop
+hors cache — `MemTotal - MemFree - Buffers - Cache + Shmem`. htop affiche le
+`Shmem` dans un segment *shared* séparé : cette valeur vaut donc htop
+« used » + « shared », et reste un peu sous l'*Utilisée* du noyau
+(`MemAvailable`).
 
 ## Couleurs
 
