@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.60
+Version 1.29.61
 
 [English](README.md) | **Français**
 
@@ -78,7 +78,7 @@ marquées ci-dessous.
 - **CPU** : utilisation par cœur ; top des processus utilisateur ; PSI et
   fréquences par cœur (étendu) ;
 - **RAM** : total, utilisée, disponible ; top des processus utilisateur ;
-  tampon, cache et PSI (étendu) ;
+  tampon, cache, la valeur « utilisée » façon htop et PSI (étendu) ;
 - **Swap** : usage par périphérique, détails zram et zswap (étendu) ;
 - **Disque** : usage par système de fichiers local et montages NFS/CIFS
   (interrogés à l'ouverture de l'infobulle ; un montage qui ne répond pas en

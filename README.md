@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.60
+Version 1.29.61
 
 **English** | [Français](README-fr.md)
 
@@ -75,8 +75,8 @@ rows marked below.
 
 - **CPU**: per-core usage; top userland processes; PSI and per-core
   frequencies (extended);
-- **RAM**: total, used, available; top userland processes; buffers, cache and
-  PSI (extended);
+- **RAM**: total, used, available; top userland processes; buffers, cache,
+  the htop-style used figure and PSI (extended);
 - **Swap**: per-device usage, zram and zswap details (extended);
 - **Disk**: usage per local filesystem and NFS/CIFS mounts (queried when the
   tooltip opens; a mount that does not answer within 2 s is omitted); I/O

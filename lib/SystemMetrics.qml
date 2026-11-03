@@ -26,6 +26,7 @@ Singleton {
 
     property real memoryPercent: 0
     property real memoryTotalKb: 0
+    property real memoryFreeKb: 0
     property real memoryUsedKb: 0
     property real memoryAvailableKb: 0
     property real memoryBuffersKb: 0
@@ -633,6 +634,7 @@ Singleton {
         availableKb = Math.max(0, Math.min(total, availableKb));
 
         metrics.memoryTotalKb = total;
+        metrics.memoryFreeKb = memFree;
         metrics.memoryUsedKb = Math.max(0, total - availableKb);
         metrics.memoryAvailableKb = availableKb;
         metrics.memoryPercent = Math.max(0, Math.min(100, 100 * metrics.memoryUsedKb / total));

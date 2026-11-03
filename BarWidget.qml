@@ -1473,8 +1473,15 @@ BarWidget {
             const lines = [];
             lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.data"));
 
+            // htop does not use MemAvailable: it subtracts MemFree, Buffers,
+            // Cached and SReclaimable, then adds Shmem back. Shows next to the
+            // kernel's "used" figure so the two definitions can be compared.
+            const htopUsedKb = Math.max(0, metrics.memoryTotalKb - metrics.memoryFreeKb - metrics.memoryCacheKb - metrics.memoryBuffersKb + metrics.memorySharedKb);
+
             for (let i = 0; i < labels.length; i++) {
-                lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth));
+                const extra = root.showExtended && i === 1 ? formatKibAsGib(htopUsedKb).padStart(valueWidth) : "";
+
+                lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth) + (extra !== "" ? root.dimMark + "  " + extra + root.dimEndMark : ""));
             }
 
             if (root.showExtended) {
