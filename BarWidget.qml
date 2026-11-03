@@ -1382,8 +1382,9 @@ BarWidget {
             if (root.diskProcesses.length === 0) {
                 // Keep the row width so the bubble does not shrink when the
                 // last active process goes idle. Non-breaking spaces are not
-                // trimmed from the end of the line.
-                lines.push(Yassm.I18n.t("common.no_io").padEnd(processWidth, "\u00A0"));
+                // trimmed from the end of the line. Dimmed like the kernel
+                // row: there is nothing to report right now.
+                lines.push(root.dimMark + Yassm.I18n.t("common.no_io").padEnd(processWidth, "\u00A0") + root.dimEndMark);
             } else {
                 for (let i = 0; i < root.diskProcesses.length; i++) {
                     const entry = root.diskProcesses[i];
@@ -1771,7 +1772,8 @@ BarWidget {
 
             rows.push({
                 label: Yassm.I18n.t("battery.remaining_time"),
-                value: remaining
+                value: remaining,
+                dim: remaining === "--"
             });
 
             if (root.showExtended) {
@@ -1784,7 +1786,8 @@ BarWidget {
 
                 rows.push({
                     label: Yassm.I18n.t("battery.power"),
-                    value: power
+                    value: power,
+                    dim: power === "--"
                 });
 
                 // Asahi exposes the pack temperature as macsmc_battery; other
@@ -1825,7 +1828,11 @@ BarWidget {
             const lines = [];
 
             for (let i = 0; i < rows.length; i++) {
-                lines.push(rows[i].label.padEnd(labelWidth) + " : " + rows[i].value);
+                const text = rows[i].label.padEnd(labelWidth) + " : " + rows[i].value;
+
+                // A "--" placeholder means "not available right now"; dim the
+                // whole row instead of letting it read as a real value.
+                lines.push(rows[i].dim ? root.dimMark + text + root.dimEndMark : text);
             }
 
             return tooltipBlock(Yassm.I18n.t("title.battery"), lines.join("\n"));
