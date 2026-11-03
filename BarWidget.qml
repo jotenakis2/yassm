@@ -1465,14 +1465,20 @@ BarWidget {
         if (key === "memory") {
             const labels = [Yassm.I18n.t("row.total"), Yassm.I18n.t("row.used"), Yassm.I18n.t("row.available")];
             const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb)];
+            const dims = [false, false, false];
 
             if (root.showExtended) {
-                labels.push(Yassm.I18n.t("row.shared"));
-                values.push(formatKibAsGib(metrics.memorySharedKb));
                 labels.push(Yassm.I18n.t("row.buffer"));
                 values.push(formatKibAsGib(metrics.memoryBuffersKb));
+                dims.push(false);
                 labels.push(Yassm.I18n.t("row.cache"));
                 values.push(formatKibAsGib(metrics.memoryCacheKb));
+                dims.push(false);
+                // Shared closes the block and is dimmed: its pages already sit
+                // inside Cache, so it is a breakdown, not a separate total.
+                labels.push(Yassm.I18n.t("row.shared"));
+                values.push(formatKibAsGib(metrics.memorySharedKb));
+                dims.push(true);
             }
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
@@ -1503,9 +1509,14 @@ BarWidget {
             }
 
             for (let i = 0; i < labels.length; i++) {
-                const extra = root.showExtended && i === 1 ? htopText.padStart(valueWidth) : "";
+                const base = labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth);
 
-                lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth) + (extra !== "" ? root.dimMark + "  " + extra + root.dimEndMark : ""));
+                if (root.showExtended && i === 1) {
+                    // Only the htop number is dim on the "used" row.
+                    lines.push(base + root.dimMark + "  " + htopText.padStart(valueWidth) + root.dimEndMark);
+                } else {
+                    lines.push(root.dimWhen(base, dims[i]));
+                }
             }
 
             if (root.showExtended) {
