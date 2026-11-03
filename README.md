@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.66
+Version 1.29.67
 
 **English** | [Français](README-fr.md)
 
@@ -98,12 +98,10 @@ swap/zram/zswap details, Wi-Fi power and frequency, the gateway and WAN IPs
 (with their country flag), the NET latency ping, the installation and last
 update dates, and battery power, temperature, cycles and health.
 
-The small `htop` value in the RAM tooltip applies htop's cache-excluding
-definition of used memory — `MemTotal - MemFree - Buffers - Cache + Shmem`.
-htop prints `Shmem` in a separate *shared* segment, so this figure equals
-htop's *used + shared*. The *Used* row above is derived from the kernel's
-`MemAvailable` estimate (`MemTotal - MemAvailable`), like `free` does, which
-is why the two numbers differ.
+The small "htop" value in the RAM tooltip applies htop's definition of used
+memory (MemTotal - MemFree - Buffers - Cache + Shmem). The first column of
+the *Used* row is derived from the kernel's MemAvailable estimate: MemTotal -
+MemAvailable (like the `free` CLI tool).
 
 ## Colors
 
