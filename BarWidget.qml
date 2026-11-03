@@ -1248,11 +1248,11 @@ BarWidget {
         };
     }
 
-    // Wrap a finished tooltip line in the dim markers when there is nothing
-    // to report: an idle pressure row should recede instead of looking like
-    // a measurement.
-    function dimWhenEmpty(text, empty) {
-        return empty ? root.dimMark + text + root.dimEndMark : text;
+    // Wrap a finished tooltip line in the dim markers when it carries no
+    // usable reading (zeros, a "--" placeholder): the row should recede
+    // instead of looking like a measurement.
+    function dimWhen(text, dim) {
+        return dim ? root.dimMark + text + root.dimEndMark : text;
     }
 
     function singlePressureRows(ten, sixty, threeHundred) {
@@ -1266,7 +1266,7 @@ BarWidget {
         return labels.map(function (label, index) {
             const line = label.padStart(4) + "  " + values[index].padStart(valueWidth);
 
-            return root.dimWhenEmpty(line, values[index] === "0.0%");
+            return root.dimWhen(line, values[index] === "0.0%");
         });
     }
 
@@ -1287,7 +1287,7 @@ BarWidget {
         for (let i = 0; i < labels.length; i++) {
             const line = labels[i].padStart(labelWidth) + "  " + some[i].padStart(valueWidth) + "  " + full[i].padStart(valueWidth);
 
-            lines.push(root.dimWhenEmpty(line, some[i] === "0.0%" && full[i] === "0.0%"));
+            lines.push(root.dimWhen(line, some[i] === "0.0%" && full[i] === "0.0%"));
         }
 
         return lines;
@@ -1592,7 +1592,7 @@ BarWidget {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
                 // zswap enabled but nothing compressed: dim the zero line.
-                lines.push(root.dimWhenEmpty(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(Number(metrics.zswapCompressedKb) > 0)));
+                lines.push(root.dimWhen(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(Number(metrics.zswapCompressedKb) > 0)));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
@@ -1759,7 +1759,12 @@ BarWidget {
             }
 
             for (let i = 0; i < ifaceRows.length; i++) {
-                lines.push(ifaceRows[i].label.padEnd(ifaceLabelWidth) + " : " + ifaceRows[i].value);
+                const text = ifaceRows[i].label.padEnd(ifaceLabelWidth) + " : " + ifaceRows[i].value;
+
+                // "--" means the value is not available on this link (no
+                // gateway, WAN lookup pending, radio details off): dim the row
+                // instead of letting it read like a real address.
+                lines.push(root.dimWhen(text, ifaceRows[i].value === "--"));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.net"), lines.join("\n"));
