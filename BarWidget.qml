@@ -1482,7 +1482,7 @@ BarWidget {
             }
 
             if (showKernel) {
-                lines.push(root.boldMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                lines.push(root.boldMark + root.dimMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth) + root.dimEndMark);
             }
 
             if (root.processMemory.length > 0) {
@@ -1649,7 +1649,7 @@ BarWidget {
                 lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
 
                 if (showKernel) {
-                    lines.push(root.boldMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth));
+                    lines.push(root.boldMark + root.dimMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth) + root.dimEndMark);
                 }
 
                 if (root.processCpu.length > 0) {
