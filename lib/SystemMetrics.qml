@@ -373,7 +373,10 @@ Singleton {
     readonly property bool hasZombies: zombieAlerts.length > 0
     readonly property bool diskAlert: diskEnabled && Math.round(diskPercent) >= 95
     readonly property bool memoryAlert: memoryEnabled && Math.round(memoryPercent) >= 95
-    readonly property bool hasAlerts: hasSystemFailure || hasZombies || diskAlert || memoryAlert
+    // A pack under 20 % of its design capacity has reached the end of its
+    // life: worth an alert even though nothing is failing right now.
+    readonly property bool batteryHealthAlert: hasBattery && batteryHealth > 0 && batteryHealth <= 20
+    readonly property bool hasAlerts: hasSystemFailure || hasZombies || diskAlert || memoryAlert || batteryHealthAlert
 
     // Quickshell models are untyped from qmllint's point of view; keep the
     // single "values" access here so only one known warning remains.

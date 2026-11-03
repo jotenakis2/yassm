@@ -450,7 +450,7 @@ BarWidget {
         const metrics = Yassm.SystemMetrics;
 
         if (key === "alerts") {
-            return metrics.missingRequiredDeps.length > 0 || metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
+            return metrics.missingRequiredDeps.length > 0 || metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert || metrics.batteryHealthAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
 
         if (key === "netOffline") {
@@ -1920,6 +1920,15 @@ BarWidget {
 
                 lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.ram"));
                 lines.push(Yassm.I18n.tf("alerts.ram_usage", [Math.round(metrics.memoryPercent)]));
+            }
+
+            if (metrics.batteryHealthAlert) {
+                if (lines.length > 0) {
+                    lines.push("");
+                }
+
+                lines.push(root.centeredMark + root.iconBatteryEmpty + " " + Yassm.I18n.t("head.battery"));
+                lines.push(Yassm.I18n.tf("alerts.battery_health", [Math.round(metrics.batteryHealth)]));
             }
 
             if (lines.length === 0) {
