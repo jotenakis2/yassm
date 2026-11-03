@@ -1956,7 +1956,10 @@ BarWidget {
                 valueWidth = Math.max(valueWidth, value.length);
                 fanRows.push({
                     name: name,
-                    value: value
+                    value: value,
+                    // A fan at 0 rpm is stopped: report it, but keep it out of
+                    // the way of the sensors that are actually measuring.
+                    dim: !(Number(fans[i].rpm) > 0)
                 });
             }
 
@@ -1982,7 +1985,9 @@ BarWidget {
                 lines.push(root.centeredMark + root.iconFan + " " + Yassm.I18n.t("head.fans"));
 
                 for (let i = 0; i < fanRows.length; i++) {
-                    lines.push(fanRows[i].name.padEnd(nameWidth) + " : " + fanRows[i].value.padStart(valueWidth) + " " + "rpm".padStart(unitWidth));
+                    const text = fanRows[i].name.padEnd(nameWidth) + " : " + fanRows[i].value.padStart(valueWidth) + " " + "rpm".padStart(unitWidth);
+
+                    lines.push(fanRows[i].dim ? root.dimMark + text + root.dimEndMark : text);
                 }
             }
 
