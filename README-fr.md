@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.65
+Version 1.29.66
 
 [English](README.md) | **Français**
 
@@ -106,8 +106,9 @@ les cycles et la santé de la batterie.
 La petite valeur `htop` de l'infobulle RAM applique la définition d'htop
 hors cache — `MemTotal - MemFree - Buffers - Cache + Shmem`. htop affiche le
 `Shmem` dans un segment *shared* séparé : cette valeur vaut donc htop
-« used » + « shared », et reste un peu sous l'*Utilisée* du noyau
-(`MemAvailable`).
+« used » + « shared ». La ligne *Utilisée* ci-dessus est déduite de
+l'estimation `MemAvailable` du noyau (`MemTotal - MemAvailable`), comme le
+fait `free`, d'où l'écart entre les deux.
 
 ## Couleurs
 

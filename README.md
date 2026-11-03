@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.65
+Version 1.29.66
 
 **English** | [Français](README-fr.md)
 
@@ -101,8 +101,9 @@ update dates, and battery power, temperature, cycles and health.
 The small `htop` value in the RAM tooltip applies htop's cache-excluding
 definition of used memory — `MemTotal - MemFree - Buffers - Cache + Shmem`.
 htop prints `Shmem` in a separate *shared* segment, so this figure equals
-htop's *used + shared* and stays slightly below the kernel's
-`MemAvailable`-based *Used*.
+htop's *used + shared*. The *Used* row above is derived from the kernel's
+`MemAvailable` estimate (`MemTotal - MemAvailable`), like `free` does, which
+is why the two numbers differ.
 
 ## Colors
 
