@@ -39,8 +39,9 @@ BarWidget {
     // rest of their line: the per-core frequency, for example.
     readonly property string dimMark: "\u0004"
     readonly property string dimEndMark: "\u0005"
-    // Marks a whole line rendered in a smaller font: a column caption.
+    // Runs between these two are drawn in a smaller font: a column caption.
     readonly property string smallMark: "\u0006"
+    readonly property string smallEndMark: "\u0007"
 
     readonly property var tooltipContent: {
         if (!root.hoveredSegment) {
@@ -63,14 +64,11 @@ BarWidget {
                 const line = raw[i];
                 const heading = line.startsWith(root.sectionMark) || line.startsWith(root.centeredMark);
                 const bold = !heading && line.startsWith(root.boldMark);
-                const small = !heading && !bold && line.startsWith(root.smallMark);
-                const trimmed = heading || bold || small ? line.slice(1) : line;
 
                 lines.push({
-                    text: heading || bold ? trimmed.replace(/\u00A0+$/, "") : trimmed,
+                    text: heading || bold ? line.slice(1).replace(/\u00A0+$/, "") : line,
                     heading: heading,
-                    bold: bold,
-                    small: small
+                    bold: bold
                 });
             }
         }
@@ -1066,52 +1064,61 @@ BarWidget {
         }
     }
 
-    // Split a line on the dim markers so the tooltip can draw the plain and
-    // dimmed runs side by side without losing the monospace column layout.
-    function splitDimRuns(text) {
-        const parts = String(text || "").split(root.dimMark);
+    // Split a line on the dim/small markers so the tooltip can draw each run
+    // side by side without losing the monospace column layout. Markers nest:
+    // a caption can be both dim and small.
+    function splitRuns(text) {
+        const source = String(text || "");
         const runs = [];
+        let buffer = "";
+        let dim = false;
+        let small = false;
 
-        for (let i = 0; i < parts.length; i++) {
-            const chunk = parts[i];
+        for (let i = 0; i < source.length; i++) {
+            const character = source.charAt(i);
 
-            if (i === 0) {
-                if (chunk !== "") {
+            if (character === root.dimMark || character === root.dimEndMark || character === root.smallMark || character === root.smallEndMark) {
+                if (buffer !== "") {
                     runs.push({
-                        text: chunk,
-                        dim: false
+                        text: buffer,
+                        dim: dim,
+                        small: small
                     });
+                    buffer = "";
+                }
+
+                if (character === root.dimMark) {
+                    dim = true;
+                } else if (character === root.dimEndMark) {
+                    dim = false;
+                } else if (character === root.smallMark) {
+                    small = true;
+                } else {
+                    small = false;
                 }
 
                 continue;
             }
 
-            const end = chunk.indexOf(root.dimEndMark);
+            buffer += character;
+        }
 
-            if (end < 0) {
-                runs.push({
-                    text: chunk,
-                    dim: true
-                });
-                continue;
-            }
-
-            if (end > 0) {
-                runs.push({
-                    text: chunk.slice(0, end),
-                    dim: true
-                });
-            }
-
-            if (chunk.length > end + 1) {
-                runs.push({
-                    text: chunk.slice(end + 1),
-                    dim: false
-                });
-            }
+        if (buffer !== "") {
+            runs.push({
+                text: buffer,
+                dim: dim,
+                small: small
+            });
         }
 
         return runs;
+    }
+
+    // A line carries rich runs when it holds one of the run markers.
+    function hasRuns(text) {
+        const source = String(text || "");
+
+        return source.indexOf(root.dimMark) >= 0 || source.indexOf(root.smallMark) >= 0;
     }
 
     function coreEntry(label, value, labelWidth, frequency, frequencyWidth) {
@@ -1426,15 +1433,13 @@ BarWidget {
                 tooltipLineModel.append({
                     lineText: "",
                     lineHeading: false,
-                    lineBold: false,
-                    lineSmall: false
+                    lineBold: false
                 });
             }
 
             tooltipLineModel.setProperty(i, "lineText", lines[i].text);
             tooltipLineModel.setProperty(i, "lineHeading", lines[i].heading);
             tooltipLineModel.setProperty(i, "lineBold", lines[i].bold);
-            tooltipLineModel.setProperty(i, "lineSmall", lines[i].small === true);
         }
     }
 
@@ -1485,16 +1490,20 @@ BarWidget {
             // kernel's "used" figure so the two definitions can be compared.
             const htopUsedKb = Math.max(0, metrics.memoryTotalKb - metrics.memoryFreeKb - metrics.memoryCacheKb - metrics.memoryBuffersKb + metrics.memorySharedKb);
 
-            if (root.showExtended) {
-                // Tiny caption over the extra column, right-aligned on the
-                // values below so it does not widen the bubble.
-                const columnEnd = nameWidth + 2 + valueWidth * 2 + 2;
+            const htopText = formatKibAsGib(htopUsedKb);
 
-                lines.push(root.smallMark + root.dimMark + "".padEnd(columnEnd - 4) + "htop" + root.dimEndMark);
+            if (root.showExtended) {
+                // Tiny caption centred over the extra column's value: the
+                // padding stays in the body font, only "htop" is small, so the
+                // position is exact.
+                const columnStart = nameWidth + 2 + valueWidth + 2;
+                const captionPad = columnStart + valueWidth - htopText.length + Math.floor((htopText.length - 4) / 2);
+
+                lines.push("".padEnd(captionPad) + root.dimMark + root.smallMark + "htop" + root.smallEndMark + root.dimEndMark);
             }
 
             for (let i = 0; i < labels.length; i++) {
-                const extra = root.showExtended && i === 1 ? formatKibAsGib(htopUsedKb).padStart(valueWidth) : "";
+                const extra = root.showExtended && i === 1 ? htopText.padStart(valueWidth) : "";
 
                 lines.push(labels[i].padEnd(nameWidth) + "  " + values[i].padStart(valueWidth) + (extra !== "" ? root.dimMark + "  " + extra + root.dimEndMark : ""));
             }
@@ -2846,14 +2855,12 @@ BarWidget {
                         required property string lineText
                         required property bool lineHeading
                         required property bool lineBold
-                        required property bool lineSmall
 
                         // Lines with a dim run are drawn as several Texts in a
                         // Row; plain lines stay one Text.
-                        readonly property bool split: lineText.indexOf(root.dimMark) >= 0
+                        readonly property bool split: root.hasRuns(lineText)
                         readonly property color textColor: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
-                        readonly property var runs: split ? root.splitDimRuns(lineText) : []
-                        readonly property real pixelSize: lineSmall ? Style.font.body * 0.78 : Style.font.body
+                        readonly property var runs: split ? root.splitRuns(lineText) : []
 
                         implicitWidth: split ? runRow.implicitWidth : plainLine.implicitWidth
                         implicitHeight: split ? runRow.implicitHeight : plainLine.implicitHeight
@@ -2866,7 +2873,7 @@ BarWidget {
                             text: tooltipLine.lineText
                             color: tooltipLine.textColor
                             font.family: button.fontFamily
-                            font.pixelSize: tooltipLine.pixelSize
+                            font.pixelSize: Style.font.body
                             font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
                             renderType: Text.NativeRendering
                         }
@@ -2886,7 +2893,7 @@ BarWidget {
                                     text: modelData.text
                                     color: modelData.dim ? Qt.rgba(tooltipLine.textColor.r, tooltipLine.textColor.g, tooltipLine.textColor.b, 0.45) : tooltipLine.textColor
                                     font.family: button.fontFamily
-                                    font.pixelSize: tooltipLine.pixelSize
+                                    font.pixelSize: modelData.small ? Style.font.body * 0.78 : Style.font.body
                                     font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal
                                     renderType: Text.NativeRendering
                                 }
