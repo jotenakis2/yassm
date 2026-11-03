@@ -1248,6 +1248,13 @@ BarWidget {
         };
     }
 
+    // Wrap a finished tooltip line in the dim markers when there is nothing
+    // to report: an idle pressure row should recede instead of looking like
+    // a measurement.
+    function dimWhenEmpty(text, empty) {
+        return empty ? root.dimMark + text + root.dimEndMark : text;
+    }
+
     function singlePressureRows(ten, sixty, threeHundred) {
         const labels = ["10s", "60s", "300s"];
         const values = [ten, sixty, threeHundred].map(function (value) {
@@ -1257,7 +1264,9 @@ BarWidget {
         const valueWidth = 6;
 
         return labels.map(function (label, index) {
-            return label.padStart(4) + "  " + values[index].padStart(valueWidth);
+            const line = label.padStart(4) + "  " + values[index].padStart(valueWidth);
+
+            return root.dimWhenEmpty(line, values[index] === "0.0%");
         });
     }
 
@@ -1276,7 +1285,9 @@ BarWidget {
         const lines = ["".padEnd(labelWidth) + "  " + "some".padStart(valueWidth) + "  " + "full".padStart(valueWidth)];
 
         for (let i = 0; i < labels.length; i++) {
-            lines.push(labels[i].padStart(labelWidth) + "  " + some[i].padStart(valueWidth) + "  " + full[i].padStart(valueWidth));
+            const line = labels[i].padStart(labelWidth) + "  " + some[i].padStart(valueWidth) + "  " + full[i].padStart(valueWidth);
+
+            lines.push(root.dimWhenEmpty(line, some[i] === "0.0%" && full[i] === "0.0%"));
         }
 
         return lines;
