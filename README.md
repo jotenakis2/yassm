@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.63
+Version 1.29.64
 
 **English** | [Français](README-fr.md)
 
@@ -97,6 +97,11 @@ Extended data adds per-core frequencies and PSI, disk and per-process I/O,
 swap/zram/zswap details, Wi-Fi power and frequency, the gateway and WAN IPs
 (with their country flag), the NET latency ping, the installation and last
 update dates, and battery power, temperature, cycles and health.
+
+The small `htop` value in the RAM tooltip is htop's own definition of used
+memory — `MemTotal - MemFree - Buffers - Cache + Shmem` — instead of the
+kernel's `MemAvailable`, so it reads a little lower and matches what htop
+shows.
 
 ## Colors
 

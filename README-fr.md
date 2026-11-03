@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.63
+Version 1.29.64
 
 [English](README.md) | **Français**
 
@@ -102,6 +102,11 @@ processus, les détails swap/zram/zswap, la puissance et la fréquence Wi-Fi, le
 Gateway et WAN (avec leur drapeau), le ping de latence NET, les dates
 d'installation et de dernière mise à jour, et la puissance, la température,
 les cycles et la santé de la batterie.
+
+La petite valeur `htop` de l'infobulle RAM est la définition d'htop de la
+mémoire utilisée — `MemTotal - MemFree - Buffers - Cache + Shmem` — et non
+`MemAvailable` du noyau : elle est donc un peu plus basse et correspond à ce
+qu'affiche htop.
 
 ## Couleurs
 
