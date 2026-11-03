@@ -2834,8 +2834,8 @@ BarWidget {
             // the right border (visible on the NET tooltip).
             implicitWidth: Math.ceil(tooltipColumn.implicitWidth + Style.space(20)) + 2
             implicitHeight: Math.ceil(tooltipColumn.implicitHeight + Style.space(14)) + 2
-            color: ShellColor.tooltip.background
-            borderSpec: Border.surfaceSpec("tooltip", "border", ShellColor.tooltip.border, 1)
+            color: Color.tooltip.background
+            borderSpec: Border.surfaceSpec("tooltip", "border", Color.tooltip.border, 1)
             radius: Style.cornerRadius
 
             Column {
@@ -2849,7 +2849,7 @@ BarWidget {
 
                     textFormat: Text.PlainText
                     text: root.tooltipContent.title
-                    color: ShellColor.tooltip.text
+                    color: Color.tooltip.text
                     font.family: button.fontFamily
                     font.pixelSize: Style.font.body
                     font.weight: Font.Bold
@@ -2870,7 +2870,7 @@ BarWidget {
                         // Lines with a dim run are drawn as several Texts in a
                         // Row; plain lines stay one Text.
                         readonly property bool split: root.hasRuns(lineText)
-                        readonly property color textColor: lineHeading ? ShellColor.tooltip.text : ShellColor.muted
+                        readonly property color textColor: lineHeading ? Color.tooltip.text : Color.muted
                         readonly property var runs: split ? root.splitRuns(lineText) : []
 
                         implicitWidth: split ? runRow.implicitWidth : plainLine.implicitWidth

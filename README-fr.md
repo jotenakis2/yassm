@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.68
+Version 1.29.69
 
 [English](README.md) | **Français**
 
@@ -157,7 +157,7 @@ masqués arrêtent l'échantillonnage. Mesures :
 
 ## Prérequis
 
-Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
+Omarchy 4.5+, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
 `btop` ou `htop` (cible du clic gauche), `curl` et `ip` (adresses réseau et drapeau du pays),
 `nmcli` (fréquence Wi-Fi), `ping` (latence NET), `nvidia-smi` (GPU NVIDIA), UPower et
 NetworkManager (batterie et SSID). Un outil optionnel manquant masque simplement le champ

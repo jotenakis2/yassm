@@ -232,9 +232,9 @@ PanelWindow {
         width: root.panelWidth
         height: root.panelHeight
         radius: Style.cornerRadius
-        color: ShellColor.popups.background
-        borderSpec: Border.surfaceSpec("menu", "border", ShellColor.popups.border, Style.normalBorderWidth)
-        palette.windowText: ShellColor.popups.text
+        color: Color.popups.background
+        borderSpec: Border.surfaceSpec("menu", "border", Color.popups.border, Style.normalBorderWidth)
+        palette.windowText: Color.popups.text
         antialiasing: true
         smooth: true
 
@@ -255,7 +255,7 @@ PanelWindow {
             id: gearIcon
 
             text: String.fromCodePoint(0xF0493)
-            color: ShellColor.popups.text
+            color: Color.popups.text
             font.family: Style.font.family
             font.pixelSize: Style.font.title
             x: settingsPanel.width - width - root.panelPadding
@@ -335,7 +335,7 @@ PanelWindow {
                                 }).join(", ")])
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.bodySmall
                         }
@@ -363,7 +363,7 @@ PanelWindow {
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
                         text: String.fromCodePoint(root.modulesOpen ? 0xF0140 : 0xF0142)
-                        color: modulesChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        color: modulesChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
 
@@ -381,7 +381,7 @@ PanelWindow {
 
                     PanelSectionHeader {
                         text: Yassm.I18n.t("settings.modules")
-                        foreground: ShellColor.popups.text
+                        foreground: Color.popups.text
                         fontFamily: Style.font.family
 
                         HoverHandler {
@@ -418,7 +418,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.preferredHeight: root.toggleRowHeight
                             radius: Style.space(4)
-                            color: root.dragFrom >= 0 && root.dragTo === moduleRow.index ? Qt.rgba(ShellColor.accent.r, ShellColor.accent.g, ShellColor.accent.b, 0.12) : "transparent"
+                            color: root.dragFrom >= 0 && root.dragTo === moduleRow.index ? Qt.rgba(Color.accent.r, Color.accent.g, Color.accent.b, 0.12) : "transparent"
 
                             RowLayout {
                                 anchors.fill: parent
@@ -430,12 +430,12 @@ PanelWindow {
                                     Layout.preferredWidth: Style.space(18)
                                     Layout.fillHeight: true
                                     radius: Style.space(4)
-                                    color: dragArea.containsMouse ? Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.08) : "transparent"
+                                    color: dragArea.containsMouse ? Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.08) : "transparent"
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: "⠿"
-                                        color: ShellColor.popups.text
+                                        color: Color.popups.text
                                         opacity: 0.7
                                         font.family: Style.font.family
                                         font.pixelSize: Style.font.body
@@ -502,7 +502,7 @@ PanelWindow {
                                     label: String.fromCodePoint(moduleRow.modelData.icon) + "  " + moduleRow.modelData.label
                                     fontFamily: Style.font.family
                                     titleSize: Style.font.body
-                                    foreground: ShellColor.popups.text
+                                    foreground: Color.popups.text
                                     checked: root.hostWidget ? root.hostWidget.setting(moduleRow.modelData.key, moduleRow.modelData.defaultValue !== false) : false
 
                                     onClicked: {
@@ -529,7 +529,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)
                     Layout.preferredHeight: 1
-                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
+                    color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.12)
                 }
 
                 RowLayout {
@@ -544,7 +544,7 @@ PanelWindow {
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
                         text: String.fromCodePoint(root.layoutOpen ? 0xF0140 : 0xF0142)
-                        color: layoutChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        color: layoutChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
 
@@ -562,7 +562,7 @@ PanelWindow {
 
                     PanelSectionHeader {
                         text: Yassm.I18n.t("settings.layout")
-                        foreground: ShellColor.popups.text
+                        foreground: Color.popups.text
                         fontFamily: Style.font.family
                     }
 
@@ -593,7 +593,7 @@ PanelWindow {
                             label: Yassm.I18n.t("settings.boxes")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
-                            foreground: ShellColor.popups.text
+                            foreground: Color.popups.text
                             checked: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
 
                             onClicked: {
@@ -621,7 +621,7 @@ PanelWindow {
                             label: Yassm.I18n.t("settings.colors")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
-                            foreground: ShellColor.popups.text
+                            foreground: Color.popups.text
                             checked: root.hostWidget ? root.hostWidget.setting("showColors", true) : false
 
                             onClicked: {
@@ -649,7 +649,7 @@ PanelWindow {
                             label: Yassm.I18n.t("settings.extended")
                             fontFamily: Style.font.family
                             titleSize: Style.font.body
-                            foreground: ShellColor.popups.text
+                            foreground: Color.popups.text
                             checked: root.hostWidget ? root.hostWidget.setting("extendedTooltips", true) : true
 
                             onClicked: {
@@ -689,7 +689,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.box_border")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -699,7 +699,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(borderSlider.liveValue)) + " px"
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -753,7 +753,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.box_radius")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -763,7 +763,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(radiusSlider.liveValue)) + " px"
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -815,7 +815,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.modules_gap")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -825,7 +825,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(spacingSlider.liveValue))
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -877,7 +877,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.icon_gap")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -887,7 +887,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(iconGapSlider.liveValue))
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -939,7 +939,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.processes_shown")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -949,7 +949,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(maxProcessesSlider.liveValue))
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -980,7 +980,7 @@ PanelWindow {
                     Layout.topMargin: Style.space(12)
                     Layout.preferredHeight: 1
                     visible: root.thresholdsVisible
-                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
+                    color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.12)
                 }
 
                 RowLayout {
@@ -996,7 +996,7 @@ PanelWindow {
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
                         text: String.fromCodePoint(root.thresholdsOpen ? 0xF0140 : 0xF0142)
-                        color: temperatureChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        color: temperatureChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
 
@@ -1014,7 +1014,7 @@ PanelWindow {
 
                     PanelSectionHeader {
                         text: Yassm.I18n.t("settings.thresholds")
-                        foreground: ShellColor.popups.text
+                        foreground: Color.popups.text
                         fontFamily: Style.font.family
                     }
 
@@ -1197,7 +1197,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)
                     Layout.preferredHeight: 1
-                    color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.12)
+                    color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.12)
                 }
 
                 RowLayout {
@@ -1212,7 +1212,7 @@ PanelWindow {
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
                         text: String.fromCodePoint(root.timersOpen ? 0xF0140 : 0xF0142)
-                        color: timersChevronArea.containsMouse ? ShellColor.popups.text : Qt.darker(ShellColor.popups.text, 1.4)
+                        color: timersChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
 
@@ -1230,7 +1230,7 @@ PanelWindow {
 
                     PanelSectionHeader {
                         text: Yassm.I18n.t("settings.timers")
-                        foreground: ShellColor.popups.text
+                        foreground: Color.popups.text
                         fontFamily: Style.font.family
                     }
 
@@ -1271,7 +1271,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.refresh")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -1281,7 +1281,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(fastSlider.liveValue)) + " s"
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -1333,7 +1333,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
                             text: Yassm.I18n.t("settings.slow")
-                            palette.windowText: ShellColor.popups.text
+                            palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -1343,7 +1343,7 @@ PanelWindow {
                             Layout.alignment: Qt.AlignVCenter
                             horizontalAlignment: Text.AlignRight
                             text: String(Math.round(slowSlider.liveValue)) + " s"
-                            color: ShellColor.popups.text
+                            color: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
                         }
@@ -1381,7 +1381,7 @@ PanelWindow {
             width: Style.space(4)
             height: handleHeight
             radius: width / 2
-            color: Qt.rgba(ShellColor.popups.text.r, ShellColor.popups.text.g, ShellColor.popups.text.b, 0.45)
+            color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.45)
             x: settingsFlick.x + settingsFlick.width - width
             y: settingsFlick.y + (settingsFlick.height - height) * (settingsFlick.contentY / maxOffset)
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.68
+Version 1.29.69
 
 **English** | [Français](README-fr.md)
 
@@ -150,7 +150,7 @@ Measurements: [performance.md](performance.md).
 
 ## Requirements
 
-Omarchy 4.x, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
+Omarchy 4.5+, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
 `btop` or `htop` (left-click target), `curl` and `ip` (network addresses and country flag),
 `nmcli` (Wi-Fi frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU), UPower and
 NetworkManager (battery and SSID). A missing optional tool simply hides the corresponding field.

@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 
-// Green / orange / red from the active Omarchy theme palette. ShellColor only
+// Green / orange / red from the active Omarchy theme palette. Color only
 // exposes foreground/background/accent/urgent, so the ANSI palette is read
 // from the same colors.toml file and kept in sync with theme changes.
 Singleton {
@@ -36,14 +36,14 @@ Singleton {
 
         root.green = values.green || values.bright_green || values.color2 || "#76946a";
         root.orange = values.orange || values.yellow || values.bright_yellow || values.color3 || "#c17158";
-        root.red = values.red || values.bright_red || values.color1 || ShellColor.urgent;
+        root.red = values.red || values.bright_red || values.color1 || Color.urgent;
         root.blue = values.blue || values.bright_blue || values.color4 || "#7aa2f7";
     }
 
     FileView {
         id: colorsFile
 
-        path: ShellColor.currentThemePath + "/colors.toml"
+        path: Color.currentThemePath + "/colors.toml"
         watchChanges: true
         printErrors: false
 
@@ -55,7 +55,7 @@ Singleton {
     // omarchy-theme-set replaces the whole theme directory, which can make
     // inotify lose the watched inode. Reload from the palette signals as well.
     Connections {
-        target: ShellColor
+        target: Color
 
         function onForegroundChanged() {
             colorsFile.reload();

@@ -61,7 +61,7 @@ RowLayout {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
         text: root.title
-        palette.windowText: Qt.darker(ShellColor.popups.text, 1.4)
+        palette.windowText: Qt.darker(Color.popups.text, 1.4)
         font.family: Style.font.family
         font.pixelSize: Style.font.bodySmall
         font.bold: true
@@ -90,7 +90,7 @@ RowLayout {
         // Threshold values are read as raw numbers: the locale group
         // separator (a narrow no-break space in French) breaks the baseline.
         Component.onCompleted: field.locale = Qt.locale("C")
-        foreground: ShellColor.popups.text
+        foreground: Color.popups.text
         fontFamily: Style.font.family
 
         onModified: function (value) {
@@ -116,7 +116,7 @@ RowLayout {
         fieldWidth: Style.space(72)
 
         Component.onCompleted: field.locale = Qt.locale("C")
-        foreground: ShellColor.popups.text
+        foreground: Color.popups.text
         fontFamily: Style.font.family
 
         onModified: function (value) {
@@ -144,7 +144,7 @@ RowLayout {
         fieldWidth: Style.space(72)
 
         Component.onCompleted: field.locale = Qt.locale("C")
-        foreground: ShellColor.popups.text
+        foreground: Color.popups.text
         fontFamily: Style.font.family
 
         onModified: function (value) {
