@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.70
+Version 1.29.71
 
 [English](README.md) | **Français**
 
@@ -64,7 +64,7 @@ L'ordre et la visibilité de chaque module sont configurables.
 | disque | le gestionnaire de fichiers par défaut (dossier personnel) |
 | réseau | le **Test de débit** d'Omarchy |
 | batterie | le menu **Système** d'Omarchy |
-| alertes | la dernière heure de warnings/erreurs, puis les unités systemd en échec |
+| alertes | la dernière heure de warnings/erreurs, les unités systemd en échec et les zombies avec leur parent |
 
 Le **clic droit** ouvre les **Réglages**. Un clic hors des modules garde la
 cible générique : `btop`, puis `htop` ; les Réglages si aucun des deux n'est

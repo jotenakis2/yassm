@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.70
+Version 1.29.71
 
 **English** | [Français](README-fr.md)
 
@@ -63,7 +63,7 @@ The order and visibility of every module are configurable.
 | disk | the default file manager (home folder) |
 | network | the Omarchy **Network Speed Test** |
 | battery | the Omarchy **System** menu |
-| alerts | the last hour of warnings/errors, then the failed systemd units |
+| alerts | the last hour of warnings/errors, the failed systemd units and the zombies with their parent |
 
 Right-click opens **Settings**. A click outside the modules keeps the generic
 target: `btop`, then `htop`; Settings when neither is installed.
