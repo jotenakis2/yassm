@@ -193,7 +193,8 @@ BarWidget {
     readonly property real moduleGap: Math.max(2, separatorMetrics.advanceWidth)
 
     readonly property string iconCpu: String.fromCodePoint(0xF0EE0)
-    readonly property string iconMemory: String.fromCodePoint(0xF035B)
+    // Font Awesome "memory" chip (U+EFC5).
+    readonly property string iconMemory: String.fromCodePoint(0xEFC5)
     readonly property string iconSwap: String.fromCodePoint(0xF04E2)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
     readonly property string iconBatteryFull: String.fromCodePoint(0xF0079)
