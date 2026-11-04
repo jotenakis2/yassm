@@ -117,7 +117,7 @@ PanelWindow {
         },
         {
             key: "showSwap",
-            icon: 0xF04E1,
+            icon: 0xF04E2,
             label: Yassm.I18n.t("module.swap")
         },
         {

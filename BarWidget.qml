@@ -196,8 +196,8 @@ BarWidget {
     readonly property string iconCpu: String.fromCodePoint(0xF4BC)
     // Font Awesome "memory" chip (U+EFC5).
     readonly property string iconMemory: String.fromCodePoint(0xEFC5)
-    // Material "swap-horizontal" (U+F04E1).
-    readonly property string iconSwap: String.fromCodePoint(0xF04E1)
+    // Material "swap-vertical" (U+F04E2).
+    readonly property string iconSwap: String.fromCodePoint(0xF04E2)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
     readonly property string iconBatteryFull: String.fromCodePoint(0xF0079)
     readonly property string iconBatteryEmpty: String.fromCodePoint(0xF008E)
