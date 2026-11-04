@@ -112,7 +112,7 @@ PanelWindow {
         },
         {
             key: "showMemory",
-            icon: 0xF035B,
+            icon: 0xEFC5,
             label: Yassm.I18n.t("module.memory")
         },
         {
