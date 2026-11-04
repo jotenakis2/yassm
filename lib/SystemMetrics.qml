@@ -1127,12 +1127,15 @@ Singleton {
             } else if (kind === "zombie") {
                 const pid = Number(value);
                 const age = Number(fields[3]);
+                const parentPid = Number(fields[4]);
 
                 if (Number.isFinite(pid) && Number.isFinite(age)) {
                     zombies.push({
                         pid: pid,
                         name: fields[2] || "?",
-                        age: age
+                        age: age,
+                        parentPid: Number.isFinite(parentPid) ? parentPid : 0,
+                        parentName: fields[5] || "?"
                     });
                 }
             }

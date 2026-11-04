@@ -1941,8 +1941,23 @@ BarWidget {
                 }
 
                 lines.push(root.centeredMark + root.iconGhost + " " + Yassm.I18n.t("head.zombie"));
+
+                // Aligned columns: pid, name, age, then the parent that is not
+                // reaping the child, which is the actionable bit.
+                let zombiePidWidth = 0;
+                let zombieNameWidth = 0;
+                let zombieAgeWidth = 0;
+
                 for (let i = 0; i < zombies.length; i++) {
-                    lines.push(zombies[i].pid + " " + zombies[i].name + " (" + formatDuration(zombies[i].age) + ")");
+                    zombiePidWidth = Math.max(zombiePidWidth, String(zombies[i].pid).length);
+                    zombieNameWidth = Math.max(zombieNameWidth, String(zombies[i].name).length);
+                    zombieAgeWidth = Math.max(zombieAgeWidth, formatDuration(zombies[i].age).length);
+                }
+
+                for (let i = 0; i < zombies.length; i++) {
+                    const zombie = zombies[i];
+
+                    lines.push(String(zombie.pid).padStart(zombiePidWidth) + "  " + String(zombie.name).padEnd(zombieNameWidth) + "  " + formatDuration(zombie.age).padStart(zombieAgeWidth) + "  ← " + zombie.parentPid + " " + zombie.parentName);
                 }
             }
 

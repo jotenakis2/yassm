@@ -25,11 +25,32 @@ while IFS= read -r unit; do
 done <<<"${user_units}"
 
 # ps walks /proc in C; doing the same loop in bash cost ~70 ms per run.
-ps -eo pid=,stat=,etimes=,comm= | awk -v min_age="${min_zombie_age}" '
-	$2 ~ /^Z/ && $3 >= min_age {
-		comm = $4
-		for (i = 5; i <= NF; i++) comm = comm " " $i
-		sub(/ <defunct>$/, "", comm)
-		printf "zombie\t%s\t%s\t%d\n", $1, comm, $3
+# PPID comes from the same table, and the parent name is resolved from it, so
+# the report says who is not reaping the child. Fields after the four numbers
+# are the command name: it may contain spaces, so the tail is joined back.
+ps -eo pid=,ppid=,stat=,etimes=,comm= | awk -v min_age="${min_zombie_age}" '
+	function joined(from,    text, i) {
+		text = $from
+		for (i = from + 1; i <= NF; i++) text = text " " $i
+		return text
+	}
+	{
+		count++
+		proc_pid[count] = $1
+		proc_ppid[count] = $2
+		proc_stat[count] = $3
+		proc_age[count] = $4
+		proc_name[count] = joined(5)
+	}
+	END {
+		for (i = 1; i <= count; i++) name_by_pid[proc_pid[i]] = proc_name[i]
+		for (i = 1; i <= count; i++) {
+			if (proc_stat[i] !~ /^Z/ || proc_age[i] < min_age) continue
+			name = proc_name[i]
+			sub(/ <defunct>$/, "", name)
+			parent = name_by_pid[proc_ppid[i]]
+			if (parent == "") parent = "?"
+			printf "zombie\t%s\t%s\t%d\t%s\t%s\n", proc_pid[i], name, proc_age[i], proc_ppid[i], parent
+		}
 	}
 ' || true

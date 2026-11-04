@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.69
+Version 1.29.70
 
 **English** | [Français](README-fr.md)
 
@@ -91,7 +91,7 @@ rows marked below.
 - **Uptime**: time since boot; installation age and date, date of the last
   package update (extended);
 - **Load**, **GPU**, **Alerts**: a short summary, or the alert list (failed
-  units, zombies, disk/RAM, battery health under 20 %).
+  units, zombies with their parent, disk/RAM, battery health under 20 %).
 
 Extended data adds per-core frequencies and PSI, disk and per-process I/O,
 swap/zram/zswap details, Wi-Fi power and frequency, the gateway and WAN IPs
