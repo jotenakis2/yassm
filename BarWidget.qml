@@ -192,10 +192,12 @@ BarWidget {
     // Two pixels is the floor: at zero spaces the glyphs can touch or overlap.
     readonly property real moduleGap: Math.max(2, separatorMetrics.advanceWidth)
 
-    readonly property string iconCpu: String.fromCodePoint(0xF0EE0)
+    // Octicons "cpu" (U+F4BC).
+    readonly property string iconCpu: String.fromCodePoint(0xF4BC)
     // Font Awesome "memory" chip (U+EFC5).
     readonly property string iconMemory: String.fromCodePoint(0xEFC5)
-    readonly property string iconSwap: String.fromCodePoint(0xF04E2)
+    // Material "swap-horizontal" (U+F04E1).
+    readonly property string iconSwap: String.fromCodePoint(0xF04E1)
     readonly property string iconGpu: String.fromCodePoint(0xF08AE)
     readonly property string iconBatteryFull: String.fromCodePoint(0xF0079)
     readonly property string iconBatteryEmpty: String.fromCodePoint(0xF008E)

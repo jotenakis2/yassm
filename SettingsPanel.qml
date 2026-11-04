@@ -97,7 +97,7 @@ PanelWindow {
         },
         {
             key: "showCpu",
-            icon: 0xF0EE0,
+            icon: 0xF4BC,
             label: Yassm.I18n.t("module.cpu")
         },
         {
@@ -117,7 +117,7 @@ PanelWindow {
         },
         {
             key: "showSwap",
-            icon: 0xF04E2,
+            icon: 0xF04E1,
             label: Yassm.I18n.t("module.swap")
         },
         {
