@@ -1498,14 +1498,14 @@ BarWidget {
             const dims = [false, false, false];
 
             if (root.showExtended) {
-                labels.push(Yassm.I18n.t("row.buffer"));
-                values.push(formatKibAsGib(metrics.memoryBuffersKb));
-                dims.push(false);
                 labels.push(Yassm.I18n.t("row.cache"));
                 values.push(formatKibAsGib(metrics.memoryCacheKb));
                 dims.push(false);
-                // Shared closes the block and is dimmed: its pages already sit
-                // inside Cache, so it is a breakdown, not a separate total.
+                // Buffer and Shared close the block, dimmed: both are parts of
+                // the cache pool, not totals of their own.
+                labels.push(Yassm.I18n.t("row.buffer"));
+                values.push(formatKibAsGib(metrics.memoryBuffersKb));
+                dims.push(true);
                 labels.push(Yassm.I18n.t("row.shared"));
                 values.push(formatKibAsGib(metrics.memorySharedKb));
                 dims.push(true);
