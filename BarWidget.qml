@@ -1603,6 +1603,7 @@ BarWidget {
             }
 
             const zramEntries = [];
+            let zramDevices = 0;
 
             for (let i = 0; i < devices.length; i++) {
                 const device = devices[i];
@@ -1618,12 +1619,17 @@ BarWidget {
                     continue;
                 }
 
+                zramDevices++;
+
+                // Under 1 MiB means nothing is really stored: the row is not
+                // worth a line, and the section says "Empty" instead.
+                if (!(root.snapSwapKb(stats.compressedKb) > 0)) {
+                    continue;
+                }
+
                 zramEntries.push({
                     name: base,
-                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(root.snapSwapKb(stats.memKb))]),
-                    // Nothing stored in zram (or under 1 MiB): the sizes read
-                    // zero, so the row is dimmed like the other empty ones.
-                    dim: !(root.snapSwapKb(stats.compressedKb) > 0)
+                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(root.snapSwapKb(stats.memKb))])
                 });
             }
 
@@ -1635,17 +1641,25 @@ BarWidget {
                     // With a single zram the name adds nothing; keep it only
                     // when several devices need to be told apart.
                     const prefix = zramEntries.length > 1 ? zramEntries[i].name + ": " : "";
-                    const text = prefix + zramEntries[i].text;
 
-                    lines.push(zramEntries[i].dim ? root.dimMark + text + root.dimEndMark : text);
+                    lines.push(prefix + zramEntries[i].text);
                 }
+            } else if (zramDevices > 0) {
+                lines.push("");
+                lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.zram"));
+                lines.push(root.dimMark + Yassm.I18n.t("swap.empty") + root.dimEndMark);
             }
 
+            // zswap is enabled: report its data, or a single dimmed "Empty".
             if (metrics.hasZswap) {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
-                // zswap enabled but nothing compressed: dim the zero line.
-                lines.push(root.dimWhen(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(root.snapSwapKb(metrics.zswapCompressedKb) > 0)));
+
+                if (root.snapSwapKb(metrics.zswapCompressedKb) > 0) {
+                    lines.push(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb));
+                } else {
+                    lines.push(root.dimMark + Yassm.I18n.t("swap.empty") + root.dimEndMark);
+                }
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
