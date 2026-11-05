@@ -1154,9 +1154,17 @@ BarWidget {
         return stripped === "" || /^[0-9]+$/.test(stripped) ? original : stripped;
     }
 
+    // Under 1 MiB a zram/zswap figure is noise: the tooltip reports 0 instead
+    // of "0.4 MiB", and the row is treated as empty.
+    function snapSwapKb(kilobytes) {
+        const value = Number(kilobytes);
+
+        return Number.isFinite(value) && value >= 1024 ? value : 0;
+    }
+
     function compressionLine(originalKb, compressedKb) {
-        const original = Number(originalKb) || 0;
-        const compressed = Number(compressedKb) || 0;
+        const original = root.snapSwapKb(originalKb);
+        const compressed = root.snapSwapKb(compressedKb);
         const ratio = compressed > 0 ? original / compressed : 0;
 
         return formatKib(original).padEnd(9, " ") + " →  " + root.iconZip + " " + formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
@@ -1612,10 +1620,10 @@ BarWidget {
 
                 zramEntries.push({
                     name: base,
-                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(stats.memKb)]),
-                    // Nothing stored in zram yet: the sizes are zeros, so the
-                    // row is dimmed like the other empty readings.
-                    dim: !(Number(stats.compressedKb) > 0)
+                    text: compressionLine(stats.originalKb, stats.compressedKb) + Yassm.I18n.tf("swap.mem", [formatKib(root.snapSwapKb(stats.memKb))]),
+                    // Nothing stored in zram (or under 1 MiB): the sizes read
+                    // zero, so the row is dimmed like the other empty ones.
+                    dim: !(root.snapSwapKb(stats.compressedKb) > 0)
                 });
             }
 
@@ -1637,7 +1645,7 @@ BarWidget {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
                 // zswap enabled but nothing compressed: dim the zero line.
-                lines.push(root.dimWhen(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(Number(metrics.zswapCompressedKb) > 0)));
+                lines.push(root.dimWhen(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb), !(root.snapSwapKb(metrics.zswapCompressedKb) > 0)));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.swap"), lines.join("\n"));
