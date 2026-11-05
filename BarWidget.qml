@@ -452,6 +452,8 @@ BarWidget {
             return 0.92;
         case "netOffline":
             return 0.97;
+        case "memory":
+            return 0.92;
         default:
             return 1.0;
         }
