@@ -440,6 +440,23 @@ BarWidget {
         return segmentMap[key] ? segmentMap[key].icon : "";
     }
 
+    // Nerd Font glyphs do not share one ink height: the clock fills 92 % of
+    // the em box where most icons sit near 83 %, and the Octicon CPU fills
+    // 100 %. Shrinking those optically keeps every segment icon the same
+    // visual weight; `scale` leaves the layout slot untouched.
+    function segmentIconScale(key) {
+        switch (key) {
+        case "cpu":
+            return 0.86;
+        case "uptime":
+            return 0.92;
+        case "netOffline":
+            return 0.97;
+        default:
+            return 1.0;
+        }
+    }
+
     function segmentValue(key) {
         return segmentMap[key] ? segmentMap[key].valueText : "";
     }
@@ -2754,6 +2771,7 @@ BarWidget {
                         Text {
                             text: root.segmentIcon(metricKey)
                             color: root.segmentIconColor(metricKey)
+                            scale: root.segmentIconScale(metricKey)
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize
                             renderType: Text.NativeRendering
