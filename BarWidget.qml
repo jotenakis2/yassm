@@ -97,6 +97,10 @@ BarWidget {
     property string gpuKind: "none"
     property string gpuPath: ""
     property string gpuCommand: ""
+    // Asahi and some DRM drivers expose their memory breakdown in sysfs.
+    property string gpuMemoryPath: ""
+    property real gpuMemUserKb: 0
+    property real gpuMemKernelKb: 0
 
     property bool showCpu: setting("showCpu", true)
     property bool showMemory: setting("showMemory", true)
@@ -1764,7 +1768,40 @@ BarWidget {
         }
 
         if (key === "gpu") {
-            return tooltipBlock(Yassm.I18n.t("title.gpu"), gpu === null ? Yassm.I18n.t("common.unavailable") : Math.round(gpu) + "%");
+            const rows = [
+                {
+                    label: Yassm.I18n.t("gpu.usage"),
+                    value: gpu === null ? Yassm.I18n.t("common.unavailable") : Math.round(gpu) + "%",
+                    dim: gpu === null
+                }
+            ];
+
+            if (root.gpuMemoryPath !== "") {
+                rows.push({
+                    label: Yassm.I18n.t("gpu.memory"),
+                    value: formatKib(root.gpuMemUserKb)
+                });
+                // Driver-side allocations, not the application buffers.
+                rows.push({
+                    label: Yassm.I18n.t("gpu.kernel"),
+                    value: root.gpuMemKernelKb > 0 ? formatKib(root.gpuMemKernelKb) : "--",
+                    dim: root.gpuMemKernelKb <= 0
+                });
+            }
+
+            let gpuLabelWidth = 0;
+
+            for (let i = 0; i < rows.length; i++) {
+                gpuLabelWidth = Math.max(gpuLabelWidth, rows[i].label.length);
+            }
+
+            const lines = [];
+
+            for (let i = 0; i < rows.length; i++) {
+                lines.push(root.dimWhen(rows[i].label.padEnd(gpuLabelWidth) + " : " + rows[i].value, rows[i].dim === true));
+            }
+
+            return tooltipBlock(Yassm.I18n.t("title.gpu"), lines.join("\n"));
         }
 
         if (key === "net" || key === "netDown" || key === "netUp" || key === "netOffline") {
@@ -2228,6 +2265,10 @@ BarWidget {
             Yassm.SystemMetrics.refreshNetworkDetails(root.showExtended);
         }
 
+        if (hit.key === "gpu" && root.gpuMemoryPath !== "") {
+            gpuMemoryFile.reload();
+        }
+
         tooltipAnchor.x = hit.center - tooltipAnchor.width / 2;
     }
 
@@ -2325,6 +2366,31 @@ BarWidget {
         if (root.bar && root.bar.shell && typeof root.bar.shell.updateEntryInline === "function") {
             root.bar.shell.updateEntryInline(root.moduleName, entry);
         }
+    }
+
+    // gpu_memory is "key value" lines in bytes:
+    // user_committed, user_resident, kernel_resident, limit, client_limit.
+    function applyGpuMemory(content) {
+        const lines = String(content || "").split("\n");
+        let user = 0;
+        let kernel = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length < 2) {
+                continue;
+            }
+
+            if (fields[0] === "user_resident") {
+                user = Number(fields[1]) || 0;
+            } else if (fields[0] === "kernel_resident") {
+                kernel = Number(fields[1]) || 0;
+            }
+        }
+
+        root.gpuMemUserKb = user / 1024;
+        root.gpuMemKernelKb = kernel / 1024;
     }
 
     function updateGpuFromSysfs() {
@@ -2554,11 +2620,24 @@ BarWidget {
                     root.gpuKind = detected.kind;
                     root.gpuPath = detected.path;
                     root.gpuCommand = detected.command;
+                    root.gpuMemoryPath = detected.memory || "";
+
+                    if (root.gpuMemoryPath !== "") {
+                        gpuMemoryFile.reload();
+                    }
                 } catch (error) {
                     console.warn("yassm: GPU detection failed:", data, error);
                 }
             }
         }
+    }
+
+    FileView {
+        id: gpuMemoryFile
+
+        path: root.gpuMemoryPath
+        printErrors: false
+        onLoaded: root.applyGpuMemory(text())
     }
 
     Process {
@@ -2684,6 +2763,15 @@ BarWidget {
         property: "slowIntervalMs"
         value: root.slowInterval * 1000
         restoreMode: Binding.RestoreNone
+    }
+
+    Timer {
+        // The GPU memory breakdown is only read while its tooltip is open.
+        interval: root.slowInterval * 1000
+        running: root.hoveredSegment === "gpu" && root.gpuMemoryPath !== ""
+        repeat: true
+
+        onTriggered: gpuMemoryFile.reload()
     }
 
     Timer {

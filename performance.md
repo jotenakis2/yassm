@@ -116,6 +116,7 @@ On demand only:
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
 | `cpu-freq.sh` | 3 ms | CPU tooltip open, Fast |
+| `/sys/class/drm/*/device/gpu_memory` | < 1 ms | GPU tooltip open, Slow |
 | `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |
 | `disk-io.sh` | 13 ms | DISK tooltip open, at the Slow interval |
 | `ip -4 -o addr` | 3 ms | each NET tooltip open |
