@@ -32,6 +32,17 @@ BarWidget {
     readonly property bool barVertical: root.bar ? root.bar.vertical === true : false
     visible: !root.barVertical
 
+    // Omarchy 4.5 renamed the ShellColor singleton to Color. When it is
+    // missing every surface falls back to white, so the widget says so once
+    // instead of drawing a broken bar.
+    readonly property bool paletteMissing: {
+        try {
+            return typeof Color === "undefined" || Color === null;
+        } catch (error) {
+            return true;
+        }
+    }
+
     readonly property string sectionMark: "\u0001"
     readonly property string centeredMark: "\u0002"
     readonly property string boldMark: "\u0003"
@@ -289,6 +300,19 @@ BarWidget {
     }
 
     readonly property var segmentCache: {
+        if (root.paletteMissing) {
+            return [
+                {
+                    key: "palette",
+                    icon: "",
+                    valueText: "",
+                    text: Yassm.I18n.t("bar.omarchy_too_old"),
+                    value: null,
+                    kind: "palette"
+                }
+            ];
+        }
+
         const metrics = Yassm.SystemMetrics;
         const segments = [];
 
@@ -422,6 +446,10 @@ BarWidget {
         return order;
     }
     readonly property var segmentOrder: {
+        if (root.paletteMissing) {
+            return ["palette"];
+        }
+
         const keys = [];
 
         for (let i = 0; i < root.moduleOrder.length; i++) {
@@ -480,7 +508,7 @@ BarWidget {
     }
 
     function segmentIconColor(key) {
-        if (!root.showColors) {
+        if (root.paletteMissing || !root.showColors) {
             return button.foreground;
         }
 
@@ -508,7 +536,7 @@ BarWidget {
     }
 
     function segmentColor(key) {
-        if (!root.showColors) {
+        if (root.paletteMissing || !root.showColors) {
             return button.foreground;
         }
         const segment = segmentMap[key];
@@ -2638,6 +2666,10 @@ BarWidget {
     }
 
     function togglePanel() {
+        if (root.paletteMissing) {
+            return;
+        }
+
         if (root.opened) {
             root.close();
         } else {
@@ -2733,6 +2765,12 @@ BarWidget {
         path: root.gpuMemoryPath
         printErrors: false
         onLoaded: root.applyGpuMemory(text())
+        // Drop the readings rather than showing the previous values as if
+        // they were current when the file goes away.
+        onLoadFailed: {
+            root.gpuMemUserKb = 0;
+            root.gpuMemKernelKb = 0;
+        }
     }
 
     Process {

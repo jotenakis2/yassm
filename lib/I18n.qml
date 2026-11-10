@@ -13,6 +13,7 @@ QtObject {
 
     readonly property var stringsEn: ({
             "bar.empty": "No module enabled",
+            "bar.omarchy_too_old": "YASSM needs Omarchy 4.5+",
             "battery.charging": "Charging",
             "battery.discharging": "Discharging",
             "battery.full": "Fully charged",
@@ -158,6 +159,7 @@ QtObject {
 
     readonly property var stringsFr: ({
             "bar.empty": "Aucun module activé",
+            "bar.omarchy_too_old": "YASSM requiert Omarchy 4.5+",
             "battery.charging": "En charge",
             "battery.discharging": "Sur batterie",
             "battery.full": "Chargée",
