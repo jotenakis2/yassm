@@ -19,6 +19,9 @@ Singleton {
     property int nproc: 1
 
     property real cpuPercent: 0
+    // Whole-machine power rail from the SMC: Apple Silicon has no per-CPU
+    // power counter. 0 when the platform exposes nothing.
+    property real cpuPowerW: 0
     property real kernelPercent: 0
     property var previousCpuTimes: null
     property var corePercents: []
@@ -1371,11 +1374,22 @@ Singleton {
     function applyCpuFreq(content) {
         const lines = String(content || "").split("\n");
         const frequencies = [];
+        let powerW = 0;
 
         for (let i = 0; i < lines.length; i++) {
             const fields = lines[i].trim().split(/\s+/);
 
             if (fields.length < 2) {
+                continue;
+            }
+
+            if (fields[0] === "power") {
+                const microwatts = Number(fields[1]);
+
+                if (Number.isFinite(microwatts) && microwatts > 0) {
+                    powerW = microwatts / 1000000;
+                }
+
                 continue;
             }
 
@@ -1388,6 +1402,7 @@ Singleton {
         }
 
         metrics.coreFreqMhz = frequencies;
+        metrics.cpuPowerW = powerW;
     }
 
     function applyUptime(content) {

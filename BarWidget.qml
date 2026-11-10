@@ -1700,6 +1700,13 @@ BarWidget {
             const cores = metrics.corePercents || [];
             const lines = [];
 
+            // Apple Silicon has no per-CPU power counter: the SMC only reports
+            // the whole machine, so the label says so.
+            if (root.showExtended && metrics.cpuPowerW > 0) {
+                lines.push(Yassm.I18n.t("cpu.system_power") + " : " + metrics.cpuPowerW.toFixed(1) + " W");
+                lines.push("");
+            }
+
             if (cores.length > 0) {
                 lines.push(root.centeredMark + root.iconCpu + " " + Yassm.I18n.t("head.cores"));
 
