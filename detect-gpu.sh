@@ -22,6 +22,21 @@ find_memory() {
 	printf ''
 }
 
+# The Apple GPU publishes a cumulative busy counter, a power reading and a
+# p-state in agx_stats; YASSM derives the utilisation from the counter.
+find_agx_stats() {
+	local file
+
+	for file in /sys/class/drm/card*/device/agx_stats; do
+		if [[ -r ${file} ]]; then
+			printf '%s' "${file}"
+			return 0
+		fi
+	done
+
+	printf ''
+}
+
 memory=$(find_memory)
 
 find_busy_percent() {
@@ -52,6 +67,13 @@ fi
 
 if command -v nvidia-smi >/dev/null 2>&1; then
 	emit "nvidia" "" "timeout 5 nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits" "${memory}"
+	exit 0
+fi
+
+agx=$(find_agx_stats)
+
+if [[ -n ${agx} ]]; then
+	emit "agx" "${agx}" "" "${memory}"
 	exit 0
 fi
 

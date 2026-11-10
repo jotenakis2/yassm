@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.81
+Version 1.29.82
 
 **English** | [Français](README-fr.md)
 
@@ -45,7 +45,7 @@ Use `left`, `center` or `right`.
 | RAM | used % |
 | Swap | used % (hidden without swap) |
 | Load | run-queue load, as a CPU-normalised % (can exceed 100) |
-| GPU | usage %; `--%` when the system exposes no counter (e.g. Apple Silicon), memory shown in the tooltip |
+| GPU | usage %; `--%` only when no counter exists; power and memory in the tooltip |
 | Disk | root filesystem usage % |
 | Network | ↓ and ↑ rates, or a crossed icon when offline |
 | Temperature | hottest sensor °C |
@@ -91,9 +91,9 @@ rows marked below.
   health (extended);
 - **Uptime**: time since boot; installation age and date, date of the last
   package update (extended);
-- **GPU**: utilisation, plus the GPU memory breakdown (application buffers and
-driver) when the kernel exposes `gpu_memory` in sysfs — the case on Apple
-  Silicon;
+- **GPU**: utilisation (from `gpu_busy_percent`, or derived from the AGX busy
+  counter on Apple Silicon), power draw, and the GPU memory breakdown
+  (application buffers and driver) when the kernel exposes `gpu_memory`;
 - **Load**, **Alerts**: a short summary, or the alert list (failed units,
   zombies with their parent, disk/RAM, battery health under 20 %).
 

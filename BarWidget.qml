@@ -101,6 +101,10 @@ BarWidget {
     property string gpuMemoryPath: ""
     property real gpuMemUserKb: 0
     property real gpuMemKernelKb: 0
+    // agx_stats: cumulative busy counter, power draw, and the last sample.
+    property real gpuBusyNs: -1
+    property real gpuBusyAt: 0
+    property real gpuPowerMw: 0
 
     property bool showCpu: setting("showCpu", true)
     property bool showMemory: setting("showMemory", true)
@@ -1776,6 +1780,13 @@ BarWidget {
                 }
             ];
 
+            if (root.gpuKind === "agx") {
+                rows.push({
+                    label: Yassm.I18n.t("gpu.power"),
+                    value: root.gpuPowerMw > 0 ? (root.gpuPowerMw / 1000).toFixed(1) + " W" : "--"
+                });
+            }
+
             if (root.gpuMemoryPath !== "") {
                 rows.push({
                     label: Yassm.I18n.t("gpu.memory"),
@@ -2398,6 +2409,64 @@ BarWidget {
         gpuBusyFile.reload();
     }
 
+    // agx_stats publishes a cumulative busy counter roughly once per second,
+    // so a raw delta alternates between zero and a spike. A time-based EMA
+    // (tau = 2.5 s) smooths that whatever the Fast interval is.
+    function applyAgxStats(content) {
+        const lines = String(content || "").split("\n");
+        let busy = -1;
+        let power = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length < 2) {
+                continue;
+            }
+
+            if (fields[0] === "busy_ns") {
+                busy = Number(fields[1]);
+            } else if (fields[0] === "power_mw") {
+                power = Number(fields[1]) || 0;
+            }
+        }
+
+        if (!Number.isFinite(busy) || busy < 0) {
+            return;
+        }
+
+        const now = Date.now();
+
+        root.gpuPowerMw = power;
+
+        if (root.gpuBusyNs < 0 || busy < root.gpuBusyNs) {
+            root.gpuBusyNs = busy;
+            root.gpuBusyAt = now;
+            return;
+        }
+
+        // The counter is published about once per second. Require a full
+        // window so two reloads a few milliseconds apart cannot divide by a
+        // window of nearly zero and pin the reading at 100 %.
+        const elapsed = now - root.gpuBusyAt;
+
+        if (elapsed < 900) {
+            return;
+        }
+
+        const instant = Math.max(0, Math.min(100, 100 * (busy - root.gpuBusyNs) / (elapsed * 1e6)));
+        const alpha = 1 - Math.exp(-elapsed / 2500);
+
+        root.gpu = root.gpu === null ? instant : root.gpu + alpha * (instant - root.gpu);
+        root.gpuBusyNs = busy;
+        root.gpuBusyAt = now;
+    }
+
+    function updateGpuFromAgx() {
+        gpuAgxFile.path = root.gpuPath;
+        gpuAgxFile.reload();
+    }
+
     function updateGpuFromCommand() {
         gpuProcess.command = ["timeout", "5", "bash", "-c", root.gpuCommand];
         gpuProcess.running = true;
@@ -2619,6 +2688,9 @@ BarWidget {
 
                     root.gpuKind = detected.kind;
                     root.gpuPath = detected.path;
+                    root.gpu = null;
+                    root.gpuBusyNs = -1;
+                    root.gpuBusyAt = 0;
                     root.gpuCommand = detected.command;
                     root.gpuMemoryPath = detected.memory || "";
 
@@ -2630,6 +2702,14 @@ BarWidget {
                 }
             }
         }
+    }
+
+    FileView {
+        id: gpuAgxFile
+
+        path: root.gpuKind === "agx" ? root.gpuPath : ""
+        printErrors: false
+        onLoaded: root.applyAgxStats(text())
     }
 
     FileView {
@@ -2783,6 +2863,8 @@ BarWidget {
         onTriggered: {
             if (root.gpuKind === "sysfs") {
                 root.updateGpuFromSysfs();
+            } else if (root.gpuKind === "agx") {
+                root.updateGpuFromAgx();
             } else if (root.gpuKind === "nvidia") {
                 root.updateGpuFromCommand();
             }

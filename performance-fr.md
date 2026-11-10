@@ -117,6 +117,7 @@ Aucun de ces processus ne survit entre deux exécutions.
 | `proc-snapshot.sh` × 2 | 11 ms chacun | tooltip CPU ouvert (photo initiale + warmup de 1 s) |
 | `cpu-freq.sh` | 3 ms | tooltip CPU ouvert, Fast |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | tooltip GPU ouvert, lent |
+| `/sys/class/drm/*/device/agx_stats` | < 1 ms | module GPU visible, Fast (Apple Silicon) |
 | `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, à l'échantillonnage lent |
 | `disk-io.sh` | 13 ms | tooltip DISK ouvert, à l'échantillonnage lent |
 | `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
