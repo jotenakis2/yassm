@@ -101,6 +101,10 @@ BarWidget {
     property string gpuMemoryPath: ""
     property real gpuMemUserKb: 0
     property real gpuMemKernelKb: 0
+    // agx_stats publishes about once a second and costs 0.01 ms to read, so it
+    // follows the Fast cadence. The DRM counter and nvidia-smi stay on Slow:
+    // one is a wake-up cost, the other spawns a process.
+    readonly property int gpuSampleInterval: root.gpuKind === "agx" ? root.refreshInterval * 1000 : root.slowInterval * 1000
     // agx_stats: cumulative busy counter, power draw, and the last sample.
     property real gpuBusyNs: -1
     property real gpuBusyAt: 0
@@ -2420,7 +2424,7 @@ BarWidget {
 
     // agx_stats publishes a cumulative busy counter roughly once per second,
     // so a raw delta alternates between zero and a spike. A time-based EMA
-    // (tau = 2.5 s) smooths that whatever the Fast interval is.
+    // (tau = 2 s) smooths that whatever the Fast interval is.
     function applyAgxStats(content) {
         const lines = String(content || "").split("\n");
         let busy = -1;
@@ -2464,7 +2468,7 @@ BarWidget {
         }
 
         const instant = Math.max(0, Math.min(100, 100 * (busy - root.gpuBusyNs) / (elapsed * 1e6)));
-        const alpha = 1 - Math.exp(-elapsed / 2500);
+        const alpha = 1 - Math.exp(-elapsed / 2000);
 
         root.gpu = root.gpu === null ? instant : root.gpu + alpha * (instant - root.gpu);
         root.gpuBusyNs = busy;
@@ -2866,7 +2870,7 @@ BarWidget {
     }
 
     Timer {
-        interval: root.slowInterval * 1000
+        interval: root.gpuSampleInterval
         running: root.showGpu && root.gpuKind !== "none"
         repeat: true
         triggeredOnStart: true
