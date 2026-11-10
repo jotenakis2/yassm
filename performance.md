@@ -115,7 +115,7 @@ On demand only:
 | Action | Cost | When |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
-| `cpu-freq.sh` | 3 ms | CPU tooltip open, Fast (frequencies + power) |
+| `cpu-freq.sh` | 3 ms | CPU or battery tooltip open, Fast (frequencies + system power) |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | GPU tooltip open, Slow |
 | `/sys/class/drm/*/device/agx_stats` | < 1 ms | GPU module visible, Fast (Apple Silicon) |
 | `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |

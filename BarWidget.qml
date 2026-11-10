@@ -1700,13 +1700,6 @@ BarWidget {
             const cores = metrics.corePercents || [];
             const lines = [];
 
-            // Apple Silicon has no per-CPU power counter: the SMC only reports
-            // the whole machine, so the label says so.
-            if (root.showExtended && metrics.cpuPowerW > 0) {
-                lines.push(Yassm.I18n.t("cpu.system_power") + " : " + metrics.cpuPowerW.toFixed(1) + " W");
-                lines.push("");
-            }
-
             if (cores.length > 0) {
                 lines.push(root.centeredMark + root.iconCpu + " " + Yassm.I18n.t("head.cores"));
 
@@ -1950,6 +1943,12 @@ BarWidget {
                     label: Yassm.I18n.t("battery.power"),
                     value: power,
                     dim: power === "--"
+                });
+                // The SMC rail covers the whole machine, not just the pack.
+                rows.push({
+                    label: Yassm.I18n.t("battery.system_power"),
+                    value: metrics.systemPowerW > 0 ? metrics.systemPowerW.toFixed(1) + " W" : "--",
+                    dim: !(metrics.systemPowerW > 0)
                 });
 
                 // Asahi exposes the pack temperature as macsmc_battery; other
@@ -2542,7 +2541,9 @@ BarWidget {
         metrics.setNetworkUser(root, root.showNet);
         metrics.setUptimeUser(root, root.showUptime);
         metrics.setPressureUser(root, extended && (root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || root.hoveredSegment === "disk"));
-        metrics.setCpuFreqUser(root, extended && root.showCpu && root.hoveredSegment === "cpu");
+        // cpu-freq.sh also prints the SMC power rail, which the battery
+        // tooltip shows, so it runs for either tooltip.
+        metrics.setCpuFreqUser(root, extended && ((root.showCpu && root.hoveredSegment === "cpu") || (root.showBattery && root.hoveredSegment === "battery")));
         metrics.setDiskIoUser(root, extended && root.showDisk && root.hoveredSegment === "disk");
         metrics.setNetworkMountUser(root, root.showDisk && root.hoveredSegment === "disk");
         metrics.setSwapDetailUser(root, extended && root.showSwap && root.hoveredSegment === "swap");

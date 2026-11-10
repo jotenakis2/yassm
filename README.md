@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.83
+Version 1.29.84
 
 **English** | [Français](README-fr.md)
 
@@ -73,8 +73,8 @@ target: `btop`, then `htop`; Settings when neither is installed.
 Hover a module for its details. **Extended data** in Settings adds the extra
 rows marked below.
 
-- **CPU**: per-core usage; top userland processes; PSI, per-core frequencies
-  and the machine power draw (extended);
+- **CPU**: per-core usage; top userland processes; PSI and per-core
+  frequencies (extended);
 - **RAM**: total, used, available; top userland processes; buffers, cache,
   the htop-style used figure and PSI (extended);
 - **Swap**: per-device usage, zram and zswap details (extended; they
@@ -87,8 +87,8 @@ rows marked below.
   power and frequency, and a latency ping to omarchy.org (at open then every
   Slow interval while the tooltip stays open);
 - **Temperature**: every sensor and fan speed, hottest first;
-- **Battery**: state and time remaining; power, pack temperature, cycles and
-  health (extended);
+- **Battery**: state and time remaining; battery and system power, pack
+  temperature, cycles and health (extended);
 - **Uptime**: time since boot; installation age and date, date of the last
   package update (extended);
 - **GPU**: utilisation (from `gpu_busy_percent`, or derived from the AGX busy

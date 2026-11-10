@@ -21,7 +21,7 @@ Singleton {
     property real cpuPercent: 0
     // Whole-machine power rail from the SMC: Apple Silicon has no per-CPU
     // power counter. 0 when the platform exposes nothing.
-    property real cpuPowerW: 0
+    property real systemPowerW: 0
     property real kernelPercent: 0
     property var previousCpuTimes: null
     property var corePercents: []
@@ -1402,7 +1402,7 @@ Singleton {
         }
 
         metrics.coreFreqMhz = frequencies;
-        metrics.cpuPowerW = powerW;
+        metrics.systemPowerW = powerW;
     }
 
     function applyUptime(content) {
