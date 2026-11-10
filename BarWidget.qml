@@ -288,7 +288,7 @@ BarWidget {
     }
 
     function makeSegment(key, icon, value, suffix, kind) {
-        const valueText = pad(value) + suffix;
+        const valueText = Yassm.Format.pad(value) + suffix;
         return {
             key: key,
             icon: icon,
@@ -317,7 +317,7 @@ BarWidget {
         const segments = [];
 
         if (showUptime) {
-            const uptimeText = formatUptime(metrics.uptimeSeconds);
+            const uptimeText = Yassm.Format.formatUptime(metrics.uptimeSeconds);
 
             segments.push({
                 key: "uptime",
@@ -357,8 +357,8 @@ BarWidget {
             if (metrics.hasNetwork) {
                 const down = metrics.networkRxKib;
                 const up = metrics.networkTxKib;
-                const downText = formatRate(down);
-                const upText = formatRate(up);
+                const downText = Yassm.Format.formatRate(down);
+                const upText = Yassm.Format.formatRate(up);
 
                 segments.push({
                     key: "netDown",
@@ -703,141 +703,17 @@ BarWidget {
         return Yassm.ThemePalette.red;
     }
 
-    function pad(value) {
-        if (value === null || value === undefined) {
-            return " --";
-        }
-
-        return String(value).padStart(3, " ");
-    }
-
-    function countryFlag(code) {
-        const value = String(code || "").toUpperCase();
-
-        if (!/^[A-Z]{2}$/.test(value)) {
-            return "";
-        }
-
-        return String.fromCodePoint(0x1F1E6 + value.charCodeAt(0) - 65, 0x1F1E6 + value.charCodeAt(1) - 65);
-    }
-
     // A rate is split into a 6-character number and a 5-character unit, so
     // the decimal point and the unit stay in the same columns. The widest
     // number is "1023.9" (MiB/s and GiB/s keep one decimal).
-    function formatRateField(kib) {
-        const text = formatRateLong(kib);
-        const space = text.indexOf(" ");
-
-        return (text.slice(0, space).padStart(6, " ") + " " + text.slice(space + 1)).padEnd(12, " ");
-    }
-
     // Same idea for the session totals: 2 decimals, a 7-character number and
     // a 3-character unit.
-    function formatSessionField(kib) {
-        const text = formatKibAsSize(kib);
-        const space = text.indexOf(" ");
-
-        return text.slice(0, space).padStart(7, " ") + " " + text.slice(space + 1).padEnd(3, " ");
-    }
-
-    function formatLoad(value) {
-        const number = Number(value);
-        return (Number.isFinite(number) ? number : 0).toFixed(2).padStart(6, " ");
-    }
-
-    function formatKibAsGib(kilobytes) {
-        const value = Number(kilobytes) / 1048576;
-        return (Number.isFinite(value) ? value : 0).toFixed(2) + " GiB";
-    }
-
     // Session totals keep 2 decimals and a 3-character unit at every size,
     // KiB included: the number never leaves its 7-character field and the
     // closing parenthesis never moves.
-    function formatKibAsSize(kilobytes) {
-        const value = Number(kilobytes);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0.00 KiB";
-        }
-
-        if (value >= 1073741824) {
-            return (value / 1073741824).toFixed(2) + " TiB";
-        }
-
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(2) + " GiB";
-        }
-
-        if (value >= 1024) {
-            return (value / 1024).toFixed(2) + " MiB";
-        }
-
-        return value.toFixed(2) + " KiB";
-    }
-
     // Compact 4-character rate for the bar (KiB/s): "  0K" … "999K", "1.0M",
     // " 10M", "1.0G". Keeping the value field at 3 characters makes a network
     // half as wide as a percentage module.
-    function formatRate(kib) {
-        const value = Number(kib);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "  0K";
-        }
-
-        // Thresholds use the rounded width so the value never spills over to
-        // "1000K" or "1000M" and widens the bar for a single tick. The switch
-        // to an integer happens as soon as the one-decimal form would reach
-        // 10.0, otherwise "10.0M" is one character wider than "9.9M".
-        if (value >= 999.5 * 1024) {
-            const gib = value / 1048576;
-            return (gib >= 9.95 ? String(Math.round(gib)) : gib.toFixed(1)).padStart(3, " ") + "G";
-        }
-
-        if (value >= 999.5) {
-            const mib = value / 1024;
-            return (mib >= 9.95 ? String(Math.round(mib)) : mib.toFixed(1)).padStart(3, " ") + "M";
-        }
-
-        return String(Math.round(value)).padStart(3, " ") + "K";
-    }
-
-    function formatRateLong(kib) {
-        const value = Number(kib);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0 KiB/s";
-        }
-
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(1) + " GiB/s";
-        }
-
-        if (value >= 1024) {
-            return (value / 1024).toFixed(1) + " MiB/s";
-        }
-
-        return Math.round(value) + " KiB/s";
-    }
-
-    function formatKib(kilobytes) {
-        const value = Number(kilobytes);
-
-        if (!Number.isFinite(value) || value <= 0) {
-            return "0 MiB";
-        }
-
-        if (value >= 1048576) {
-            return (value / 1048576).toFixed(2) + " GiB";
-        }
-
-        return (value / 1024).toFixed(1) + " MiB";
-    }
-
-    function formatBytesAsGib(bytes) {
-        return formatKibAsGib(Number(bytes) / 1024);
-    }
-
     function aggregateProcesses(content, limit) {
         const byName = {};
         const lines = content.split("\n");
@@ -1099,7 +975,7 @@ BarWidget {
 
         for (let i = 0; i < entries.length; i++) {
             const name = entries[i].name;
-            const value = memory ? formatKib(entries[i].value) : entries[i].value.toFixed(1) + "%";
+            const value = memory ? Yassm.Format.formatKib(entries[i].value) : entries[i].value.toFixed(1) + "%";
 
             nameWidth = Math.max(nameWidth, name.length);
             valueWidth = Math.max(valueWidth, value.length);
@@ -1206,27 +1082,14 @@ BarWidget {
     // Sensor labels often end with "Temp"/"Temperature", which the value
     // column already says in °C. Drop that word (and a leading one), but keep
     // the raw label when nothing meaningful is left ("temp", "temp1").
-    function cleanSensorName(name) {
-        const original = String(name || "").trim();
-        const stripped = original.replace(/[\s_\-.]+(temperatures?|temps?)$/i, "").replace(/^(temperatures?|temps?)[\s_\-.]+/i, "").trim();
-
-        return stripped === "" || /^[0-9]+$/.test(stripped) ? original : stripped;
-    }
-
     // Under 1 MiB a zram/zswap figure is noise: the tooltip reports 0 instead
     // of "0.4 MiB", and the row is treated as empty.
-    function snapSwapKb(kilobytes) {
-        const value = Number(kilobytes);
-
-        return Number.isFinite(value) && value >= 1024 ? value : 0;
-    }
-
     function compressionLine(originalKb, compressedKb) {
-        const original = root.snapSwapKb(originalKb);
-        const compressed = root.snapSwapKb(compressedKb);
+        const original = Yassm.Format.snapSwapKb(originalKb);
+        const compressed = Yassm.Format.snapSwapKb(compressedKb);
         const ratio = compressed > 0 ? original / compressed : 0;
 
-        return formatKib(original).padEnd(9, " ") + " →  " + root.iconZip + " " + formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
+        return Yassm.Format.formatKib(original).padEnd(9, " ") + " →  " + root.iconZip + " " + Yassm.Format.formatKib(compressed).padStart(9, " ") + (ratio > 0 ? " (" + ratio.toFixed(2) + ":1)" : "");
     }
 
     function batteryStateLabel(status) {
@@ -1262,34 +1125,6 @@ BarWidget {
         }
 
         return "";
-    }
-
-    function formatDuration(seconds) {
-        const totalMinutes = Math.max(0, Math.round(Number(seconds) / 60));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-
-        if (hours > 0) {
-            return hours + "h " + String(minutes).padStart(2, "0") + "m";
-        }
-
-        return minutes + "m";
-    }
-
-    function formatUptime(seconds) {
-        const totalMinutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-
-        return hours > 0 ? hours + "h" + String(minutes).padStart(2, "0") : minutes + "m";
-    }
-
-    function formatUptimeLong(seconds) {
-        const totalMinutes = Math.floor(Math.max(0, Number(seconds) || 0) / 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-
-        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
 
     function installAgeDays() {
@@ -1425,8 +1260,8 @@ BarWidget {
 
         for (let i = 0; i < mounts.length; i++) {
             const target = mounts[i].target;
-            const used = formatBytesAsGib(mounts[i].usedBytes);
-            const total = formatBytesAsGib(mounts[i].totalBytes);
+            const used = Yassm.Format.formatBytesAsGib(mounts[i].usedBytes);
+            const total = Yassm.Format.formatBytesAsGib(mounts[i].totalBytes);
             const percent = "(" + mounts[i].percent + "%)";
 
             targetWidth = Math.max(targetWidth, target.length);
@@ -1452,7 +1287,7 @@ BarWidget {
         if (root.showExtended) {
             lines.push("");
             lines.push(root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"));
-            lines.push("R" + formatRateField(metrics.diskReadKib) + "  W" + formatRateField(metrics.diskWriteKib));
+            lines.push("R" + Yassm.Format.formatRateField(metrics.diskReadKib) + "  W" + Yassm.Format.formatRateField(metrics.diskWriteKib));
             lines.push("");
             lines.push(root.centeredMark + root.iconLoadHigh + " " + Yassm.I18n.t("head.pressure"));
 
@@ -1483,7 +1318,7 @@ BarWidget {
                     const entry = root.diskProcesses[i];
                     const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
 
-                    lines.push(name.padEnd(nameWidth) + "  R" + formatRateField(entry.read / 1024) + "  W" + formatRateField(entry.write / 1024));
+                    lines.push(name.padEnd(nameWidth) + "  R" + Yassm.Format.formatRateField(entry.read / 1024) + "  W" + Yassm.Format.formatRateField(entry.write / 1024));
                 }
             }
         }
@@ -1526,7 +1361,7 @@ BarWidget {
 
             for (let i = 0; i < loads.length; i++) {
                 const percent = Math.round(100 * Number(loads[i]) / cores);
-                lines.push(labels[i] + formatLoad(loads[i]) + " → " + String(percent).padStart(3, " ") + "%");
+                lines.push(labels[i] + Yassm.Format.formatLoad(loads[i]) + " → " + String(percent).padStart(3, " ") + "%");
             }
 
             return tooltipBlock(Yassm.I18n.t("title.load"), lines.join("\n"));
@@ -1534,25 +1369,25 @@ BarWidget {
 
         if (key === "memory") {
             const labels = [Yassm.I18n.t("row.total"), Yassm.I18n.t("row.used"), Yassm.I18n.t("row.available")];
-            const values = [formatKibAsGib(metrics.memoryTotalKb), formatKibAsGib(metrics.memoryUsedKb), formatKibAsGib(metrics.memoryAvailableKb)];
+            const values = [Yassm.Format.formatKibAsGib(metrics.memoryTotalKb), Yassm.Format.formatKibAsGib(metrics.memoryUsedKb), Yassm.Format.formatKibAsGib(metrics.memoryAvailableKb)];
             const dims = [false, false, false];
 
             if (root.showExtended) {
                 labels.push(Yassm.I18n.t("row.cache"));
-                values.push(formatKibAsGib(metrics.memoryCacheKb));
+                values.push(Yassm.Format.formatKibAsGib(metrics.memoryCacheKb));
                 dims.push(false);
                 // Buffer and Shared close the block, dimmed: both are parts of
                 // the cache pool, not totals of their own.
                 labels.push(Yassm.I18n.t("row.buffer"));
-                values.push(formatKibAsGib(metrics.memoryBuffersKb));
+                values.push(Yassm.Format.formatKibAsGib(metrics.memoryBuffersKb));
                 dims.push(true);
                 labels.push(Yassm.I18n.t("row.shared"));
-                values.push(formatKibAsGib(metrics.memorySharedKb));
+                values.push(Yassm.Format.formatKibAsGib(metrics.memorySharedKb));
                 dims.push(true);
             }
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
-            const kernelValue = showKernel ? formatKib(metrics.kernelTotalKb) : "";
+            const kernelValue = showKernel ? Yassm.Format.formatKib(metrics.kernelTotalKb) : "";
             // Fixed columns: the process list refreshes every 5 s and the
             // values must not shift when the longest name or value changes.
             const nameWidth = 15;
@@ -1566,7 +1401,7 @@ BarWidget {
             // kernel's "used" figure so the two definitions can be compared.
             const htopUsedKb = Math.max(0, metrics.memoryTotalKb - metrics.memoryFreeKb - metrics.memoryCacheKb - metrics.memoryBuffersKb + metrics.memorySharedKb);
 
-            const htopText = formatKibAsGib(htopUsedKb);
+            const htopText = Yassm.Format.formatKibAsGib(htopUsedKb);
 
             if (root.showExtended) {
                 // Tiny caption centred over the extra column's value: the
@@ -1629,8 +1464,8 @@ BarWidget {
 
                 for (let i = 0; i < devices.length; i++) {
                     const device = devices[i];
-                    const usedText = formatKibAsGib(device.usedKb);
-                    const totalText = formatKibAsGib(device.sizeKb);
+                    const usedText = Yassm.Format.formatKibAsGib(device.usedKb);
+                    const totalText = Yassm.Format.formatKibAsGib(device.sizeKb);
                     const percent = device.sizeKb > 0 ? Math.round(100 * device.usedKb / device.sizeKb) : 0;
 
                     nameWidth = Math.max(nameWidth, device.name.length);
@@ -1654,7 +1489,7 @@ BarWidget {
                     lines.push(row.name.padEnd(nameWidth) + " : " + row.used.padStart(usedWidth) + " / " + row.total.padStart(totalWidth) + " (" + row.percent + "%)");
                 }
             } else {
-                lines.push(formatKibAsGib(metrics.swapUsedKb) + " / " + formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
+                lines.push(Yassm.Format.formatKibAsGib(metrics.swapUsedKb) + " / " + Yassm.Format.formatKibAsGib(metrics.swapTotalKb) + " (" + totalPercent + "%)");
             }
 
             if (!root.showExtended) {
@@ -1682,7 +1517,7 @@ BarWidget {
 
                 // Under 1 MiB means nothing is really stored: the row is not
                 // worth a line, and the section says "Empty" instead.
-                if (!(root.snapSwapKb(stats.compressedKb) > 0)) {
+                if (!(Yassm.Format.snapSwapKb(stats.compressedKb) > 0)) {
                     continue;
                 }
 
@@ -1717,7 +1552,7 @@ BarWidget {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconZip + " " + Yassm.I18n.t("head.zswap"));
 
-                if (root.snapSwapKb(metrics.zswapCompressedKb) > 0) {
+                if (Yassm.Format.snapSwapKb(metrics.zswapCompressedKb) > 0) {
                     lines.push(compressionLine(metrics.zswapOriginalKb, metrics.zswapCompressedKb));
                 } else {
                     lines.push(root.dimMark + Yassm.I18n.t("swap.empty") + root.dimEndMark);
@@ -1825,12 +1660,12 @@ BarWidget {
             if (root.gpuMemoryPath !== "") {
                 rows.push({
                     label: Yassm.I18n.t("gpu.memory"),
-                    value: formatKib(root.gpuMemUserKb)
+                    value: Yassm.Format.formatKib(root.gpuMemUserKb)
                 });
                 // Driver-side allocations, not the application buffers.
                 rows.push({
                     label: Yassm.I18n.t("gpu.kernel"),
-                    value: root.gpuMemKernelKb > 0 ? formatKib(root.gpuMemKernelKb) : "--",
+                    value: root.gpuMemKernelKb > 0 ? Yassm.Format.formatKib(root.gpuMemKernelKb) : "--",
                     dim: root.gpuMemKernelKb <= 0
                 });
             }
@@ -1858,7 +1693,7 @@ BarWidget {
             }
 
             const ifaceIcon = metrics.activeWifi ? root.iconWifi : root.iconEthernet;
-            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + formatRateField(metrics.networkRxKib) + "  (" + Yassm.I18n.t("common.session") + " " + formatSessionField(metrics.networkRxSessionKb) + ")", "↑ " + formatRateField(metrics.networkTxKib) + "  (" + Yassm.I18n.t("common.session") + " " + formatSessionField(metrics.networkTxSessionKb) + ")"];
+            const lines = [root.centeredMark + root.iconSwap + " " + Yassm.I18n.t("head.io"), "↓ " + Yassm.Format.formatRateField(metrics.networkRxKib) + "  (" + Yassm.I18n.t("common.session") + " " + Yassm.Format.formatSessionField(metrics.networkRxSessionKb) + ")", "↑ " + Yassm.Format.formatRateField(metrics.networkTxKib) + "  (" + Yassm.I18n.t("common.session") + " " + Yassm.Format.formatSessionField(metrics.networkTxSessionKb) + ")"];
 
             if (root.showExtended && root.hasPing) {
                 const latency = metrics.pingMeasured ? (metrics.pingMs > 0 ? Math.round(metrics.pingMs) + " ms" : "KO") : "--";
@@ -1883,7 +1718,7 @@ BarWidget {
                     label: Yassm.I18n.t("net.gateway"),
                     value: metrics.gatewayV4 !== "" ? metrics.gatewayV4 : "--"
                 });
-                const wanFlag = root.countryFlag(metrics.wanCountry);
+                const wanFlag = Yassm.Format.countryFlag(metrics.wanCountry);
 
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.wan_ip"),
@@ -1955,9 +1790,9 @@ BarWidget {
             let remaining = "--";
 
             if (metrics.batteryStatus === "Charging" && metrics.batteryTimeToFull > 0) {
-                remaining = formatDuration(metrics.batteryTimeToFull);
+                remaining = Yassm.Format.formatDuration(metrics.batteryTimeToFull);
             } else if (metrics.batteryTimeToEmpty > 0) {
-                remaining = formatDuration(metrics.batteryTimeToEmpty);
+                remaining = Yassm.Format.formatDuration(metrics.batteryTimeToEmpty);
             }
 
             rows.push({
@@ -2084,13 +1919,13 @@ BarWidget {
                 for (let i = 0; i < zombies.length; i++) {
                     zombiePidWidth = Math.max(zombiePidWidth, String(zombies[i].pid).length);
                     zombieNameWidth = Math.max(zombieNameWidth, String(zombies[i].name).length);
-                    zombieAgeWidth = Math.max(zombieAgeWidth, formatDuration(zombies[i].age).length);
+                    zombieAgeWidth = Math.max(zombieAgeWidth, Yassm.Format.formatDuration(zombies[i].age).length);
                 }
 
                 for (let i = 0; i < zombies.length; i++) {
                     const zombie = zombies[i];
 
-                    lines.push(String(zombie.pid).padStart(zombiePidWidth) + "  " + String(zombie.name).padEnd(zombieNameWidth) + "  " + formatDuration(zombie.age).padStart(zombieAgeWidth) + "  ← " + zombie.parentPid + " " + zombie.parentName);
+                    lines.push(String(zombie.pid).padStart(zombiePidWidth) + "  " + String(zombie.name).padEnd(zombieNameWidth) + "  " + Yassm.Format.formatDuration(zombie.age).padStart(zombieAgeWidth) + "  ← " + zombie.parentPid + " " + zombie.parentName);
                 }
             }
 
@@ -2133,10 +1968,10 @@ BarWidget {
             const install = root.showExtended ? root.installRows(bootLabel) : [];
 
             if (install.length === 0) {
-                return tooltipBlock(Yassm.I18n.t("title.uptime"), bootLabel + " : " + formatUptimeLong(metrics.uptimeSeconds));
+                return tooltipBlock(Yassm.I18n.t("title.uptime"), bootLabel + " : " + Yassm.Format.formatUptimeLong(metrics.uptimeSeconds));
             }
 
-            const lines = [bootLabel.padEnd(install.width) + " : " + formatUptimeLong(metrics.uptimeSeconds)].concat(install.lines);
+            const lines = [bootLabel.padEnd(install.width) + " : " + Yassm.Format.formatUptimeLong(metrics.uptimeSeconds)].concat(install.lines);
 
             return tooltipBlock(Yassm.I18n.t("title.uptime"), lines.join("\n"));
         }
@@ -2157,7 +1992,7 @@ BarWidget {
             let valueWidth = 0;
 
             for (let i = 0; i < temperatures.length; i++) {
-                const name = root.cleanSensorName(temperatures[i].sensor);
+                const name = Yassm.Format.cleanSensorName(temperatures[i].sensor);
                 const value = temperatures[i].celsius.toFixed(1);
 
                 nameWidth = Math.max(nameWidth, name.length);
