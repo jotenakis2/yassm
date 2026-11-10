@@ -101,13 +101,13 @@ Idle state (no tooltip), reference machine:
 
 | Script | CPU / run | Frequency | CPU / minute |
 | --- | --- | --- | --- |
-| `temperature.sh` (temperatures + fans) | 14 ms | 6×/min | 85 ms |
-| `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
+| `temperature.sh` (temperatures + fans) | 18 ms | 6×/min | 108 ms |
+| `alerts.sh` (systemd + zombies) | 21 ms | 1×/min | 21 ms |
 | `findmnt` (local filesystems) | 1 ms | 6×/min | 6 ms |
 | Battery cycle count (`sysfs`) | < 1 ms | 1×/h | < 0.1 ms |
-| **Total** | | | **≈ 114 ms/min** |
+| **Total** | | | **≈ 135 ms/min** |
 
-≈ 114 ms of CPU per minute is **0.19 % of one core** (0.018 % of the
+≈ 135 ms of CPU per minute is **0.23 % of one core** (0.019 % of the
 machine). None of these processes stays alive between runs.
 
 On demand only:
@@ -115,25 +115,25 @@ On demand only:
 | Action | Cost | When |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
-| `cpu-freq.sh` | 3 ms | CPU or battery tooltip open, Fast (frequencies + system power) |
+| `cpu-freq.sh` | 5 ms | CPU or battery tooltip open, Fast (frequencies + system power) |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | GPU tooltip open, Slow |
 | `/sys/class/drm/*/device/agx_stats` | < 1 ms | GPU module visible, Fast (Apple Silicon) |
-| `ps -eo … rss` | ~15 ms | RAM tooltip open, at the Slow interval |
-| `disk-io.sh` | 13 ms | DISK tooltip open, at the Slow interval |
-| `ip -4 -o addr` | 3 ms | each NET tooltip open |
+| `ps -eo … rss` | ~13 ms | RAM tooltip open, at the Slow interval |
+| `disk-io.sh` | 12 ms | DISK tooltip open, at the Slow interval |
+| `ip -4 -o addr` | 1 ms | each NET tooltip open |
 | `wifi-freq.sh` | 9 ms | NET tooltip open, Fast (wireless) |
 | `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
 | `curl https://ipinfo.io/json` | one HTTPS request | NET tooltip open, cache 5 min or uplink change |
-| `install-date.sh` | 15 ms | once at startup (Uptime tooltip, install and last-update dates) |
-| `deps.sh` | 5 ms | once at startup (Settings warning) |
+| `install-date.sh` | 12 ms | once at startup (Uptime tooltip, install and last-update dates) |
+| `deps.sh` | 3 ms | once at startup (Settings warning) |
 
 ## Total
 
 | Component | Points of one core | Share of the 12-core machine |
 | --- | --- | --- |
 | Shell update path (1 s) | +0.60 | 0.05 % |
-| Idle scripts | +0.21 | 0.018 % |
-| **Total overhead** | **≈ +0.8** | **≈ 0.07 %** |
+| Idle scripts | +0.23 | 0.019 % |
+| **Total overhead** | **≈ +0.83** | **≈ 0.07 %** |
 
 At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
 (≈ 0.03 % of the machine).
@@ -157,9 +157,9 @@ At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
   `temperature.sh` are wrapped in `timeout` so a dead network mount or a
   stuck systemd query cannot freeze the widget.
 - **Scripts kept lean.** The temperature scan batches device symlink
-  resolution in a single `readlink` call (30 ms → 14 ms), and `alerts.sh`
+  resolution in a single `readlink` call (30 ms → 18 ms), and `alerts.sh`
   scans zombies with `ps` + `awk` instead of a bash loop over `/proc`
-  (82 ms → 23 ms).
+  (82 ms → 21 ms).
 
 ## Accepted costs
 
@@ -167,7 +167,7 @@ At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
   second. Lowering it to 2 s or more in Settings cuts the shell overhead
   roughly proportionally.
 - Opening the CPU tooltip costs two `/proc` snapshots 1 s apart (the first is
-  only a baseline, because instantaneous CPU% needs a delta), plus a 3 ms
+  only a baseline, because instantaneous CPU% needs a delta), plus a 5 ms
   frequency read.
 - RSS is not reported here: the shell process is shared with every other
   plugin and its resident size fluctuates by more than YASSM's own footprint

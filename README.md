@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.87
+Version 1.29.88
 
 **English** | [Français](README-fr.md)
 
@@ -129,9 +129,10 @@ icon turns green on mains power while the value keeps the normal bar colour.
 ## Alerts
 
 The module stays hidden until something is wrong: a failed systemd unit, a
-zombie older than 60 s, the root filesystem at 95 % or more, or RAM at 95 % or
-more. Its icon shows the severity; the tooltip lists the cause. It also
-appears when a **required tool** is missing, even if Alerts is disabled.
+zombie older than 60 s, the root filesystem or RAM at 95 % or more, or a
+battery health at 20 % or less. Its icon shows the severity; the tooltip lists
+the cause. It also appears when a **required tool** is missing, even if Alerts
+is disabled.
 
 ## Settings
 
@@ -148,7 +149,7 @@ Preferences are stored in `~/.config/omarchy/shell.json`.
 
 ## Performance
 
-YASSM is optimized to stay light: about **0.05 % of the machine** at the
+YASSM is optimized to stay light: about **0.07 % of the machine** at the
 default 1 s refresh, no resident process, and hidden modules stop sampling.
 Measurements: [performance.md](performance.md).
 
@@ -156,8 +157,9 @@ Measurements: [performance.md](performance.md).
 
 Omarchy 4.5+, `bash`, `awk`, coreutils, `findmnt`, `ps` and `systemd`. Optional:
 `btop` or `htop` (left-click target), `curl` and `ip` (network addresses and country flag),
-`nmcli` (Wi-Fi frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU), UPower and
-NetworkManager (battery and SSID). A missing optional tool simply hides the corresponding field.
+`nmcli` (Wi-Fi frequency), `ping` (NET latency), `nvidia-smi` (NVIDIA GPU),
+`less` (alerts report), UPower and NetworkManager (battery and SSID). A missing
+optional tool simply hides the corresponding field.
 
 The widget needs a horizontal bar; it is hidden on vertical bars.
 

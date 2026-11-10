@@ -101,13 +101,13 @@ Au repos (aucun tooltip), machine de référence :
 
 | Script | CPU / exécution | Fréquence | CPU / minute |
 | --- | --- | --- | --- |
-| `temperature.sh` (températures + ventilateurs) | 14 ms | 6×/min | 85 ms |
-| `alerts.sh` (systemd + zombies) | 23 ms | 1×/min | 23 ms |
+| `temperature.sh` (températures + ventilateurs) | 18 ms | 6×/min | 108 ms |
+| `alerts.sh` (systemd + zombies) | 21 ms | 1×/min | 21 ms |
 | `findmnt` (systèmes de fichiers locaux) | 1 ms | 6×/min | 6 ms |
 | Cycles batterie (`sysfs`) | < 1 ms | 1×/h | < 0,1 ms |
-| **Total** | | | **≈ 114 ms/min** |
+| **Total** | | | **≈ 135 ms/min** |
 
-≈ 114 ms de CPU par minute, soit **0,19 % d'un cœur** (0,018 % de la machine).
+≈ 135 ms de CPU par minute, soit **0,23 % d'un cœur** (0,019 % de la machine).
 Aucun de ces processus ne survit entre deux exécutions.
 
 À la demande uniquement :
@@ -115,25 +115,25 @@ Aucun de ces processus ne survit entre deux exécutions.
 | Action | Coût | Quand |
 | --- | --- | --- |
 | `proc-snapshot.sh` × 2 | 11 ms chacun | tooltip CPU ouvert (photo initiale + warmup de 1 s) |
-| `cpu-freq.sh` | 3 ms | tooltip CPU ou batterie ouvert, Fast (fréquences + puissance système) |
+| `cpu-freq.sh` | 5 ms | tooltip CPU ou batterie ouvert, Fast (fréquences + puissance système) |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | tooltip GPU ouvert, lent |
 | `/sys/class/drm/*/device/agx_stats` | < 1 ms | module GPU visible, Fast (Apple Silicon) |
-| `ps -eo … rss` | ~15 ms | tooltip RAM ouvert, à l'échantillonnage lent |
-| `disk-io.sh` | 13 ms | tooltip DISK ouvert, à l'échantillonnage lent |
-| `ip -4 -o addr` | 3 ms | à chaque ouverture du tooltip NET |
+| `ps -eo … rss` | ~13 ms | tooltip RAM ouvert, à l'échantillonnage lent |
+| `disk-io.sh` | 12 ms | tooltip DISK ouvert, à l'échantillonnage lent |
+| `ip -4 -o addr` | 1 ms | à chaque ouverture du tooltip NET |
 | `wifi-freq.sh` | 9 ms | tooltip NET ouvert, Fast (sans fil) |
 | `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, Fast (sans fil) |
 | `curl https://ipinfo.io/json` | une requête HTTPS | tooltip NET ouvert, cache 5 min ou changement de lien |
-| `install-date.sh` | 15 ms | une fois au démarrage (tooltip Uptime, installation et dernière mise à jour) |
-| `deps.sh` | 5 ms | une fois au démarrage (avertissement Settings) |
+| `install-date.sh` | 12 ms | une fois au démarrage (tooltip Uptime, installation et dernière mise à jour) |
+| `deps.sh` | 3 ms | une fois au démarrage (avertissement Settings) |
 
 ## Total
 
 | Composant | Points d'un cœur | Part de la machine 12 cœurs |
 | --- | --- | --- |
 | Boucle du shell (1 s) | +0,60 | 0,05 % |
-| Scripts au repos | +0,21 | 0,018 % |
-| **Surcoût total** | **≈ +0,8** | **≈ 0,07 %** |
+| Scripts au repos | +0,23 | 0,019 % |
+| **Surcoût total** | **≈ +0,83** | **≈ 0,07 %** |
 
 Au refresh de 5 s, le surcoût total tombe à ≈ 0,4 point d'un cœur (≈ 0,03 % de
 la machine).
@@ -164,7 +164,7 @@ la machine).
 - **Scripts allégés.** Le scan des températures regroupe la résolution des
   liens de périphériques en un seul appel `readlink` (30 ms → 14 ms), et
   `alerts.sh` détecte les zombies avec `ps` + `awk` au lieu d'une boucle bash
-  sur `/proc` (82 ms → 23 ms).
+  sur `/proc` (82 ms → 21 ms).
 
 ## Coûts acceptés
 
@@ -173,7 +173,7 @@ la machine).
   surcoût du shell à peu près proportionnellement.
 - Ouvrir le tooltip CPU coûte deux snapshots `/proc` espacés d'une seconde (le
   premier ne sert que de référence, car un pourcentage CPU instantané exige un
-  delta), plus une lecture de fréquence de 3 ms.
+  delta), plus une lecture de fréquence de 5 ms.
 - Le RSS n'est pas reporté ici : le processus du shell est partagé avec tous
   les autres plugins et sa taille résidente fluctue de plus que l'empreinte
   propre de YASSM (quelques Mo d'objets QML et un modèle de tooltip de 20

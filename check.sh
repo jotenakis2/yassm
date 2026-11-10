@@ -89,7 +89,7 @@ if grep -q '^Warning:' "${lib_log}"; then
 fi
 
 # BarWidget and SettingsPanel depend on Quickshell types that have no
-# qmltypes: their nested members (Style, ShellColor) and the PopupWindow
+# qmltypes: their nested members (Style, Color) and the PopupWindow
 # anchor group cannot be type-checked. Every warning is expected to fall in
 # those categories; anything else is a real issue and fails the check.
 lint_log=${qml_root}/bar-widget.log

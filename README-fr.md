@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.87
+Version 1.29.88
 
 [English](README.md) | **Français**
 
@@ -135,9 +135,9 @@ couleur normale de la barre.
 ## Alertes
 
 Le module reste masqué tant que tout va bien : unité systemd en échec, zombie
-de plus de 60 s, racine à 95 % ou plus, ou RAM à 95 % ou plus. Son icône donne
-la gravité, l'infobulle en liste la cause. Il apparaît aussi lorsqu'un **outil
-requis** manque, même si Alertes est désactivé.
+de plus de 60 s, racine ou RAM à 95 % ou plus, ou santé de la batterie à 20 %
+ou moins. Son icône donne la gravité, l'infobulle en liste la cause. Il
+apparaît aussi lorsqu'un **outil requis** manque, même si Alertes est désactivé.
 
 ## Réglages
 
@@ -154,7 +154,7 @@ Les préférences sont stockées dans `~/.config/omarchy/shell.json`.
 
 ## Performances
 
-YASSM est optimisé pour rester léger : environ **0,05 % de la machine** au
+YASSM est optimisé pour rester léger : environ **0,07 % de la machine** au
 rafraîchissement par défaut (1 s), aucun processus résident, et les modules
 masqués arrêtent l'échantillonnage. Mesures :
 [performance-fr.md](performance-fr.md).
@@ -163,9 +163,9 @@ masqués arrêtent l'échantillonnage. Mesures :
 
 Omarchy 4.5+, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
 `btop` ou `htop` (cible du clic gauche), `curl` et `ip` (adresses réseau et drapeau du pays),
-`nmcli` (fréquence Wi-Fi), `ping` (latence NET), `nvidia-smi` (GPU NVIDIA), UPower et
-NetworkManager (batterie et SSID). Un outil optionnel manquant masque simplement le champ
-correspondant.
+`nmcli` (fréquence Wi-Fi), `ping` (latence NET), `nvidia-smi` (GPU NVIDIA),
+`less` (rapport des alertes), UPower et NetworkManager (batterie et SSID). Un
+outil optionnel manquant masque simplement le champ correspondant.
 
 Le widget nécessite une barre horizontale ; il est masqué sur une barre
 verticale.

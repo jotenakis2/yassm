@@ -30,7 +30,7 @@ fi
 # alerts.sh owns the thresholds and the ps walk; reuse it so the report and the
 # tooltip always agree, and only reformat the zombie rows here.
 zombies=$(
-	"${script_dir}/alerts.sh" 2>/dev/null | awk -F'\t' '
+	"${script_dir}/alerts.sh" zombie 2>/dev/null | awk -F'\t' '
 		function fmt(seconds) {
 			if (seconds >= 3600) return sprintf("%dh %02dm", int(seconds / 3600), int((seconds % 3600) / 60))
 			if (seconds >= 60) return sprintf("%dm", int(seconds / 60))
