@@ -1189,18 +1189,6 @@ BarWidget {
         return Number.isFinite(value) && value >= 1024 ? value : 0;
     }
 
-    // zram is summarised with the three numbers that matter: the uncompressed
-    // size, the RAM the device really consumes, and the compression ratio. The
-    // compressed size itself is left out to keep the row readable.
-    function zramLine(stats) {
-        const original = root.snapSwapKb(stats.originalKb);
-        const compressed = root.snapSwapKb(stats.compressedKb);
-        const mem = root.snapSwapKb(stats.memKb);
-        const ratio = compressed > 0 ? original / compressed : 0;
-
-        return Yassm.I18n.t("zram.original") + " " + formatKib(original) + "   " + Yassm.I18n.t("zram.ram") + " " + formatKib(mem) + "   " + Yassm.I18n.t("zram.ratio") + " " + (ratio > 0 ? ratio.toFixed(2) + ":1" : "--");
-    }
-
     function compressionLine(originalKb, compressedKb) {
         const original = root.snapSwapKb(originalKb);
         const compressed = root.snapSwapKb(compressedKb);
@@ -1666,9 +1654,12 @@ BarWidget {
                     continue;
                 }
 
+                // Same shape as zswap. mem_used_total is what the device
+                // really costs in RAM and is within a few percent of the
+                // compressed size, so it stands in for it.
                 zramEntries.push({
                     name: base,
-                    text: root.zramLine(stats)
+                    text: compressionLine(stats.originalKb, stats.memKb)
                 });
             }
 
