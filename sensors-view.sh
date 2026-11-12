@@ -5,6 +5,10 @@ set -euo pipefail
 # Opened by the temperature click. The terminal closes as soon as this script
 # exits, so it prints the report and waits for Enter.
 
+# Take the keyboard before printing: the terminal maps behind the caller, so
+# the Enter prompt below would otherwise never receive the key.
+hyprctl dispatch 'hl.dsp.focus({ window = "class:org.omarchy.yassm-sensors" })' >/dev/null 2>&1 || true
+
 if ! command -v sensors >/dev/null 2>&1; then
 	if [[ ${LANG:-} == fr* ]]; then
 		printf 'sensors est absent : installer le paquet lm_sensors.\n' >&2
