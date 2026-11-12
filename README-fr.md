@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.90
+Version 1.29.91
 
 [English](README.md) | **Français**
 
@@ -97,7 +97,7 @@ marquées ci-dessous.
   de la dernière mise à jour des paquets (étendu) ;
 - **GPU** : utilisation (via `gpu_busy_percent`, ou calculée depuis le
   compteur AGX sur Apple Silicon), puissance, et détail de la mémoire GPU
-  (tampons applicatifs et pilote) quand le noyau expose `gpu_memory` ;
+  (objets et pilote) quand le noyau expose `gpu_memory` ;
 - **Charge**, **Alertes** : résumé court, ou liste des alertes (unités en
   échec, zombies avec leur parent, disque/RAM, santé de la batterie sous 20 %).
 

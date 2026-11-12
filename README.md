@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.90
+Version 1.29.91
 
 **English** | [Français](README-fr.md)
 
@@ -93,7 +93,7 @@ rows marked below.
   package update (extended);
 - **GPU**: utilisation (from `gpu_busy_percent`, or derived from the AGX busy
   counter on Apple Silicon), power draw, and the GPU memory breakdown
-  (application buffers and driver) when the kernel exposes `gpu_memory`;
+  (objects and driver) when the kernel exposes `gpu_memory`;
 - **Load**, **Alerts**: a short summary, or the alert list (failed units,
   zombies with their parent, disk/RAM, battery health under 20 %).
 

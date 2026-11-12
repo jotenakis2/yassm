@@ -1642,7 +1642,7 @@ BarWidget {
         }
 
         if (key === "gpu") {
-            const rows = [
+            const headRows = [
                 {
                     label: Yassm.I18n.t("gpu.usage"),
                     value: gpu === null ? Yassm.I18n.t("common.unavailable") : Math.round(gpu) + "%",
@@ -1651,35 +1651,54 @@ BarWidget {
             ];
 
             if (root.gpuKind === "agx") {
-                rows.push({
+                headRows.push({
                     label: Yassm.I18n.t("gpu.power"),
-                    value: root.gpuPowerMw > 0 ? (root.gpuPowerMw / 1000).toFixed(1) + " W" : "--"
+                    value: root.gpuPowerMw > 0 ? (root.gpuPowerMw / 1000).toFixed(1) + " W" : "--",
+                    dim: !(root.gpuPowerMw > 0)
                 });
             }
+
+            // Memory is its own block: driver-side allocations and the buffers
+            // the applications asked for ("objects").
+            const memoryRows = [];
 
             if (root.gpuMemoryPath !== "") {
-                rows.push({
-                    label: Yassm.I18n.t("gpu.memory"),
-                    value: Yassm.Format.formatKib(root.gpuMemUserKb)
-                });
-                // Driver-side allocations, not the application buffers.
-                rows.push({
-                    label: Yassm.I18n.t("gpu.kernel"),
+                memoryRows.push({
+                    label: Yassm.I18n.t("gpu.driver"),
                     value: root.gpuMemKernelKb > 0 ? Yassm.Format.formatKib(root.gpuMemKernelKb) : "--",
-                    dim: root.gpuMemKernelKb <= 0
+                    dim: !(root.gpuMemKernelKb > 0)
+                });
+                memoryRows.push({
+                    label: Yassm.I18n.t("gpu.objects"),
+                    value: root.gpuMemUserKb > 0 ? Yassm.Format.formatKib(root.gpuMemUserKb) : "--",
+                    dim: !(root.gpuMemUserKb > 0)
                 });
             }
 
+            // One label column for both blocks, so every colon lines up.
             let gpuLabelWidth = 0;
 
-            for (let i = 0; i < rows.length; i++) {
-                gpuLabelWidth = Math.max(gpuLabelWidth, rows[i].label.length);
+            for (let i = 0; i < headRows.length; i++) {
+                gpuLabelWidth = Math.max(gpuLabelWidth, headRows[i].label.length);
+            }
+
+            for (let i = 0; i < memoryRows.length; i++) {
+                gpuLabelWidth = Math.max(gpuLabelWidth, memoryRows[i].label.length);
             }
 
             const lines = [];
 
-            for (let i = 0; i < rows.length; i++) {
-                lines.push(root.dimWhen(rows[i].label.padEnd(gpuLabelWidth) + " : " + rows[i].value, rows[i].dim === true));
+            for (let i = 0; i < headRows.length; i++) {
+                lines.push(root.dimWhen(headRows[i].label.padEnd(gpuLabelWidth) + " : " + headRows[i].value, headRows[i].dim === true));
+            }
+
+            if (memoryRows.length > 0) {
+                lines.push("");
+                lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("gpu.memory"));
+
+                for (let i = 0; i < memoryRows.length; i++) {
+                    lines.push(root.dimWhen(memoryRows[i].label.padEnd(gpuLabelWidth) + " : " + memoryRows[i].value, memoryRows[i].dim === true));
+                }
             }
 
             return tooltipBlock(Yassm.I18n.t("title.gpu"), lines.join("\n"));
