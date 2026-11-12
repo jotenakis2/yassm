@@ -16,6 +16,7 @@ checks=(
 	"required|timeout|command guards"
 	"optional|curl|public address and country flag in the NET tooltip"
 	"optional|sensors|temperature report in a floating terminal"
+	"optional|grc|colours in the sensors report"
 	"optional|ip|LAN address in the NET tooltip"
 	"optional|nmcli|Wi-Fi frequency in the NET tooltip"
 )
