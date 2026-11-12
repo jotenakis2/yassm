@@ -2410,9 +2410,8 @@ BarWidget {
         }
 
         if (key === "temp") {
-            // --hold keeps the terminal open once sensors has printed; the
-            // report would otherwise vanish with the command.
-            Quickshell.execDetached(["/usr/bin/xdg-terminal-exec", "--app-id=org.omarchy.yassm-sensors", "--hold", "-e", "bash", root.sensorsViewScriptPath]);
+            // The script waits for Enter, so the terminal stays until then.
+            Quickshell.execDetached(["/usr/bin/xdg-terminal-exec", "--app-id=org.omarchy.yassm-sensors", "-e", "bash", root.sensorsViewScriptPath]);
             return;
         }
 
