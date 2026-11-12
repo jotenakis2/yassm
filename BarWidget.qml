@@ -2401,7 +2401,9 @@ BarWidget {
             return;
         }
 
-        if (key === "battery") {
+        // Battery and uptime both open the Omarchy system menu, where the
+        // power actions live.
+        if (key === "battery" || key === "uptime") {
             Quickshell.execDetached(["omarchy", "menu", "summon", "system"]);
             return;
         }

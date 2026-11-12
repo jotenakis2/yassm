@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.91
+Version 1.29.92
 
 [English](README.md) | **Français**
 
@@ -60,10 +60,10 @@ L'ordre et la visibilité de chaque module sont configurables.
 
 | Clic gauche sur | Ouvre |
 | --- | --- |
-| CPU, charge, GPU, RAM, swap, température, uptime | `btop`, ou `htop` si `btop` manque |
+| CPU, charge, GPU, RAM, swap, température | `btop`, ou `htop` si `btop` manque |
 | disque | le gestionnaire de fichiers par défaut (dossier personnel) |
 | réseau | le **Test de débit** d'Omarchy |
-| batterie | le menu **Système** d'Omarchy |
+| batterie, uptime | le menu **Système** d'Omarchy (actions d'alimentation) |
 | alertes | la dernière heure de warnings/erreurs, les unités systemd en échec et les zombies avec leur parent |
 
 Le **clic droit** ouvre les **Réglages**. Un clic hors des modules garde la
