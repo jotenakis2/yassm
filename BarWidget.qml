@@ -515,11 +515,6 @@ BarWidget {
 
         const metrics = Yassm.SystemMetrics;
 
-        if (key === "temp") {
-            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-sensors", "bash", root.sensorsViewScriptPath]);
-            return;
-        }
-
         if (key === "alerts") {
             return metrics.missingRequiredDeps.length > 0 || metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert || metrics.batteryHealthAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;
         }
@@ -2411,6 +2406,11 @@ BarWidget {
         // power actions live.
         if (key === "battery" || key === "uptime") {
             Quickshell.execDetached(["omarchy", "menu", "summon", "system"]);
+            return;
+        }
+
+        if (key === "temp") {
+            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-sensors", "bash", root.sensorsViewScriptPath]);
             return;
         }
 
