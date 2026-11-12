@@ -16,7 +16,7 @@ BarWidget {
     readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
     readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
     readonly property string alertsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("alerts-view.sh").toString().replace("file://", ""))
-    readonly property string sensorsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("sensors-view.sh").toString().replace("file://", ""))
+    readonly property string sensorsOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("sensors-open.sh").toString().replace("file://", ""))
 
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
@@ -2410,8 +2410,9 @@ BarWidget {
         }
 
         if (key === "temp") {
-            // The script waits for Enter, so the terminal stays until then.
-            Quickshell.execDetached(["/usr/bin/xdg-terminal-exec", "--app-id=org.omarchy.yassm-sensors", "-e", "bash", root.sensorsViewScriptPath]);
+            // sensors-open.sh launches the report and gives it the keyboard;
+            // sensors-view.sh waits for Enter before the window closes.
+            Quickshell.execDetached(["bash", root.sensorsOpenScriptPath]);
             return;
         }
 
