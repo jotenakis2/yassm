@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.92
+Version 1.29.93
 
 [English](README.md) | **Français**
 
@@ -60,8 +60,9 @@ L'ordre et la visibilité de chaque module sont configurables.
 
 | Clic gauche sur | Ouvre |
 | --- | --- |
-| CPU, charge, GPU, RAM, swap, température | `btop`, ou `htop` si `btop` manque |
+| CPU, charge, GPU, RAM, swap | `btop`, ou `htop` si `btop` manque |
 | disque | le gestionnaire de fichiers par défaut (dossier personnel) |
+| température | le rapport `sensors` complet dans un terminal flottant |
 | réseau | le **Test de débit** d'Omarchy |
 | batterie, uptime | le menu **Système** d'Omarchy (actions d'alimentation) |
 | alertes | la dernière heure de warnings/erreurs, les unités systemd en échec et les zombies avec leur parent |
@@ -164,7 +165,8 @@ masqués arrêtent l'échantillonnage. Mesures :
 Omarchy 4.5+, `bash`, `awk`, coreutils, `findmnt`, `ps` et `systemd`. En option :
 `btop` ou `htop` (cible du clic gauche), `curl` et `ip` (adresses réseau et drapeau du pays),
 `nmcli` (fréquence Wi-Fi), `ping` (latence NET), `nvidia-smi` (GPU NVIDIA),
-`less` (rapport des alertes), UPower et NetworkManager (batterie et SSID). Un
+`less` (rapports des alertes et des capteurs), `sensors` (rapport des
+capteurs), UPower et NetworkManager (batterie et SSID). Un
 outil optionnel manquant masque simplement le champ correspondant.
 
 Le widget nécessite une barre horizontale ; il est masqué sur une barre

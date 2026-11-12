@@ -16,6 +16,7 @@ BarWidget {
     readonly property string procSnapshotPath: decodeURIComponent(Qt.resolvedUrl("proc-snapshot.sh").toString().replace("file://", ""))
     readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
     readonly property string alertsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("alerts-view.sh").toString().replace("file://", ""))
+    readonly property string sensorsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("sensors-view.sh").toString().replace("file://", ""))
 
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
@@ -513,6 +514,11 @@ BarWidget {
         }
 
         const metrics = Yassm.SystemMetrics;
+
+        if (key === "temp") {
+            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-sensors", "bash", root.sensorsViewScriptPath]);
+            return;
+        }
 
         if (key === "alerts") {
             return metrics.missingRequiredDeps.length > 0 || metrics.hasSystemFailure || metrics.diskAlert || metrics.memoryAlert || metrics.batteryHealthAlert ? Yassm.ThemePalette.red : Yassm.ThemePalette.orange;

@@ -154,6 +154,7 @@ QtObject {
             "dep.systemctl": "Alerts module",
             "dep.timeout": "command guards",
             "dep.curl": "public address and country flag in the NET tooltip",
+            "dep.sensors": "temperature report in a floating terminal",
             "dep.ip": "LAN address in the NET tooltip",
             "dep.nmcli": "Wi-Fi frequency in the NET tooltip"
         })
@@ -301,6 +302,7 @@ QtObject {
             "dep.systemctl": "module Alertes",
             "dep.timeout": "garde-fous des commandes",
             "dep.curl": "adresse publique et drapeau du pays dans l'infobulle NET",
+            "dep.sensors": "rapport des capteurs dans un terminal flottant",
             "dep.ip": "adresse LAN dans l'infobulle NET",
             "dep.nmcli": "fréquence Wi-Fi dans l'infobulle NET"
         })
