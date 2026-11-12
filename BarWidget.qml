@@ -1213,24 +1213,33 @@ BarWidget {
 
     function tooltipBlock(title, body) {
         const lines = body.split("\n");
-        let width = title.length;
+
+        // Control markers and surrogate pairs do not occupy cells: measuring the
+        // raw string length made a dimmed line count two characters more than
+        // it draws, which widened the whole bubble.
+        function visibleLength(text) {
+            return text.replace(/[\u0001-\u0007]/g, "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_").length;
+        }
+
+        let width = visibleLength(title);
 
         for (let i = 0; i < lines.length; i++) {
-            width = Math.max(width, lines[i].length);
+            width = Math.max(width, visibleLength(lines[i]));
         }
 
         function padLine(line) {
             // NBSP padding keeps every line the same width, so the bar's
             // centered Text lines up their left edges in a monospace font.
+            const visible = visibleLength(line);
+
             if (line.startsWith(root.centeredMark)) {
                 const body = line.slice(1);
-                const visible = body.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_").length;
                 const indent = Math.max(0, Math.floor((width - visible) / 2));
 
-                return root.centeredMark + "\u00A0".repeat(indent) + body.padEnd(width - indent, "\u00A0");
+                return root.centeredMark + "\u00A0".repeat(indent) + body + "\u00A0".repeat(Math.max(0, width - indent - visible));
             }
 
-            return line.padEnd(width, "\u00A0");
+            return line + "\u00A0".repeat(Math.max(0, width - visible));
         }
 
         const padded = [padLine(title.toUpperCase())];
@@ -1313,13 +1322,16 @@ BarWidget {
                 // last active process goes idle. Non-breaking spaces are not
                 // trimmed from the end of the line. Dimmed like the kernel
                 // row: there is nothing to report right now.
-                lines.push(root.dimMark + Yassm.I18n.t("common.no_io").padEnd(processWidth, "\u00A0") + root.dimEndMark);
+                lines.push(root.dimMark + Yassm.I18n.t("common.no_io").padEnd(processWidth + 1, "\u00A0") + root.dimEndMark);
             } else {
                 for (let i = 0; i < root.diskProcesses.length; i++) {
                     const entry = root.diskProcesses[i];
                     const name = entry.name.length > nameWidth ? entry.name.slice(0, nameWidth - 1) + "…" : entry.name;
 
-                    lines.push(name.padEnd(nameWidth) + "  R" + Yassm.Format.formatRateField(entry.read / 1024) + "  W" + Yassm.Format.formatRateField(entry.write / 1024));
+                    // Trailing NBSP: Qt drops trailing spaces when measuring a
+                    // line, so without it a short rate narrowed the whole bubble
+                    // once real data replaced the "No I/O" placeholder.
+                    lines.push(name.padEnd(nameWidth) + "  R" + Yassm.Format.formatRateField(entry.read / 1024) + "  W" + Yassm.Format.formatRateField(entry.write / 1024) + "\u00A0");
                 }
             }
         }
