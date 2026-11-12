@@ -2,20 +2,22 @@
 # shellcheck enable=all
 set -euo pipefail
 
-# Opened by the temperature click: the full lm-sensors report, kept in a pager
-# so nothing is lost when the terminal is shorter than the sensor list.
+# Opened by the temperature click. The terminal is started with --hold, so the
+# report stays on screen after this script exits; no pager is needed.
 
-report=$(mktemp)
-trap 'rm -f "${report}"' EXIT
-
-sensors >"${report}" 2>&1 || true
-
-if [[ ! -s ${report} ]]; then
+if ! command -v sensors >/dev/null 2>&1; then
 	if [[ ${LANG:-} == fr* ]]; then
-		printf 'sensors ne renvoie aucun capteur (paquet lm_sensors ?).\n' >"${report}"
+		printf 'sensors est absent : installer le paquet lm_sensors.\n' >&2
 	else
-		printf 'sensors reported no sensors (lm_sensors package?).\n' >"${report}"
+		printf 'sensors is missing: install the lm_sensors package.\n' >&2
 	fi
+	exit 0
 fi
 
-less -R +G "${report}"
+if ! sensors; then
+	if [[ ${LANG:-} == fr* ]]; then
+		printf '\nsensors ne renvoie aucun capteur.\n' >&2
+	else
+		printf '\nsensors reported no sensors.\n' >&2
+	fi
+fi

@@ -2410,7 +2410,9 @@ BarWidget {
         }
 
         if (key === "temp") {
-            Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-sensors", "bash", root.sensorsViewScriptPath]);
+            // --hold keeps the terminal open once sensors has printed; the
+            // report would otherwise vanish with the command.
+            Quickshell.execDetached(["/usr/bin/xdg-terminal-exec", "--app-id=org.omarchy.yassm-sensors", "--hold", "-e", "bash", root.sensorsViewScriptPath]);
             return;
         }
 
