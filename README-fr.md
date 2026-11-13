@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.104
+Version 1.29.105
 
 [English](README.md) | **Français**
 
@@ -92,9 +92,9 @@ marquées ci-dessous.
   l'infobulle reste ouverte) ;
 - **Température** : tous les capteurs et ventilateurs, du plus chaud au plus
   froid ;
-- **Batterie** : état, temps restant et durée de l'état secteur/batterie en
-  cours ; puissance batterie et système, température du pack, cycles et santé
-  (étendu) ;
+- **Batterie** : état, temps restant et durée de l'état en cours (en
+  charge, sur secteur ou sur batterie) ; puissance batterie et système,
+  température du pack, cycles et santé (étendu) ;
 - **Uptime** : temps depuis le démarrage ; âge et date d'installation, date
   de la dernière mise à jour des paquets (étendu) ;
 - **GPU** : utilisation (via `gpu_busy_percent`, ou calculée depuis le

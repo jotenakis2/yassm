@@ -421,34 +421,66 @@ Singleton {
     readonly property string powerStateScriptPath: decodeURIComponent(Qt.resolvedUrl("../power-state.sh").toString().replace("file://", ""))
     property real batteryStateSince: 0
     property bool powerStateKnown: false
+    property bool powerStatePlugged: false
+    property real batteryChargingSince: 0
+    property bool chargingStateKnown: false
+    property bool chargingStateCharging: false
+    readonly property bool batteryCharging: hasBattery && batteryStatus === "Charging"
+
+    function persistPowerState() {
+        Quickshell.execDetached(["bash", metrics.powerStateScriptPath, "write", metrics.powerStatePlugged ? "1" : "0", String(metrics.batteryStateSince), String(metrics.batteryChargingSince)]);
+    }
 
     function notePowerState(plugged) {
-        const now = Date.now();
-
         if (!metrics.powerStateKnown || metrics.powerStatePlugged !== plugged) {
-            metrics.batteryStateSince = now;
+            metrics.batteryStateSince = Date.now();
             metrics.powerStatePlugged = plugged;
             metrics.powerStateKnown = true;
-            Quickshell.execDetached(["bash", metrics.powerStateScriptPath, "write", plugged ? "1" : "0", String(now)]);
+            metrics.persistPowerState();
         }
     }
 
-    property bool powerStatePlugged: false
+    function noteChargingState(charging) {
+        if (!metrics.chargingStateKnown || metrics.chargingStateCharging !== charging) {
+            metrics.batteryChargingSince = charging ? Date.now() : 0;
+            metrics.chargingStateCharging = charging;
+            metrics.chargingStateKnown = true;
+            metrics.persistPowerState();
+        }
+    }
 
     function applyPowerState(content) {
-        const fields = String(content || "").trim().split(/\s+/);
-        const plugged = fields[0] === "1";
-        const stamp = Number(fields[1]);
+        const lines = String(content || "").split("\n");
+        const values = {};
 
-        // Only trust the file when it describes the state we are in now.
-        if (Number.isFinite(stamp) && stamp > 0 && plugged === metrics.batteryPlugged && !metrics.powerStateKnown) {
-            metrics.batteryStateSince = stamp;
-            metrics.powerStatePlugged = plugged;
-            metrics.powerStateKnown = true;
-            return;
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].trim().split(/\s+/);
+
+            if (fields.length === 2) {
+                values[fields[0]] = fields[1];
+            }
         }
 
-        metrics.notePowerState(metrics.batteryPlugged);
+        const storedPlugged = values.plugged === "1";
+        const pluggedSince = Number(values.plugged_since) || 0;
+        const chargingSince = Number(values.charging_since) || 0;
+
+        // Only trust the file when it describes the state we are in now.
+        if (!metrics.powerStateKnown && pluggedSince > 0 && storedPlugged === metrics.batteryPlugged) {
+            metrics.batteryStateSince = pluggedSince;
+            metrics.powerStatePlugged = storedPlugged;
+            metrics.powerStateKnown = true;
+        } else {
+            metrics.notePowerState(metrics.batteryPlugged);
+        }
+
+        if (!metrics.chargingStateKnown && metrics.batteryCharging && chargingSince > 0) {
+            metrics.batteryChargingSince = chargingSince;
+            metrics.chargingStateCharging = true;
+            metrics.chargingStateKnown = true;
+        } else {
+            metrics.noteChargingState(metrics.batteryCharging);
+        }
     }
 
     Connections {
@@ -456,6 +488,14 @@ Singleton {
 
         function onOnBatteryChanged() {
             metrics.notePowerState(!UPower.onBattery);
+        }
+    }
+
+    Connections {
+        target: metrics.batteryDevice
+
+        function onStateChanged() {
+            metrics.noteChargingState(metrics.batteryCharging);
         }
     }
 

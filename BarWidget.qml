@@ -1842,12 +1842,23 @@ BarWidget {
                 dim: remaining === "--"
             });
 
-            // How long the current cable state has lasted (tracked by the
-            // sampler, since UPower does not expose it).
-            if (metrics.batteryStateSince > 0) {
+            // How long the current state has lasted: charging, on mains, or on
+            // battery. The sampler stamps each change, UPower exposes none.
+            let since = 0;
+            let sinceLabel = "";
+
+            if (metrics.batteryCharging && metrics.batteryChargingSince > 0) {
+                since = metrics.batteryChargingSince;
+                sinceLabel = Yassm.I18n.t("battery.charging_since");
+            } else if (metrics.batteryStateSince > 0) {
+                since = metrics.batteryStateSince;
+                sinceLabel = Yassm.I18n.t(metrics.batteryPlugged ? "battery.on_mains_since" : "battery.on_battery_since");
+            }
+
+            if (since > 0) {
                 rows.push({
-                    label: Yassm.I18n.t(metrics.batteryPlugged ? "battery.on_mains_since" : "battery.on_battery_since"),
-                    value: Yassm.Format.formatDuration((Date.now() - metrics.batteryStateSince) / 1000)
+                    label: sinceLabel,
+                    value: Yassm.Format.formatDuration((Date.now() - since) / 1000)
                 });
             }
 
