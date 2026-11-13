@@ -1376,7 +1376,11 @@ BarWidget {
 
             for (let i = 0; i < loads.length; i++) {
                 const percent = Math.round(100 * Number(loads[i]) / cores);
-                lines.push(labels[i] + Yassm.Format.formatLoad(loads[i]) + " → " + String(percent).padStart(3, " ") + "%");
+                const text = labels[i] + Yassm.Format.formatLoad(loads[i]) + " → " + String(percent).padStart(3, " ") + "%";
+
+                // The one-minute value is the live reading; the averages are
+                // context and stay in the background.
+                lines.push(root.dimWhen(text, i > 0));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.load"), lines.join("\n"));
@@ -1669,7 +1673,7 @@ BarWidget {
                 headRows.push({
                     label: Yassm.I18n.t("gpu.power"),
                     value: root.gpuPowerMw > 0 ? (root.gpuPowerMw / 1000).toFixed(1) + " W" : "--",
-                    dim: !(root.gpuPowerMw > 0)
+                    dim: true
                 });
             }
 
@@ -1681,7 +1685,7 @@ BarWidget {
                 memoryRows.push({
                     label: Yassm.I18n.t("gpu.driver"),
                     value: root.gpuMemKernelKb > 0 ? Yassm.Format.formatKib(root.gpuMemKernelKb) : "--",
-                    dim: !(root.gpuMemKernelKb > 0)
+                    dim: true
                 });
                 memoryRows.push({
                     label: Yassm.I18n.t("gpu.objects"),
@@ -1744,13 +1748,15 @@ BarWidget {
 
             ifaceRows.push({
                 label: Yassm.I18n.t("net.lan_ip"),
-                value: metrics.ifaceIpv4 !== "" ? metrics.ifaceIpv4 : "--"
+                value: metrics.ifaceIpv4 !== "" ? metrics.ifaceIpv4 : "--",
+                dim: true
             });
 
             if (root.showExtended) {
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.gateway"),
-                    value: metrics.gatewayV4 !== "" ? metrics.gatewayV4 : "--"
+                    value: metrics.gatewayV4 !== "" ? metrics.gatewayV4 : "--",
+                    dim: true
                 });
                 const wanFlag = Yassm.Format.countryFlag(metrics.wanCountry);
 
@@ -1766,7 +1772,8 @@ BarWidget {
             if (root.showExtended) {
                 ifaceRows.push({
                     label: Yassm.I18n.t("net.iface"),
-                    value: metrics.networkInterface
+                    value: metrics.networkInterface,
+                    dim: true
                 });
             }
 
@@ -1802,7 +1809,7 @@ BarWidget {
                 // "--" means the value is not available on this link (no
                 // gateway, WAN lookup pending, radio details off): dim the row
                 // instead of letting it read like a real address.
-                lines.push(root.dimWhen(text, ifaceRows[i].value === "--"));
+                lines.push(root.dimWhen(text, ifaceRows[i].dim === true || ifaceRows[i].value === "--"));
             }
 
             return tooltipBlock(Yassm.I18n.t("title.net"), lines.join("\n"));
@@ -1846,13 +1853,13 @@ BarWidget {
                 rows.push({
                     label: Yassm.I18n.t("battery.power"),
                     value: power,
-                    dim: power === "--"
+                    dim: true
                 });
                 // The SMC rail covers the whole machine, not just the pack.
                 rows.push({
                     label: Yassm.I18n.t("battery.system_power"),
                     value: metrics.systemPowerW > 0 ? metrics.systemPowerW.toFixed(1) + " W" : "--",
-                    dim: !(metrics.systemPowerW > 0)
+                    dim: true
                 });
 
                 // Asahi exposes the pack temperature as macsmc_battery; other
@@ -1876,11 +1883,13 @@ BarWidget {
 
                 rows.push({
                     label: Yassm.I18n.t("battery.cycles"),
-                    value: metrics.batteryCycles > 0 ? String(metrics.batteryCycles) : "--"
+                    value: metrics.batteryCycles > 0 ? String(metrics.batteryCycles) : "--",
+                    dim: true
                 });
                 rows.push({
                     label: Yassm.I18n.t("battery.health"),
-                    value: metrics.batteryHealth > 0 ? Math.round(metrics.batteryHealth) + "%" : "--"
+                    value: metrics.batteryHealth > 0 ? Math.round(metrics.batteryHealth) + "%" : "--",
+                    dim: true
                 });
             }
 
@@ -2062,7 +2071,10 @@ BarWidget {
                 lines.push(root.centeredMark + root.iconTemp + " " + Yassm.I18n.t("head.temperatures"));
 
                 for (let i = 0; i < tempRows.length; i++) {
-                    lines.push(tempRows[i].name.padEnd(nameWidth) + " : " + tempRows[i].value.padStart(valueWidth) + " " + "°C".padStart(unitWidth));
+                    const text = tempRows[i].name.padEnd(nameWidth) + " : " + tempRows[i].value.padStart(valueWidth) + " " + "°C".padStart(unitWidth);
+
+                    // Cool sensors are context: anything at or below 35 C.
+                    lines.push(root.dimWhen(text, temperatures[i].celsius <= 35));
                 }
             }
 
