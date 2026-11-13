@@ -1157,8 +1157,10 @@ BarWidget {
             lines.push(ageLabel.padEnd(width) + " : " + root.formatInstallAge(ageDays));
         }
 
-        lines.push(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : Yassm.I18n.t("common.unknown")));
-        lines.push(updateLabel.padEnd(width) + " : " + (metrics.updateDate !== "" ? metrics.updateDate : Yassm.I18n.t("common.unknown")));
+        // Dates are reference data, not a live reading: dimmed like the other
+        // secondary rows.
+        lines.push(root.dimWhen(dateLabel.padEnd(width) + " : " + (metrics.installDate !== "" ? metrics.installDate : Yassm.I18n.t("common.unknown")), true));
+        lines.push(root.dimWhen(updateLabel.padEnd(width) + " : " + (metrics.updateDate !== "" ? metrics.updateDate : Yassm.I18n.t("common.unknown")), true));
 
         return {
             width: width,
