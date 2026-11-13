@@ -1381,7 +1381,7 @@ PanelWindow {
             width: Style.space(4)
             height: handleHeight
             radius: width / 2
-            color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.45)
+            color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, Yassm.ThemePalette.dimOpacity)
             x: settingsFlick.x + settingsFlick.width - width
             y: settingsFlick.y + (settingsFlick.height - height) * (settingsFlick.contentY / maxOffset)
 

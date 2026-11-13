@@ -2891,7 +2891,7 @@ BarWidget {
                             color: root.segmentColor(metricKey)
                             // No usable GPU source: keep the "--%" readable
                             // but dimmed so it reads as unavailable.
-                            opacity: metricKey === "gpu" && root.gpu === null ? 0.45 : 1.0
+                            opacity: metricKey === "gpu" && root.gpu === null ? Yassm.ThemePalette.dimOpacity : 1.0
                             font.family: button.fontFamily
                             font.pixelSize: button.fontSize
                             renderType: Text.NativeRendering
@@ -3063,7 +3063,7 @@ BarWidget {
 
                                     textFormat: Text.PlainText
                                     text: modelData.text
-                                    color: modelData.dim ? Qt.rgba(tooltipLine.textColor.r, tooltipLine.textColor.g, tooltipLine.textColor.b, 0.45) : tooltipLine.textColor
+                                    color: modelData.dim ? Qt.rgba(tooltipLine.textColor.r, tooltipLine.textColor.g, tooltipLine.textColor.b, Yassm.ThemePalette.dimOpacity) : tooltipLine.textColor
                                     font.family: button.fontFamily
                                     font.pixelSize: modelData.small ? Style.font.body * 0.78 : Style.font.body
                                     font.weight: tooltipLine.lineHeading || tooltipLine.lineBold ? Font.Bold : Font.Normal

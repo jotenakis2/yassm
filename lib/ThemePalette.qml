@@ -11,6 +11,10 @@ import qs.Commons
 Singleton {
     id: root
 
+    // One opacity for every "secondary" element: dimmed tooltip runs, the
+    // unavailable GPU value, the settings scrollbar.
+    readonly property real dimOpacity: 0.45
+
     property color green: "#76946a"
     property color orange: "#c17158"
     property color red: "#a55555"
