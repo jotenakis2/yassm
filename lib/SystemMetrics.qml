@@ -415,6 +415,50 @@ Singleton {
     readonly property real batteryPowerW: hasBattery ? (Number(batteryDevice.changeRate) || 0) : 0
     readonly property bool batteryPlugged: hasBattery && !UPower.onBattery
 
+    // UPower never says when the cable was last (un)plugged, so the change is
+    // stamped here and written to the shell state dir; power-state.sh reads it
+    // back after a restart.
+    readonly property string powerStateScriptPath: decodeURIComponent(Qt.resolvedUrl("../power-state.sh").toString().replace("file://", ""))
+    property real batteryStateSince: 0
+    property bool powerStateKnown: false
+
+    function notePowerState(plugged) {
+        const now = Date.now();
+
+        if (!metrics.powerStateKnown || metrics.powerStatePlugged !== plugged) {
+            metrics.batteryStateSince = now;
+            metrics.powerStatePlugged = plugged;
+            metrics.powerStateKnown = true;
+            Quickshell.execDetached(["bash", metrics.powerStateScriptPath, "write", plugged ? "1" : "0", String(now)]);
+        }
+    }
+
+    property bool powerStatePlugged: false
+
+    function applyPowerState(content) {
+        const fields = String(content || "").trim().split(/\s+/);
+        const plugged = fields[0] === "1";
+        const stamp = Number(fields[1]);
+
+        // Only trust the file when it describes the state we are in now.
+        if (Number.isFinite(stamp) && stamp > 0 && plugged === metrics.batteryPlugged && !metrics.powerStateKnown) {
+            metrics.batteryStateSince = stamp;
+            metrics.powerStatePlugged = plugged;
+            metrics.powerStateKnown = true;
+            return;
+        }
+
+        metrics.notePowerState(metrics.batteryPlugged);
+    }
+
+    Connections {
+        target: UPower
+
+        function onOnBatteryChanged() {
+            metrics.notePowerState(!UPower.onBattery);
+        }
+    }
+
     // The aggregate DisplayDevice exposes percentage and power but leaves
     // nativePath and healthPercentage empty; the real battery device carries
     // them, so health and cycle count read from that one.
@@ -1828,6 +1872,18 @@ Singleton {
     }
 
     Process {
+        id: powerStateProcess
+
+        command: ["timeout", "3", "bash", metrics.powerStateScriptPath, "read"]
+
+        stdout: StdioCollector {
+            id: powerStateOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyPowerState(powerStateOutput.text)
+        }
+    }
+
+    Process {
         id: wanIpProcess
 
         command: ["timeout", "6", "curl", "-fsS", "--max-time", "5", "https://ipinfo.io/json"]
@@ -1924,5 +1980,6 @@ Singleton {
     Component.onCompleted: {
         installDateProcess.running = true;
         depsProcess.running = true;
+        powerStateProcess.running = true;
     }
 }

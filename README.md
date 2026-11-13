@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.103
+Version 1.29.104
 
 **English** | [Français](README-fr.md)
 
@@ -88,8 +88,9 @@ rows marked below.
   power and frequency, and a latency ping to omarchy.org (at open then every
   Slow interval while the tooltip stays open);
 - **Temperature**: every sensor and fan speed, hottest first;
-- **Battery**: state and time remaining; battery and system power, pack
-  temperature, cycles and health (extended);
+- **Battery**: state, time remaining and how long the current cable state
+  has lasted; battery and system power, pack temperature, cycles and health
+  (extended);
 - **Uptime**: time since boot; installation age and date, date of the last
   package update (extended);
 - **GPU**: utilisation (from `gpu_busy_percent`, or derived from the AGX busy
