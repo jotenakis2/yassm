@@ -172,6 +172,12 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(20, Math.min(100, value)) : 100;
     }
 
+    // Opacity of the secondary rows (dimmed tooltip runs, unavailable values).
+    readonly property int secondaryOpacity: {
+        const value = Math.round(Number(setting("secondaryOpacity", 45)));
+        return Number.isFinite(value) ? Math.max(10, Math.min(100, value)) : 45;
+    }
+
     readonly property int refreshInterval: {
         const value = Math.round(Number(setting("refreshInterval", 1)));
         return Number.isFinite(value) ? Math.max(1, Math.min(5, value)) : 1;
@@ -2801,6 +2807,13 @@ BarWidget {
     }
 
     // All bar instances share one sampler; the value is identical for each.
+    Binding {
+        target: Yassm.ThemePalette
+        property: "dimOpacity"
+        value: root.secondaryOpacity / 100
+        restoreMode: Binding.RestoreNone
+    }
+
     Binding {
         target: Yassm.SystemMetrics
         property: "fastIntervalMs"

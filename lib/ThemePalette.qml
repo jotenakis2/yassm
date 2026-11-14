@@ -12,8 +12,9 @@ Singleton {
     id: root
 
     // One opacity for every "secondary" element: dimmed tooltip runs, the
-    // unavailable GPU value, the settings scrollbar.
-    readonly property real dimOpacity: 0.45
+    // unavailable GPU value, the settings scrollbar. The bar binds it to the
+    // matching setting.
+    property real dimOpacity: 0.45
 
     property color green: "#76946a"
     property color orange: "#c17158"

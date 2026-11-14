@@ -932,13 +932,14 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: tooltipOpacityHover.hovered
-                            text: Yassm.I18n.t("settings.tooltip_opacity_tip")
+                            text: Yassm.I18n.t("settings.tooltip_transparency_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: Yassm.I18n.t("settings.tooltip_opacity")
+                            text: Yassm.I18n.t("settings.tooltip_transparency")
+                            elide: Text.ElideRight
                             palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
@@ -969,6 +970,69 @@ PanelWindow {
                             onReleased: function (value) {
                                 if (root.hostWidget) {
                                     root.hostWidget.updateSetting("tooltipOpacity", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: secondaryOpacityHover
+                        }
+
+                        PanelToolTip {
+                            visible: secondaryOpacityHover.hovered
+                            text: Yassm.I18n.t("settings.secondary_opacity_tip")
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.secondary_opacity")
+                            elide: Text.ElideRight
+                            palette.windowText: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(18)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: Math.round(secondaryOpacitySlider.liveValue) + "%"
+                            color: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            id: secondaryOpacitySlider
+
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 10
+                            maximum: 100
+                            step: 5
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.secondaryOpacity : 45
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("secondaryOpacity", Math.round(value));
                                 }
                             }
                         }
