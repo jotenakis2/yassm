@@ -158,6 +158,9 @@ PanelWindow {
     property bool thresholdsOpen: false
     property bool timersOpen: false
     property bool clicksOpen: false
+    // True while a custom-command field holds the keyboard: the panel key
+    // catcher then forwards everything to it instead of eating the keys.
+    property bool commandEditing: false
     property var clickAppsList: []
 
     // Threshold colours are only used when Colors is on, so the whole section
@@ -1630,9 +1633,34 @@ PanelWindow {
 
                             required property var modelData
 
-                            // Set when the custom entry is picked: the command
-                            // field below must take the keyboard once it shows.
-                            property bool pendingFocus: false
+                            // Retry counter for the custom command field: the
+                            // dropdown popup keeps the focus for a moment and
+                            // the field only shows once the setting lands.
+                            property int focusAttempts: 0
+
+                            function focusCommand() {
+                                focusAttempts = 0;
+                                focusRetry.restart();
+                            }
+
+                            Timer {
+                                id: focusRetry
+
+                                interval: 120
+                                repeat: true
+
+                                onTriggered: {
+                                    clickRow.focusAttempts += 1;
+
+                                    if (commandField.visible) {
+                                        commandField.forceActiveFocus();
+                                    }
+
+                                    if (commandField.activeFocus || clickRow.focusAttempts >= 12) {
+                                        stop();
+                                    }
+                                }
+                            }
 
                             Layout.fillWidth: true
                             spacing: Style.space(2)
@@ -1683,7 +1711,13 @@ PanelWindow {
                                                 root.setClickTarget(key, "cmd:");
                                             }
 
-                                            clickRow.pendingFocus = true;
+                                            // Try immediately as well: Qt.callLater
+                                            // lands after the popup closes, and the
+                                            // retry loop covers the rest.
+                                            Qt.callLater(function () {
+                                                commandField.forceActiveFocus();
+                                            });
+                                            clickRow.focusCommand();
                                             return;
                                         }
 
@@ -1701,22 +1735,7 @@ PanelWindow {
                                 Layout.leftMargin: Style.space(30)
                                 Layout.rightMargin: Style.space(8)
                                 visible: root.clickTarget(clickRow.modelData.key).startsWith("cmd:")
-                                onVisibleChanged: {
-                                    if (visible && clickRow.pendingFocus) {
-                                        clickRow.pendingFocus = false;
-                                        focusDelay.restart();
-                                    }
-                                }
-
-                                // The dropdown popup still owns focus when the
-                                // field appears, so hand it over just after.
-                                Timer {
-                                    id: focusDelay
-
-                                    interval: 80
-                                    repeat: false
-                                    onTriggered: commandField.forceActiveFocus()
-                                }
+                                onActiveFocusChanged: root.commandEditing = activeFocus
                                 text: {
                                     const target = root.clickTarget(clickRow.modelData.key);
 
@@ -1957,6 +1976,7 @@ PanelWindow {
 
         PanelKeyCatcher {
             anchors.fill: parent
+            blocked: root.commandEditing
 
             onCloseRequested: {
                 if (root.hostWidget) {
