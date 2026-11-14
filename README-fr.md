@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.110
+Version 1.29.111
 
 [English](README.md) | **Français**
 
@@ -67,9 +67,11 @@ L'ordre et la visibilité de chaque module sont configurables.
 | batterie, uptime | le menu **Système** d'Omarchy (actions d'alimentation) |
 | alertes | la dernière heure de warnings/erreurs, les unités systemd en échec et les zombies avec leur parent |
 
-Le **clic droit** ouvre les **Réglages**. Un clic hors des modules garde la
-cible générique : `btop`, puis `htop` ; les Réglages si aucun des deux n'est
-installé.
+Le **clic droit** ouvre les **Réglages**. Chaque cible ci-dessus se règle par
+module dans **Clics** (préréglage, application installée, ou commande
+personnalisée lancée dans un terminal flottant qui attend Entrée). Un clic
+hors des modules garde la cible générique : `btop`, puis `htop` ; les Réglages
+si aucun des deux n'est installé.
 
 ## Infobulles
 
@@ -143,7 +145,7 @@ apparaît aussi lorsqu'un **outil requis** manque, même si Alertes est désacti
 
 ## Réglages
 
-Clic droit sur le widget. Le panneau a quatre sections :
+Clic droit sur le widget. Le panneau a cinq sections :
 
 - **Modules** : activer/désactiver, glisser la poignée pour réordonner ;
 - **Affichage** : cadres, fond des modules, bordure, rayon des coins, couleurs,
@@ -151,6 +153,8 @@ Clic droit sur le widget. Le panneau a quatre sections :
   secondaire, processus affichés ;
 - **Seuils** : utilisation, disque, charge, réseau, batterie, température.
   Masqués tant que **Couleurs** est désactivé ;
+- **Clics** : la cible de chaque module (un préréglage, une application
+  installée, ou une commande personnalisée lancée dans un terminal flottant) ;
 - **Intervalles** : échantillonnage rapide (1–5 s) et lent (5–30 s).
 
 Les préférences sont stockées dans `~/.config/omarchy/shell.json`.

@@ -17,6 +17,7 @@ BarWidget {
     readonly property string diskIoScriptPath: decodeURIComponent(Qt.resolvedUrl("disk-io.sh").toString().replace("file://", ""))
     readonly property string alertsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("alerts-view.sh").toString().replace("file://", ""))
     readonly property string sensorsOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("sensors-open.sh").toString().replace("file://", ""))
+    readonly property string commandOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("command-open.sh").toString().replace("file://", ""))
 
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
@@ -176,6 +177,28 @@ BarWidget {
     readonly property int secondaryOpacity: {
         const value = Math.round(Number(setting("secondaryOpacity", 45)));
         return Number.isFinite(value) ? Math.max(10, Math.min(100, value)) : 45;
+    }
+
+    // Left-click target per module: preset:<id>, app:<desktop-id> or cmd:<command>.
+    readonly property var clickApps: setting("clickApps", {}) || {}
+    readonly property var clickDefaultTargets: ({
+            alerts: "preset:alerts",
+            battery: "preset:power",
+            cpu: "preset:monitor",
+            disk: "preset:files",
+            gpu: "preset:monitor",
+            load: "preset:monitor",
+            memory: "preset:monitor",
+            net: "preset:speedtest",
+            swap: "preset:monitor",
+            temp: "preset:sensors",
+            uptime: "preset:power"
+        })
+
+    function clickTarget(key) {
+        const map = root.clickApps || {};
+
+        return String(map[key] || root.clickDefaultTargets[key] || "preset:monitor");
     }
 
     // Fill of the module boxes, in percent of the bar foreground.
@@ -2457,31 +2480,62 @@ BarWidget {
     // Left click follows the module under the cursor; the gaps and the empty
     // area keep the generic monitor target.
     function activateSegment(key) {
-        if (key.indexOf("net") === 0) {
-            Quickshell.execDetached(["omarchy-shell", "shell", "summon", "omarchy.speedtest"]);
+        const target = root.clickTarget(key);
+
+        if (target.startsWith("app:")) {
+            const appId = target.slice(4);
+            const library = root.bar && root.bar.shell ? root.bar.shell.appLibrary : null;
+
+            if (library && appId !== "") {
+                library.launch(appId, appId);
+                return;
+            }
+
+            if (appId !== "") {
+                Quickshell.execDetached(["gtk-launch", appId + ".desktop"]);
+            }
+
             return;
         }
 
-        if (key === "disk") {
+        if (target.startsWith("cmd:")) {
+            const command = target.slice(4);
+
+            // Same treatment as the sensors report: a floating terminal that
+            // waits for Enter, so the output does not vanish.
+            if (command !== "") {
+                Quickshell.execDetached(["bash", root.commandOpenScriptPath, command]);
+            }
+
+            return;
+        }
+
+        // Presets keep the historical behaviour; "monitor" is the fallback.
+        const preset = target.startsWith("preset:") ? target.slice(7) : "monitor";
+
+        if (preset === "files") {
             Quickshell.execDetached(["xdg-open", Quickshell.env("HOME")]);
             return;
         }
 
-        // Battery and uptime both open the Omarchy system menu, where the
-        // power actions live.
-        if (key === "battery" || key === "uptime") {
+        if (preset === "speedtest") {
+            Quickshell.execDetached(["omarchy-shell", "shell", "summon", "omarchy.speedtest"]);
+            return;
+        }
+
+        if (preset === "power") {
             Quickshell.execDetached(["omarchy", "menu", "summon", "system"]);
             return;
         }
 
-        if (key === "temp") {
+        if (preset === "sensors") {
             // sensors-open.sh launches the report and gives it the keyboard;
             // sensors-view.sh waits for Enter before the window closes.
             Quickshell.execDetached(["bash", root.sensorsOpenScriptPath]);
             return;
         }
 
-        if (key === "alerts") {
+        if (preset === "alerts") {
             Quickshell.execDetached(["omarchy-launch-or-focus-tui", "--app-id=org.omarchy.yassm-alerts", "bash", root.alertsViewScriptPath]);
             return;
         }

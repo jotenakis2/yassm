@@ -157,10 +157,140 @@ PanelWindow {
     property bool layoutOpen: false
     property bool thresholdsOpen: false
     property bool timersOpen: false
+    property bool clicksOpen: false
+    property var clickAppsList: []
 
     // Threshold colours are only used when Colors is on, so the whole section
     // follows that toggle.
     readonly property bool thresholdsVisible: !root.hostWidget || root.hostWidget.showColors
+
+    // Left-click targets: one row per module.
+    readonly property var clickModules: [
+        {
+            key: "cpu",
+            icon: 0xF4BC,
+            label: Yassm.I18n.t("module.cpu")
+        },
+        {
+            key: "load",
+            icon: 0xF0F86,
+            label: Yassm.I18n.t("module.load")
+        },
+        {
+            key: "gpu",
+            icon: 0xF08AE,
+            label: Yassm.I18n.t("module.gpu")
+        },
+        {
+            key: "memory",
+            icon: 0xEFC5,
+            label: Yassm.I18n.t("module.memory")
+        },
+        {
+            key: "swap",
+            icon: 0xF04E2,
+            label: Yassm.I18n.t("module.swap")
+        },
+        {
+            key: "disk",
+            icon: 0xF02CA,
+            label: Yassm.I18n.t("module.disk")
+        },
+        {
+            key: "net",
+            icon: 0xF01DA,
+            label: Yassm.I18n.t("module.net")
+        },
+        {
+            key: "temp",
+            icon: 0xF050F,
+            label: Yassm.I18n.t("module.temp")
+        },
+        {
+            key: "battery",
+            icon: 0xF0079,
+            label: Yassm.I18n.t("module.battery")
+        },
+        {
+            key: "uptime",
+            icon: 0xF017,
+            label: Yassm.I18n.t("module.uptime")
+        },
+        {
+            key: "alerts",
+            icon: 0xF071,
+            label: Yassm.I18n.t("module.alerts")
+        }
+    ]
+
+    readonly property var clickPresets: [
+        {
+            value: "preset:monitor",
+            label: Yassm.I18n.t("click.monitor")
+        },
+        {
+            value: "preset:files",
+            label: Yassm.I18n.t("click.files")
+        },
+        {
+            value: "preset:speedtest",
+            label: Yassm.I18n.t("click.speedtest")
+        },
+        {
+            value: "preset:power",
+            label: Yassm.I18n.t("click.power")
+        },
+        {
+            value: "preset:sensors",
+            label: Yassm.I18n.t("click.sensors")
+        },
+        {
+            value: "preset:alerts",
+            label: Yassm.I18n.t("click.alerts")
+        }
+    ]
+
+    readonly property var clickOptions: root.clickPresets.concat(root.clickAppsList).concat([
+        {
+            value: "custom",
+            label: Yassm.I18n.t("click.custom")
+        }
+    ])
+
+    function clickTarget(key) {
+        return root.hostWidget ? root.hostWidget.clickTarget(key) : "preset:monitor";
+    }
+
+    function setClickTarget(key, value) {
+        if (!root.hostWidget) {
+            return;
+        }
+
+        const next = Object.assign({}, root.hostWidget.clickApps);
+        next[key] = value;
+        root.hostWidget.updateSetting("clickApps", next);
+    }
+
+    function loadClickApps() {
+        const library = root.hostBar && root.hostBar.shell ? root.hostBar.shell.appLibrary : null;
+
+        if (!library) {
+            return;
+        }
+
+        const rows = library.sortedEntries("");
+        const out = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const entry = rows[i].entry;
+            out.push({
+                value: "app:" + String(entry.id),
+                label: library.entryName(entry)
+            });
+        }
+
+        root.clickAppsList = out;
+    }
 
     function orderKey(settingKey) {
         return settingKey.startsWith("show") ? settingKey.charAt(4).toLowerCase() + settingKey.slice(5) : settingKey;
@@ -1384,6 +1514,151 @@ PanelWindow {
                         toRed: 140
                     }
                 }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Style.space(12)
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(Color.popups.text.r, Color.popups.text.g, Color.popups.text.b, 0.12)
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Style.space(10)
+                    Layout.bottomMargin: Style.space(2)
+                    spacing: Style.space(4)
+
+                    Text {
+                        id: clicksChevron
+
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredWidth: Style.space(10)
+                        text: String.fromCodePoint(root.clicksOpen ? 0xF0140 : 0xF0142)
+                        color: clicksChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
+                        font.family: Style.font.family
+                        font.pixelSize: Style.font.body
+
+                        MouseArea {
+                            id: clicksChevronArea
+
+                            anchors.fill: parent
+                            anchors.margins: -Style.space(4)
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onClicked: {
+                                root.clicksOpen = !root.clicksOpen;
+
+                                if (root.clicksOpen) {
+                                    root.loadClickApps();
+                                }
+                            }
+                        }
+                    }
+
+                    PanelSectionHeader {
+                        text: Yassm.I18n.t("settings.clicks")
+                        foreground: Color.popups.text
+                        fontFamily: Style.font.family
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Style.space(4)
+                    visible: root.clicksOpen
+
+                    Repeater {
+                        model: root.clickModules
+
+                        ColumnLayout {
+                            id: clickRow
+
+                            required property var modelData
+
+                            Layout.fillWidth: true
+                            spacing: Style.space(2)
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: Style.space(32)
+                                Layout.leftMargin: Style.space(8)
+                                spacing: Style.space(8)
+
+                                Text {
+                                    Layout.preferredWidth: Style.space(14)
+                                    text: String.fromCodePoint(clickRow.modelData.icon)
+                                    color: Color.popups.text
+                                    font.family: Style.font.family
+                                    font.pixelSize: Style.font.body
+                                }
+
+                                Label {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    text: clickRow.modelData.label
+                                    elide: Text.ElideRight
+                                    palette.windowText: Color.popups.text
+                                    font.family: Style.font.family
+                                    font.pixelSize: Style.font.body
+                                }
+
+                                SearchableDropdown {
+                                    Layout.preferredWidth: Style.space(190)
+                                    Layout.alignment: Qt.AlignVCenter
+                                    value: {
+                                        const target = root.clickTarget(clickRow.modelData.key);
+
+                                        return target.startsWith("cmd:") ? "custom" : target;
+                                    }
+                                    options: root.clickOptions
+                                    foreground: Color.popups.text
+                                    background: Color.popups.background
+                                    fontFamily: Style.font.family
+
+                                    onChanged: function (value) {
+                                        const key = clickRow.modelData.key;
+                                        const current = root.clickTarget(key);
+                                        const next = value === "custom" ? (current.startsWith("cmd:") ? current : "cmd:") : value;
+
+                                        if (next !== current) {
+                                            root.setClickTarget(key, next);
+                                        }
+                                    }
+                                }
+                            }
+
+                            TextField {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Style.space(30)
+                                Layout.rightMargin: Style.space(8)
+                                visible: root.clickTarget(clickRow.modelData.key).startsWith("cmd:")
+                                text: {
+                                    const target = root.clickTarget(clickRow.modelData.key);
+
+                                    return target.startsWith("cmd:") ? target.slice(4) : "";
+                                }
+                                placeholderText: Yassm.I18n.t("click.custom_placeholder")
+                                foreground: Color.popups.text
+                                accent: Color.accent
+                                font.family: Style.font.family
+
+                                onEditingFinished: {
+                                    const key = clickRow.modelData.key;
+                                    const command = text.trim();
+
+                                    if (command !== "" && command !== root.clickTarget(key).slice(4)) {
+                                        root.setClickTarget(key, "cmd:" + command);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: Style.space(12)

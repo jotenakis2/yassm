@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.110
+Version 1.29.111
 
 **English** | [Français](README-fr.md)
 
@@ -66,8 +66,10 @@ The order and visibility of every module are configurable.
 | battery, uptime | the Omarchy **System** menu (power actions) |
 | alerts | the last hour of warnings/errors, the failed systemd units and the zombies with their parent |
 
-Right-click opens **Settings**. A click outside the modules keeps the generic
-target: `btop`, then `htop`; Settings when neither is installed.
+Right-click opens **Settings**. Every target above can be changed per module
+in **Clicks** (preset, installed app, or a custom command that runs in a
+floating terminal and waits for Enter). A click outside the modules keeps the
+generic target: `btop`, then `htop`; Settings when neither is installed.
 
 ## Tooltips
 
@@ -138,7 +140,7 @@ is disabled.
 
 ## Settings
 
-Right-click the widget. The panel has four sections:
+Right-click the widget. The panel has five sections:
 
 - **Modules**: toggle a module, drag the handle to reorder;
 - **Layout**: boxes, module background, border width, corner radius, colors,
@@ -146,6 +148,8 @@ Right-click the widget. The panel has four sections:
   shown;
 - **Thresholds**: usage, disk, load, network, battery, temperature. Hidden
   while **Colors** is off;
+- **Clicks**: the target of each module (a preset, an installed app, or a
+  custom command run in a floating terminal);
 - **Timers**: fast sampling (1–5 s) and slow sampling (5–30 s).
 
 Preferences are stored in `~/.config/omarchy/shell.json`.
