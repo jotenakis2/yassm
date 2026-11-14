@@ -165,6 +165,13 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(0, Math.min(3, value)) : 1;
     }
 
+    // Percentage applied to the theme's tooltip background alpha, so 100 keeps
+    // the theme look and lower values thin the bubble out.
+    readonly property int tooltipOpacity: {
+        const value = Math.round(Number(setting("tooltipOpacity", 100)));
+        return Number.isFinite(value) ? Math.max(20, Math.min(100, value)) : 100;
+    }
+
     readonly property int refreshInterval: {
         const value = Math.round(Number(setting("refreshInterval", 1)));
         return Number.isFinite(value) ? Math.max(1, Math.min(5, value)) : 1;
@@ -3027,7 +3034,7 @@ BarWidget {
             // the right border (visible on the NET tooltip).
             implicitWidth: Math.ceil(tooltipColumn.implicitWidth + Style.space(20)) + 2
             implicitHeight: Math.ceil(tooltipColumn.implicitHeight + Style.space(14)) + 2
-            color: Color.tooltip.background
+            color: Qt.rgba(Color.tooltip.background.r, Color.tooltip.background.g, Color.tooltip.background.b, Color.tooltip.background.a * root.tooltipOpacity / 100)
             borderSpec: Border.surfaceSpec("tooltip", "border", Color.tooltip.border, 1)
             radius: Style.cornerRadius
 

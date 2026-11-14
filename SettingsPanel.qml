@@ -927,6 +927,68 @@ PanelWindow {
                         }
 
                         HoverHandler {
+                            id: tooltipOpacityHover
+                        }
+
+                        PanelToolTip {
+                            visible: tooltipOpacityHover.hovered
+                            text: Yassm.I18n.t("settings.tooltip_opacity_tip")
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.tooltip_opacity")
+                            palette.windowText: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(18)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: Math.round(tooltipOpacitySlider.liveValue) + "%"
+                            color: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            id: tooltipOpacitySlider
+
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 20
+                            maximum: 100
+                            step: 5
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.tooltipOpacity : 100
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("tooltipOpacity", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
                             id: maxProcessesHover
                         }
 
