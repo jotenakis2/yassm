@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.109
+Version 1.29.110
 
 [English](README.md) | **Français**
 
@@ -147,7 +147,7 @@ Clic droit sur le widget. Le panneau a quatre sections :
 
 - **Modules** : activer/désactiver, glisser la poignée pour réordonner ;
 - **Affichage** : cadres, fond des modules, bordure, rayon des coins, couleurs,
-  données étendues, espacements, transparence des infobulles, opacité du texte
+  données étendues, espacements, opacité des infobulles, opacité du texte
   secondaire, processus affichés ;
 - **Seuils** : utilisation, disque, charge, réseau, batterie, température.
   Masqués tant que **Couleurs** est désactivé ;

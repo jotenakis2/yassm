@@ -997,13 +997,13 @@ PanelWindow {
 
                         PanelToolTip {
                             visible: tooltipOpacityHover.hovered
-                            text: Yassm.I18n.t("settings.tooltip_transparency_tip")
+                            text: Yassm.I18n.t("settings.tooltip_opacity_tip")
                         }
 
                         Label {
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            text: Yassm.I18n.t("settings.tooltip_transparency")
+                            text: Yassm.I18n.t("settings.tooltip_opacity")
                             elide: Text.ElideRight
                             palette.windowText: Color.popups.text
                             font.family: Style.font.family

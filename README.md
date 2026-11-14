@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.109
+Version 1.29.110
 
 **English** | [Français](README-fr.md)
 
@@ -142,8 +142,8 @@ Right-click the widget. The panel has four sections:
 
 - **Modules**: toggle a module, drag the handle to reorder;
 - **Layout**: boxes, module background, border width, corner radius, colors,
-  extended data, spacing, tooltip transparency, secondary text opacity,
-  processes shown;
+  extended data, spacing, tooltip opacity, secondary text opacity, processes
+  shown;
 - **Thresholds**: usage, disk, load, network, battery, temperature. Hidden
   while **Colors** is off;
 - **Timers**: fast sampling (1–5 s) and slow sampling (5–30 s).
