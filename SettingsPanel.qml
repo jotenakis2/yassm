@@ -1571,6 +1571,48 @@ PanelWindow {
                     spacing: Style.space(4)
                     visible: root.clicksOpen
 
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        Layout.leftMargin: Style.space(8)
+                        spacing: Style.space(8)
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.settings_button")
+                            elide: Text.ElideRight
+                            palette.windowText: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Dropdown {
+                            Layout.preferredWidth: Style.space(260)
+                            Layout.alignment: Qt.AlignVCenter
+                            value: root.hostWidget ? root.hostWidget.settingsButton : "right"
+                            options: [
+                                {
+                                    value: "right",
+                                    label: Yassm.I18n.t("click.button_right")
+                                },
+                                {
+                                    value: "left",
+                                    label: Yassm.I18n.t("click.button_left")
+                                }
+                            ]
+                            foreground: Color.popups.text
+                            background: Color.popups.background
+                            fontFamily: Style.font.family
+
+                            onChanged: function (value) {
+                                if (root.hostWidget && value !== root.hostWidget.settingsButton) {
+                                    root.hostWidget.updateSetting("settingsButton", value);
+                                }
+                            }
+                        }
+                    }
+
                     Repeater {
                         model: root.clickModules
 

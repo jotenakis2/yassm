@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.113
+Version 1.29.114
 
 **English** | [Français](README-fr.md)
 
@@ -66,7 +66,9 @@ The order and visibility of every module are configurable.
 | battery, uptime | the Omarchy **System** menu (power actions) |
 | alerts | the last hour of warnings/errors, the failed systemd units and the zombies with their parent |
 
-Right-click opens **Settings**. Every target above can be changed per module
+The button that opens **Settings** is configurable in **Clicks** (right by
+default); the other button triggers the module action. Every target can be
+changed per module
 in **Clicks** (preset, installed app, or a custom command that runs in a
 floating terminal and waits for Enter). A click outside the modules keeps the
 generic target: `btop`, then `htop`; Settings when neither is installed.

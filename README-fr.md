@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.113
+Version 1.29.114
 
 [English](README.md) | **Français**
 
@@ -67,7 +67,8 @@ L'ordre et la visibilité de chaque module sont configurables.
 | batterie, uptime | le menu **Système** d'Omarchy (actions d'alimentation) |
 | alertes | la dernière heure de warnings/erreurs, les unités systemd en échec et les zombies avec leur parent |
 
-Le **clic droit** ouvre les **Réglages**. Chaque cible ci-dessus se règle par
+Le bouton qui ouvre les **Réglages** se choisit dans **Clics** (clic droit
+par défaut) ; l'autre déclenche l'action du module. Chaque cible se règle par
 module dans **Clics** (préréglage, application installée, ou commande
 personnalisée lancée dans un terminal flottant qui attend Entrée). Un clic
 hors des modules garde la cible générique : `btop`, puis `htop` ; les Réglages

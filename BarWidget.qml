@@ -195,6 +195,10 @@ BarWidget {
             uptime: "preset:power"
         })
 
+    // Which mouse button opens the settings panel; the other one triggers the
+    // module action.
+    readonly property string settingsButton: setting("settingsButton", "right") === "left" ? "left" : "right"
+
     function clickTarget(key) {
         const map = root.clickApps || {};
 
@@ -2927,10 +2931,16 @@ BarWidget {
         // press), so the segment under the cursor is taken from the hover
         // tracker rather than from a MouseArea of ours.
         onPressed: function (buttonCode) {
-            if (buttonCode === Qt.LeftButton) {
-                root.activateSegment(root.hoveredSegment);
-            } else if (buttonCode === Qt.RightButton) {
+            const isRight = buttonCode === Qt.RightButton;
+
+            if (buttonCode !== Qt.LeftButton && !isRight) {
+                return;
+            }
+
+            if (isRight === (root.settingsButton === "right")) {
                 root.togglePanel();
+            } else {
+                root.activateSegment(root.hoveredSegment);
             }
         }
 
