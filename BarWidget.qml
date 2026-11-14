@@ -1690,14 +1690,14 @@ BarWidget {
 
             if (root.gpuMemoryPath !== "") {
                 memoryRows.push({
-                    label: Yassm.I18n.t("gpu.driver"),
-                    value: root.gpuMemKernelKb > 0 ? Yassm.Format.formatKib(root.gpuMemKernelKb) : "--",
-                    dim: true
-                });
-                memoryRows.push({
                     label: Yassm.I18n.t("gpu.objects"),
                     value: root.gpuMemUserKb > 0 ? Yassm.Format.formatKib(root.gpuMemUserKb) : "--",
                     dim: !(root.gpuMemUserKb > 0)
+                });
+                memoryRows.push({
+                    label: Yassm.I18n.t("gpu.driver"),
+                    value: root.gpuMemKernelKb > 0 ? Yassm.Format.formatKib(root.gpuMemKernelKb) : "--",
+                    dim: true
                 });
             }
 
