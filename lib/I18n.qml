@@ -273,6 +273,8 @@ QtObject {
             "settings.boxes": "Cadres",
             "settings.colors": "Couleurs",
             "settings.extended": "Données étendues dans les infobulles",
+            "settings.box_opacity": "Fond des modules",
+            "settings.box_opacity_tip": "Remplissage des cadres, en pourcentage de la couleur du texte de la barre. 3 % par défaut ; ne s'applique que si Cadres est activé.",
             "settings.box_border": "Bordure des cadres",
             "settings.box_border_tip": "Épaisseur de la bordure des cadres, en pixels (1–4).\nPar défaut, celle du thème.",
             "settings.box_radius": "Rayon des coins",

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.108
+Version 1.29.109
 
 **English** | [Français](README-fr.md)
 
@@ -141,7 +141,8 @@ is disabled.
 Right-click the widget. The panel has four sections:
 
 - **Modules**: toggle a module, drag the handle to reorder;
-- **Layout**: boxes, border width, corner radius, colors, extended data,
+- **Layout**: boxes, module background, border width, corner radius,
+  colors, extended data,
   spacing, tooltip transparency, secondary text opacity, processes shown;
 - **Thresholds**: usage, disk, load, network, battery, temperature. Hidden
   while **Colors** is off;

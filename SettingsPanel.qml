@@ -661,6 +661,71 @@ PanelWindow {
                     }
 
                     RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Style.space(32)
+                        spacing: Style.space(8)
+                        // The fill of the boxes has no effect when they are off.
+                        visible: root.hostWidget ? root.hostWidget.showBoxes : true
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse
+
+                            onWheel: function (event) {
+                                root.scrollPanel(event.angleDelta.y);
+                                event.accepted = true;
+                            }
+                        }
+
+                        HoverHandler {
+                            id: boxOpacityHover
+                        }
+
+                        PanelToolTip {
+                            visible: boxOpacityHover.hovered
+                            text: Yassm.I18n.t("settings.box_opacity_tip")
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: Yassm.I18n.t("settings.box_opacity")
+                            elide: Text.ElideRight
+                            palette.windowText: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        Text {
+                            Layout.preferredWidth: Style.space(18)
+                            Layout.alignment: Qt.AlignVCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: Math.round(boxOpacitySlider.liveValue) + "%"
+                            color: Color.popups.text
+                            font.family: Style.font.family
+                            font.pixelSize: Style.font.body
+                        }
+
+                        PanelSlider {
+                            id: boxOpacitySlider
+
+                            Layout.preferredWidth: Style.space(160)
+                            Layout.alignment: Qt.AlignVCenter
+                            bar: root.hostBar
+                            minimum: 0
+                            maximum: 30
+                            step: 1
+                            integer: true
+                            value: root.hostWidget ? root.hostWidget.boxOpacity : 3
+
+                            onReleased: function (value) {
+                                if (root.hostWidget) {
+                                    root.hostWidget.updateSetting("boxOpacity", Math.round(value));
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
                         visible: root.hostWidget ? root.hostWidget.setting("showBoxes", true) : false
 
                         Layout.fillWidth: true

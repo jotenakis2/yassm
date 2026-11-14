@@ -178,6 +178,12 @@ BarWidget {
         return Number.isFinite(value) ? Math.max(10, Math.min(100, value)) : 45;
     }
 
+    // Fill of the module boxes, in percent of the bar foreground.
+    readonly property int boxOpacity: {
+        const value = Math.round(Number(setting("boxOpacity", 3)));
+        return Number.isFinite(value) ? Math.max(0, Math.min(30, value)) : 3;
+    }
+
     readonly property int refreshInterval: {
         const value = Math.round(Number(setting("refreshInterval", 1)));
         return Number.isFinite(value) ? Math.max(1, Math.min(5, value)) : 1;
@@ -2913,7 +2919,7 @@ BarWidget {
                     implicitWidth: segmentContent.implicitWidth + paddingX * 2
                     implicitHeight: segmentContent.implicitHeight + paddingY * 2
                     radius: root.showBoxes ? Style.space(root.boxRadius) : 0
-                    color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.03) : "transparent"
+                    color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, root.boxOpacity / 100) : "transparent"
                     border.width: root.showBoxes ? root.boxBorder : 0
                     border.color: root.showBoxes ? Qt.rgba(button.foreground.r, button.foreground.g, button.foreground.b, 0.20) : "transparent"
 
