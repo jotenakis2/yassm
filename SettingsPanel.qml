@@ -257,12 +257,13 @@ PanelWindow {
         }
     ]
 
-    readonly property var clickOptions: root.clickPresets.concat(root.hostWidget ? root.hostWidget.clickAppChoices : []).concat([
+    // Presets, then the custom command, then the installed applications.
+    readonly property var clickOptions: root.clickPresets.concat([
         {
             value: "custom",
             label: Yassm.I18n.t("click.custom")
         }
-    ])
+    ]).concat(root.hostWidget ? root.hostWidget.clickAppChoices : [])
 
     function clickTarget(key) {
         return root.hostWidget ? root.hostWidget.clickTarget(key) : "preset:monitor";
