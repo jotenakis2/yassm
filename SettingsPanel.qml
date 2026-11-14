@@ -1585,6 +1585,15 @@ PanelWindow {
                             palette.windowText: Color.popups.text
                             font.family: Style.font.family
                             font.pixelSize: Style.font.body
+
+                            HoverHandler {
+                                id: settingsButtonHover
+                            }
+
+                            PanelToolTip {
+                                visible: settingsButtonHover.hovered
+                                text: Yassm.I18n.t("settings.settings_button_tip")
+                            }
                         }
 
                         Dropdown {
