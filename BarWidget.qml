@@ -18,6 +18,16 @@ BarWidget {
     readonly property string alertsViewScriptPath: decodeURIComponent(Qt.resolvedUrl("alerts-view.sh").toString().replace("file://", ""))
     readonly property string sensorsOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("sensors-open.sh").toString().replace("file://", ""))
     readonly property string commandOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("command-open.sh").toString().replace("file://", ""))
+    readonly property string appLauncherScriptPath: decodeURIComponent(Qt.resolvedUrl("launch-app.sh").toString().replace("file://", ""))
+    readonly property string appListScriptPath: decodeURIComponent(Qt.resolvedUrl("list-apps.sh").toString().replace("file://", ""))
+    // Filled on demand for the click picker in Settings.
+    property var clickAppChoices: []
+
+    function loadClickApps() {
+        if (!appsListProcess.running) {
+            appsListProcess.running = true;
+        }
+    }
 
     // Linux USER_HZ is 100 on the supported architectures.
     readonly property int clkTck: 100
@@ -2488,15 +2498,11 @@ BarWidget {
 
         if (target.startsWith("app:")) {
             const appId = target.slice(4);
-            const library = root.bar && root.bar.shell ? root.bar.shell.appLibrary : null;
 
-            if (library && appId !== "") {
-                library.launch(appId, appId);
-                return;
-            }
-
+            // launch-app.sh reads the desktop entry: a terminal entry goes to
+            // omarchy-launch-tui, anything else to gtk-launch.
             if (appId !== "") {
-                Quickshell.execDetached(["gtk-launch", appId + ".desktop"]);
+                Quickshell.execDetached(["bash", root.appLauncherScriptPath, appId]);
             }
 
             return;
@@ -2757,6 +2763,37 @@ BarWidget {
         onLoadFailed: {
             root.gpuMemUserKb = 0;
             root.gpuMemKernelKb = 0;
+        }
+    }
+
+    Process {
+        id: appsListProcess
+
+        command: ["timeout", "5", "bash", root.appListScriptPath]
+
+        stdout: StdioCollector {
+            id: appsListOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                const lines = appsListOutput.text.split("\n");
+                const out = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const fields = lines[i].split("\t");
+
+                    if (fields.length < 2 || fields[0] === "") {
+                        continue;
+                    }
+
+                    out.push({
+                        value: "app:" + fields[0],
+                        label: fields[1]
+                    });
+                }
+
+                root.clickAppChoices = out;
+            }
         }
     }
 

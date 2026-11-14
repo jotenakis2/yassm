@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3
+Version 1.3.1
 
 [English](README.md) | **Français**
 
@@ -161,7 +161,8 @@ Clic droit sur le widget. Le panneau a cinq sections, ouvertes une à la fois
 - **Seuils** : utilisation, disque, charge, réseau, batterie, température.
   Masqués tant que **Couleurs** est désactivé ;
 - **Clics** : la cible de chaque module (un préréglage, une application
-  installée, ou une commande personnalisée lancée dans un terminal flottant) ;
+  installée — les applications terminal s'ouvrent dans un terminal — ou une
+  commande personnalisée lancée dans un terminal flottant) ;
 - **Intervalles** : échantillonnage rapide (1–5 s) et lent (5–30 s).
 
 Les préférences sont stockées dans `~/.config/omarchy/shell.json`.

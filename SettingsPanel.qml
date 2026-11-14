@@ -166,7 +166,6 @@ PanelWindow {
     // True while a custom-command field holds the keyboard: the panel key
     // catcher then forwards everything to it instead of eating the keys.
     property bool commandEditing: false
-    property var clickAppsList: []
 
     // Threshold colours are only used when Colors is on, so the whole section
     // follows that toggle.
@@ -258,7 +257,7 @@ PanelWindow {
         }
     ]
 
-    readonly property var clickOptions: root.clickPresets.concat(root.clickAppsList).concat([
+    readonly property var clickOptions: root.clickPresets.concat(root.hostWidget ? root.hostWidget.clickAppChoices : []).concat([
         {
             value: "custom",
             label: Yassm.I18n.t("click.custom")
@@ -280,24 +279,9 @@ PanelWindow {
     }
 
     function loadClickApps() {
-        const library = root.hostBar && root.hostBar.shell ? root.hostBar.shell.appLibrary : null;
-
-        if (!library) {
-            return;
+        if (root.hostWidget) {
+            root.hostWidget.loadClickApps();
         }
-
-        const rows = library.sortedEntries("");
-        const out = [];
-
-        for (let i = 0; i < rows.length; i++) {
-            const entry = rows[i].entry;
-            out.push({
-                value: "app:" + String(entry.id),
-                label: library.entryName(entry)
-            });
-        }
-
-        root.clickAppsList = out;
     }
 
     function orderKey(settingKey) {

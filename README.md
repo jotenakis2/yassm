@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3
+Version 1.3.1
 
 **English** | [Français](README-fr.md)
 
@@ -155,8 +155,8 @@ Right-click the widget. The panel has five sections, one open at a time
   shown;
 - **Thresholds**: usage, disk, load, network, battery, temperature. Hidden
   while **Colors** is off;
-- **Clicks**: the target of each module (a preset, an installed app, or a
-  custom command run in a floating terminal);
+- **Clicks**: the target of each module (a preset, an installed app — terminal
+  apps open in a terminal — or a custom command run in a floating terminal);
 - **Timers**: fast sampling (1–5 s) and slow sampling (5–30 s).
 
 Preferences are stored in `~/.config/omarchy/shell.json`.
