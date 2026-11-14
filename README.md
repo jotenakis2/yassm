@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.116
+Version 1.29.117
 
 **English** | [Français](README-fr.md)
 
@@ -142,7 +142,8 @@ is disabled.
 
 ## Settings
 
-Right-click the widget. The panel has five sections:
+Right-click the widget. The panel has five sections, one open at a time
+(expanding one folds the others):
 
 - **Modules**: toggle a module, drag the handle to reorder;
 - **Layout**: boxes, module background, border width, corner radius, colors,

@@ -153,11 +153,16 @@ PanelWindow {
     property int dragTo: -1
 
     // Section disclosure state, kept for the session only.
-    property bool modulesOpen: true
-    property bool layoutOpen: false
-    property bool thresholdsOpen: false
-    property bool timersOpen: false
-    property bool clicksOpen: false
+    // Accordion: a single section is expanded at a time (empty = all folded).
+    property string openSection: "modules"
+
+    function toggleSection(name) {
+        root.openSection = root.openSection === name ? "" : name;
+
+        if (root.openSection === "clicks") {
+            root.loadClickApps();
+        }
+    }
     // True while a custom-command field holds the keyboard: the panel key
     // catcher then forwards everything to it instead of eating the keys.
     property bool commandEditing: false
@@ -495,7 +500,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.modulesOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.openSection === "modules" ? 0xF0140 : 0xF0142)
                         color: modulesChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -508,7 +513,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: root.modulesOpen = !root.modulesOpen
+                            onClicked: root.toggleSection("modules")
                         }
                     }
 
@@ -536,7 +541,7 @@ PanelWindow {
                     id: moduleList
 
                     Layout.fillWidth: true
-                    visible: root.modulesOpen
+                    visible: root.openSection === "modules"
                     spacing: Style.space(2)
 
                     Repeater {
@@ -676,7 +681,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.layoutOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.openSection === "layout" ? 0xF0140 : 0xF0142)
                         color: layoutChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -689,7 +694,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: root.layoutOpen = !root.layoutOpen
+                            onClicked: root.toggleSection("layout")
                         }
                     }
 
@@ -707,7 +712,7 @@ PanelWindow {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: Style.space(4)
-                    visible: root.layoutOpen
+                    visible: root.openSection === "layout"
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -1319,7 +1324,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.thresholdsOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.openSection === "thresholds" ? 0xF0140 : 0xF0142)
                         color: temperatureChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -1332,7 +1337,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: root.thresholdsOpen = !root.thresholdsOpen
+                            onClicked: root.toggleSection("thresholds")
                         }
                     }
 
@@ -1349,7 +1354,7 @@ PanelWindow {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    visible: root.thresholdsVisible && root.thresholdsOpen
+                    visible: root.thresholdsVisible && root.openSection === "thresholds"
                     spacing: Style.space(6)
 
                     // Legend: the three colour dots, once, above the fields.
@@ -1535,7 +1540,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.clicksOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.openSection === "clicks" ? 0xF0140 : 0xF0142)
                         color: clicksChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -1548,13 +1553,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: {
-                                root.clicksOpen = !root.clicksOpen;
-
-                                if (root.clicksOpen) {
-                                    root.loadClickApps();
-                                }
-                            }
+                            onClicked: root.toggleSection("clicks")
                         }
                     }
 
@@ -1572,7 +1571,7 @@ PanelWindow {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: Style.space(4)
-                    visible: root.clicksOpen
+                    visible: root.openSection === "clicks"
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -1777,7 +1776,7 @@ PanelWindow {
 
                         Layout.alignment: Qt.AlignVCenter
                         Layout.preferredWidth: Style.space(10)
-                        text: String.fromCodePoint(root.timersOpen ? 0xF0140 : 0xF0142)
+                        text: String.fromCodePoint(root.openSection === "timers" ? 0xF0140 : 0xF0142)
                         color: timersChevronArea.containsMouse ? Color.popups.text : Qt.darker(Color.popups.text, 1.4)
                         font.family: Style.font.family
                         font.pixelSize: Style.font.body
@@ -1790,7 +1789,7 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
 
-                            onClicked: root.timersOpen = !root.timersOpen
+                            onClicked: root.toggleSection("timers")
                         }
                     }
 
@@ -1808,7 +1807,7 @@ PanelWindow {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: Style.space(4)
-                    visible: root.timersOpen
+                    visible: root.openSection === "timers"
 
                     RowLayout {
                         Layout.fillWidth: true
