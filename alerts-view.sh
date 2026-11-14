@@ -14,13 +14,13 @@ export SYSTEMD_COLORS=1
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [[ ${LANG:-} == fr* ]]; then
-	journal_title="journal : dernière heure, warning et au-dessus"
+	journal_title="journal : erreurs de la dernière heure"
 	system_title="unités systemd en échec : système"
 	user_title="unités systemd en échec : utilisateur"
 	zombie_title="processus zombie (pid, âge, parent)"
 	zombie_none="aucun"
 else
-	journal_title="journal: last hour, warning and above"
+	journal_title="journal: last hour errors"
 	system_title="failed units: system"
 	user_title="failed units: user"
 	zombie_title="zombie processes (pid, age, parent)"
@@ -51,7 +51,7 @@ trap 'rm -f "${report}"' EXIT
 
 {
 	printf '== %s ==\n\n' "${journal_title}"
-	journalctl -b -p warning --no-hostname --since=-1h --no-pager || true
+	journalctl -b -p error --since=-1h --no-pager || true
 	printf '\n== %s ==\n\n' "${system_title}"
 	systemctl --failed --no-pager || true
 	printf '\n== %s ==\n\n' "${user_title}"

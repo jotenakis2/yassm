@@ -1,11 +1,15 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.29.117
+Version 1.3
 
 **English** | [Français](README-fr.md)
 
 A compact Omarchy bar widget: CPU, RAM, swap, load, GPU, disk, network,
 temperature, battery, uptime and alerts, each with a detailed tooltip.
+
+**Feature complete.** The widget covers what it set out to do: new features
+are not planned, only bug fixes and Omarchy compatibility updates.
+
 
 Repository: <https://github.com/jotenakis2/yassm>
 
