@@ -1579,6 +1579,10 @@ PanelWindow {
 
                             required property var modelData
 
+                            // Set when the custom entry is picked: the command
+                            // field below must take the keyboard once it shows.
+                            property bool pendingFocus: false
+
                             Layout.fillWidth: true
                             spacing: Style.space(2)
 
@@ -1606,8 +1610,8 @@ PanelWindow {
                                     font.pixelSize: Style.font.body
                                 }
 
-                                SearchableDropdown {
-                                    Layout.preferredWidth: Style.space(190)
+                                Dropdown {
+                                    Layout.preferredWidth: Style.space(260)
                                     Layout.alignment: Qt.AlignVCenter
                                     value: {
                                         const target = root.clickTarget(clickRow.modelData.key);
@@ -1622,20 +1626,46 @@ PanelWindow {
                                     onChanged: function (value) {
                                         const key = clickRow.modelData.key;
                                         const current = root.clickTarget(key);
-                                        const next = value === "custom" ? (current.startsWith("cmd:") ? current : "cmd:") : value;
 
-                                        if (next !== current) {
-                                            root.setClickTarget(key, next);
+                                        if (value === "custom") {
+                                            if (!current.startsWith("cmd:")) {
+                                                root.setClickTarget(key, "cmd:");
+                                            }
+
+                                            clickRow.pendingFocus = true;
+                                            return;
+                                        }
+
+                                        if (value !== current) {
+                                            root.setClickTarget(key, value);
                                         }
                                     }
                                 }
                             }
 
                             TextField {
+                                id: commandField
+
                                 Layout.fillWidth: true
                                 Layout.leftMargin: Style.space(30)
                                 Layout.rightMargin: Style.space(8)
                                 visible: root.clickTarget(clickRow.modelData.key).startsWith("cmd:")
+                                onVisibleChanged: {
+                                    if (visible && clickRow.pendingFocus) {
+                                        clickRow.pendingFocus = false;
+                                        focusDelay.restart();
+                                    }
+                                }
+
+                                // The dropdown popup still owns focus when the
+                                // field appears, so hand it over just after.
+                                Timer {
+                                    id: focusDelay
+
+                                    interval: 80
+                                    repeat: false
+                                    onTriggered: commandField.forceActiveFocus()
+                                }
                                 text: {
                                     const target = root.clickTarget(clickRow.modelData.key);
 
