@@ -882,10 +882,17 @@ BarWidget {
     // One dim line above a process table: the same totals split by owner.
     // Fixed widths keep the tooltip from resizing as the values change.
     function userSummaryLine(selfValue, rootValue, otherValue, memory) {
-        const valueWidth = memory ? 8 : 6;
+        // Both lines read in percent: of the total CPU for the fast sampler,
+        // of the total RAM for the RSS sums.
+        const valueWidth = 6;
         const labelWidth = 7;
+        const totalRamKb = Number(Yassm.SystemMetrics.memoryTotalKb);
         const format = function (value) {
-            return memory ? Yassm.Format.formatKibAsGib(value) : value.toFixed(1) + "%";
+            if (!memory) {
+                return value.toFixed(1) + "%";
+            }
+
+            return (totalRamKb > 0 ? 100 * value / totalRamKb : 0).toFixed(1) + "%";
         };
         const column = function (label, value) {
             return Yassm.I18n.t(label).padEnd(labelWidth) + format(value).padStart(valueWidth);
