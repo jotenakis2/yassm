@@ -331,6 +331,10 @@ Singleton {
         Quickshell.execDetached(["bash", metrics.netSessionScriptPath, "write", String(Math.round(metrics.networkRxSessionKb)), String(Math.round(metrics.networkTxSessionKb))]);
     }
     property var networkPrevious: null
+    // Owner of the shell process: the process tooltips split their totals
+    // between this user, root and everyone else.
+    property int selfUid: -1
+
     readonly property bool hasNetwork: networkInterface !== ""
     property real wifiLevel: 0
 
@@ -2003,6 +2007,25 @@ Singleton {
     }
 
     Process {
+        id: selfUidProcess
+
+        command: ["timeout", "3", "id", "-u"]
+
+        stdout: StdioCollector {
+            id: selfUidOutput
+            waitForEnd: true
+
+            onStreamFinished: {
+                const value = Number(selfUidOutput.text.trim());
+
+                if (Number.isFinite(value)) {
+                    metrics.selfUid = Math.round(value);
+                }
+            }
+        }
+    }
+
+    Process {
         id: powerStateProcess
 
         command: ["timeout", "3", "bash", metrics.powerStateScriptPath, "read"]
@@ -2113,5 +2136,6 @@ Singleton {
         depsProcess.running = true;
         powerStateProcess.running = true;
         netSessionProcess.running = true;
+        selfUidProcess.running = true;
     }
 }

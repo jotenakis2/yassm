@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.5
+Version 1.3.6
 
 **English** | [Français](README-fr.md)
 
@@ -82,9 +82,11 @@ generic target: `btop`, then `htop`; Settings when neither is installed.
 Hover a module for its details. **Extended data** in Settings adds the extra
 rows marked below.
 
-- **CPU**: per-core usage; top userland processes; PSI and per-core
+- **CPU**: per-core usage; top userland processes, split between you, root and
+  other accounts; PSI and per-core
   frequencies (extended);
-- **RAM**: total, used, available; top userland processes; buffers, cache,
+- **RAM**: total, used, available; top userland processes, split between you,
+  root and other accounts; buffers, cache,
   the htop-style used figure and PSI (extended);
 - **Swap**: per-device usage, zram and zswap details (extended; they
   read *Empty* until something is compressed);

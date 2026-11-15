@@ -9,3 +9,8 @@ for stat in /proc/[0-9]*/stat; do
 	[[ -r ${stat} ]] || continue
 	printf '%s\n' "$(<"${stat}")"
 done
+
+# Owner of every pid, for the "you / root / others" summary in the tooltips.
+# A single find is far cheaper than a stat or a status read per process.
+printf '%s\n' "--uids--"
+find /proc -maxdepth 1 -type d -name '[0-9]*' -printf '%f %U\n'

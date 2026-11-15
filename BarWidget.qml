@@ -110,6 +110,13 @@ BarWidget {
 
     property var processCpu: []
     property var processMemory: []
+    // Same totals split between the current user, root and the rest.
+    property real processCpuSelf: 0
+    property real processCpuRoot: 0
+    property real processCpuOther: 0
+    property real processMemorySelfKb: 0
+    property real processMemoryRootKb: 0
+    property real processMemoryOtherKb: 0
     property var diskProcesses: []
     property var diskIoSnapshot: null
 
@@ -773,17 +780,19 @@ BarWidget {
     // half as wide as a percentage module.
     function aggregateProcesses(content, limit) {
         const byName = {};
+        const byUid = {};
         const lines = content.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
             const parts = lines[i].trim().split(/\s+/);
 
-            if (parts.length < 4) {
+            if (parts.length < 5) {
                 continue;
             }
 
-            const pid = Number(parts[0]);
-            const ppid = Number(parts[1]);
+            const uid = Number(parts[0]);
+            const pid = Number(parts[1]);
+            const ppid = Number(parts[2]);
             const value = Number(parts[parts.length - 1]);
 
             if (!Number.isFinite(pid) || !Number.isFinite(ppid)) {
@@ -800,13 +809,14 @@ BarWidget {
                 continue;
             }
 
-            const name = parts.slice(2, -1).join(" ") || "?";
+            const name = parts.slice(3, -1).join(" ") || "?";
 
             if (name === "ps") {
                 continue;
             }
 
             byName[name] = (byName[name] || 0) + value;
+            byUid[Number.isFinite(uid) ? uid : -1] = (byUid[Number.isFinite(uid) ? uid : -1] || 0) + value;
         }
 
         const entries = Object.keys(byName).map(function (name) {
@@ -820,11 +830,58 @@ BarWidget {
             return right.value - left.value;
         });
 
-        return entries.slice(0, limit || 10);
+        return {
+            rows: entries.slice(0, limit || 10),
+            byUid: byUid
+        };
     }
 
     function applyProcessMemory(content) {
-        root.processMemory = aggregateProcesses(content, root.maxProcesses);
+        const aggregate = aggregateProcesses(content, root.maxProcesses);
+
+        root.processMemory = aggregate.rows;
+        root.applyUserTotals(aggregate.byUid, true);
+    }
+
+    // "you / root / others": the last group absorbs anything that is neither
+    // the current user nor root, so the three always add up to the total.
+    function applyUserTotals(byUid, memory) {
+        let total = 0;
+
+        for (const uid in byUid) {
+            total += byUid[uid];
+        }
+
+        const selfUid = Yassm.SystemMetrics.selfUid;
+        const selfValue = selfUid >= 0 ? (byUid[selfUid] || 0) : 0;
+        const rootValue = selfUid === 0 ? 0 : (byUid[0] || 0);
+        const otherValue = Math.max(0, total - selfValue - rootValue);
+
+        if (memory) {
+            root.processMemorySelfKb = selfValue;
+            root.processMemoryRootKb = rootValue;
+            root.processMemoryOtherKb = otherValue;
+        } else {
+            root.processCpuSelf = selfValue;
+            root.processCpuRoot = rootValue;
+            root.processCpuOther = otherValue;
+        }
+    }
+
+    // One dim line above a process table: the same totals split by owner.
+    // Fixed widths keep the tooltip from resizing as the values change.
+    function userSummaryLine(selfValue, rootValue, otherValue, memory) {
+        const valueWidth = memory ? 10 : 6;
+        const labelWidth = 7;
+        const format = function (value) {
+            return memory ? Yassm.Format.formatKib(value) : value.toFixed(1) + "%";
+        };
+        const column = function (label, value) {
+            return Yassm.I18n.t(label).padEnd(labelWidth) + format(value).padStart(valueWidth);
+        };
+        const parts = [column("group.you", selfValue), column("group.root", rootValue), column("group.others", otherValue)];
+
+        return parts.join("  ");
     }
 
     function startDiskIo() {
@@ -923,9 +980,28 @@ BarWidget {
             return;
         }
 
+        // proc-snapshot.sh ends with the pid → uid table used by the owner
+        // summary; the per-process stat lines come first.
+        const marker = "--uids--";
+        const separator = content.indexOf(marker);
+        const statText = separator < 0 ? content : content.slice(0, separator);
+        const ownerText = separator < 0 ? "" : content.slice(separator + marker.length);
+        const owners = {};
+        const ownerLines = ownerText.split("\n");
+
+        for (let i = 0; i < ownerLines.length; i++) {
+            const fields = ownerLines[i].trim().split(/\s+/);
+            const pid = Number(fields[0]);
+            const uid = Number(fields[1]);
+
+            if (Number.isFinite(pid) && Number.isFinite(uid)) {
+                owners[pid] = uid;
+            }
+        }
+
         const now = Date.now();
         const current = {};
-        const lines = content.split("\n");
+        const lines = statText.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
@@ -983,6 +1059,7 @@ BarWidget {
         }
 
         const byName = {};
+        const byUid = {};
         const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
 
         for (const key in current) {
@@ -1005,7 +1082,13 @@ BarWidget {
             // "Processes shown" setting, so 20 always means 20 userland rows
             // when that many processes exist (idle ones display 0.0%).
             byName[entry.comm] = (byName[entry.comm] || 0) + percent;
+
+            const uid = owners[Number(key)];
+            const owner = Number.isFinite(uid) ? uid : -1;
+            byUid[owner] = (byUid[owner] || 0) + percent;
         }
+
+        root.applyUserTotals(byUid, false);
 
         const entries = Object.keys(byName).map(function (name) {
             return {
@@ -1513,6 +1596,7 @@ BarWidget {
             if (showKernel || root.processMemory.length > 0) {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
+                lines.push(root.dimMark + root.userSummaryLine(root.processMemorySelfKb, root.processMemoryRootKb, root.processMemoryOtherKb, true) + root.dimEndMark);
             }
 
             if (showKernel) {
@@ -1703,6 +1787,7 @@ BarWidget {
                 }
 
                 lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
+                lines.push(root.dimMark + root.userSummaryLine(root.processCpuSelf, root.processCpuRoot, root.processCpuOther, false) + root.dimEndMark);
 
                 if (showKernel) {
                     lines.push(root.boldMark + root.dimMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth) + root.dimEndMark);
@@ -2841,7 +2926,7 @@ BarWidget {
     Process {
         id: memoryTopProcess
 
-        command: ["timeout", "5", "ps", "-eo", "pid=,ppid=,comm=,rss=", "--sort=-rss"]
+        command: ["timeout", "5", "ps", "-eo", "uid=,pid=,ppid=,comm=,rss=", "--sort=-rss"]
 
         stdout: StdioCollector {
             id: memoryTopOutput
