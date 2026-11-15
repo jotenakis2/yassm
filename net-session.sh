@@ -8,7 +8,10 @@ set -euo pipefail
 
 state_dir=${XDG_STATE_HOME:-${HOME}/.local/state}/yassm
 state_file=${state_dir}/net-session
-boot_id=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null || true)
+# Read straight into the variable: a `cat` here would cost a second process
+# start for a 36-byte file, which is most of this script's runtime.
+boot_id=""
+IFS= read -r boot_id </proc/sys/kernel/random/boot_id || true
 
 case ${1:-read} in
 read)
@@ -22,7 +25,7 @@ read)
 write)
 	[[ -n ${boot_id} ]] || exit 1
 
-	mkdir -p "${state_dir}"
+	[[ -d ${state_dir} ]] || mkdir -p "${state_dir}"
 	printf '%s %s %s\n' "${boot_id}" "${2:-0}" "${3:-0}" >"${state_file}"
 	;;
 *)
