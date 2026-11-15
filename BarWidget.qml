@@ -1056,10 +1056,17 @@ BarWidget {
                 continue;
             }
 
+            // The pid → uid table and the stat lines are two reads: a process
+            // started in between is missing from the first. Reuse the owner of
+            // the previous sample when there is one.
+            const known = owners[pid];
+            const before = root.cpuSnapshot ? root.cpuSnapshot[pid] : null;
+
             current[pid] = {
                 comm: comm,
                 ppid: ppid,
-                ticks: ticks
+                ticks: ticks,
+                uid: Number.isFinite(known) ? known : (before ? before.uid : -1)
             };
         }
 
@@ -1105,8 +1112,7 @@ BarWidget {
             // Keep zero-delta processes too: the list is capped by the
             // "Processes shown" setting, so 20 always means 20 userland rows
             // when that many processes exist (idle ones display 0.0%).
-            const uid = owners[Number(key)];
-            const owner = Number.isFinite(uid) ? uid : -1;
+            const owner = entry.uid;
             const id = owner + "\u0000" + entry.comm;
             const bucket = byName[id] || {
                 name: entry.comm,

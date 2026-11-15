@@ -360,9 +360,15 @@ Singleton {
     }
 
     function userName(uid) {
+        // Unknown owner (the pid table and the stat snapshot are two reads, so
+        // a process can be missing from one): print nothing rather than "-1".
+        if (!(uid >= 0)) {
+            return "";
+        }
+
         const name = metrics.userNames[uid];
 
-        return name ? String(name) : String(uid);
+        return name ? String(name) : "uid " + String(uid);
     }
 
     readonly property bool hasNetwork: networkInterface !== ""
