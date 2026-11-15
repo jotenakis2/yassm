@@ -115,18 +115,19 @@ On demand only:
 
 | Action | Cost | When |
 | --- | --- | --- |
-| `proc-snapshot.sh` × 2 | 11 ms each | CPU tooltip open (first snapshot + 1 s warmup) |
+| `proc-snapshot.sh` | ~15 ms | CPU tooltip open, at the bar cadence (stat lines + owner table) |
 | `cpu-freq.sh` | 5 ms | CPU or battery tooltip open, Fast (frequencies + system power) |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | GPU tooltip open, Slow |
 | `/sys/class/drm/*/device/agx_stats` | < 1 ms | GPU module visible, Fast (Apple Silicon) |
-| `ps -eo … rss` | ~13 ms | RAM tooltip open, at the Slow interval |
-| `disk-io.sh` | 12 ms | DISK tooltip open, at the Slow interval |
+| `ps -eo … rss` | ~13 ms | RAM tooltip open, at the bar cadence |
+| `disk-io.sh` | 12 ms | DISK tooltip open, at the bar cadence |
 | `ip -4 -o addr` | 1 ms | each NET tooltip open |
 | `wifi-freq.sh` | 9 ms | NET tooltip open, Fast (wireless) |
 | `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
 | `curl https://ipinfo.io/json` | one HTTPS request | NET tooltip open, cache 5 min or uplink change |
 | `install-date.sh` | 12 ms | once at startup (Uptime tooltip, install and last-update dates) |
 | `deps.sh` | 3 ms | once at startup (Settings warning) |
+| `getent passwd` | 1 ms | once at startup (process owners) |
 
 ## Total
 

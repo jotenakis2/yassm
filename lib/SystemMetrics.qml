@@ -334,6 +334,36 @@ Singleton {
     // Owner of the shell process: the process tooltips split their totals
     // between this user, root and everyone else.
     property int selfUid: -1
+    // uid → login name, read once from /etc/passwd so the process rows can
+    // print their owner. Unknown uids fall back to the number.
+    property var userNames: ({})
+
+    function applyPasswd(content) {
+        const names = {};
+        const lines = String(content || "").split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+            const fields = lines[i].split(":");
+
+            if (fields.length < 4) {
+                continue;
+            }
+
+            const uid = Number(fields[2]);
+
+            if (Number.isFinite(uid) && fields[0] !== "") {
+                names[uid] = fields[0];
+            }
+        }
+
+        metrics.userNames = names;
+    }
+
+    function userName(uid) {
+        const name = metrics.userNames[uid];
+
+        return name ? String(name) : String(uid);
+    }
 
     readonly property bool hasNetwork: networkInterface !== ""
     property real wifiLevel: 0
@@ -1701,6 +1731,20 @@ Singleton {
         onLoaded: metrics.applyNetDev(text())
     }
 
+    // getent rather than /etc/passwd: systemd's dynamic users (62454 and
+    // friends) only exist through NSS.
+    Process {
+        id: passwdProcess
+
+        command: ["timeout", "3", "getent", "passwd"]
+
+        stdout: StdioCollector {
+            id: passwdOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyPasswd(passwdOutput.text)
+        }
+    }
+
     FileView {
         id: procSwaps
         path: "/proc/swaps"
@@ -2137,5 +2181,6 @@ Singleton {
         powerStateProcess.running = true;
         netSessionProcess.running = true;
         selfUidProcess.running = true;
+        passwdProcess.running = true;
     }
 }

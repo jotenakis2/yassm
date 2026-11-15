@@ -116,18 +116,19 @@ Aucun de ces processus ne survit entre deux exécutions.
 
 | Action | Coût | Quand |
 | --- | --- | --- |
-| `proc-snapshot.sh` × 2 | 11 ms chacun | tooltip CPU ouvert (photo initiale + warmup de 1 s) |
+| `proc-snapshot.sh` | ~15 ms | tooltip CPU ouvert, à la cadence de la barre (lignes stat + table des propriétaires) |
 | `cpu-freq.sh` | 5 ms | tooltip CPU ou batterie ouvert, Fast (fréquences + puissance système) |
 | `/sys/class/drm/*/device/gpu_memory` | < 1 ms | tooltip GPU ouvert, lent |
 | `/sys/class/drm/*/device/agx_stats` | < 1 ms | module GPU visible, Fast (Apple Silicon) |
-| `ps -eo … rss` | ~13 ms | tooltip RAM ouvert, à l'échantillonnage lent |
-| `disk-io.sh` | 12 ms | tooltip DISK ouvert, à l'échantillonnage lent |
+| `ps -eo … rss` | ~13 ms | tooltip RAM ouvert, à la cadence de la barre |
+| `disk-io.sh` | 12 ms | tooltip DISK ouvert, à la cadence de la barre |
 | `ip -4 -o addr` | 1 ms | à chaque ouverture du tooltip NET |
 | `wifi-freq.sh` | 9 ms | tooltip NET ouvert, Fast (sans fil) |
 | `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, Fast (sans fil) |
 | `curl https://ipinfo.io/json` | une requête HTTPS | tooltip NET ouvert, cache 5 min ou changement de lien |
 | `install-date.sh` | 12 ms | une fois au démarrage (tooltip Uptime, installation et dernière mise à jour) |
 | `deps.sh` | 3 ms | une fois au démarrage (avertissement Settings) |
+| `getent passwd` | 1 ms | une fois au démarrage (propriétaires des processus) |
 
 ## Total
 

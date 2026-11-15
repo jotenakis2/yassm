@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.14
+Version 1.3.15
 
 [English](README.md) | **Français**
 
@@ -86,10 +86,12 @@ Survolez un module pour ses détails. **Données étendues** ajoute les lignes
 marquées ci-dessous.
 
 - **CPU** : utilisation par cœur ; top des processus utilisateur, réparti entre
-  vous, root et les autres comptes ; PSI et
+  vous, root et les autres comptes, chaque ligne indiquant son propriétaire ;
+  PSI et
   fréquences par cœur (étendu) ;
 - **RAM** : total, utilisée, disponible ; top des processus utilisateur, réparti
-  entre vous, root et les autres comptes ;
+  entre vous, root et les autres comptes, chaque ligne indiquant son
+  propriétaire ;
   tampon, cache, la valeur « utilisée » façon htop et PSI (étendu) ;
 - **Swap** : usage par périphérique, détails zram et zswap (étendu ;
   ils affichent *Vide* tant que rien n'est compressé) ;

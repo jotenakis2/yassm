@@ -821,20 +821,26 @@ BarWidget {
             }
 
             const name = parts.slice(3, -1).join(" ") || "?";
+            const owner = Number.isFinite(uid) ? uid : -1;
+            const id = owner + "\u0000" + name;
 
             if (name === "ps") {
                 continue;
             }
 
-            byName[name] = (byName[name] || 0) + value;
-            byUid[Number.isFinite(uid) ? uid : -1] = (byUid[Number.isFinite(uid) ? uid : -1] || 0) + value;
+            const bucket = byName[id] || {
+                name: name,
+                uid: owner,
+                value: 0
+            };
+
+            bucket.value += value;
+            byName[id] = bucket;
+            byUid[owner] = (byUid[owner] || 0) + value;
         }
 
-        const entries = Object.keys(byName).map(function (name) {
-            return {
-                name: name,
-                value: byName[name]
-            };
+        const entries = Object.keys(byName).map(function (id) {
+            return byName[id];
         });
 
         entries.sort(function (left, right) {
@@ -1099,20 +1105,24 @@ BarWidget {
             // Keep zero-delta processes too: the list is capped by the
             // "Processes shown" setting, so 20 always means 20 userland rows
             // when that many processes exist (idle ones display 0.0%).
-            byName[entry.comm] = (byName[entry.comm] || 0) + percent;
-
             const uid = owners[Number(key)];
             const owner = Number.isFinite(uid) ? uid : -1;
+            const id = owner + "\u0000" + entry.comm;
+            const bucket = byName[id] || {
+                name: entry.comm,
+                uid: owner,
+                value: 0
+            };
+
+            bucket.value += percent;
+            byName[id] = bucket;
             byUid[owner] = (byUid[owner] || 0) + percent;
         }
 
         root.applyUserTotals(byUid, false);
 
-        const entries = Object.keys(byName).map(function (name) {
-            return {
-                name: name,
-                value: byName[name]
-            };
+        const entries = Object.keys(byName).map(function (id) {
+            return byName[id];
         });
 
         entries.sort(function (left, right) {
@@ -1139,7 +1149,8 @@ BarWidget {
             valueWidth = Math.max(valueWidth, value.length);
             rows.push({
                 name: name,
-                value: value
+                value: value,
+                owner: entries[i].uid === undefined ? "" : Yassm.SystemMetrics.userName(entries[i].uid)
             });
         }
 
@@ -1156,7 +1167,11 @@ BarWidget {
 
         for (let i = 0; i < table.rows.length; i++) {
             const row = table.rows[i];
-            lines.push(row.name.padEnd(nw) + "  " + row.value.padStart(vw));
+            // The owner trails the value, dimmed and ragged, so the name and
+            // value columns keep the alignment of the block above.
+            const owner = row.owner ? root.dimMark + "  " + row.owner + root.dimEndMark : "";
+
+            lines.push(row.name.padEnd(nw) + "  " + row.value.padStart(vw) + owner);
         }
     }
 
