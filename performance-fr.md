@@ -30,7 +30,9 @@ repos, sans tooltip ouvert, écran de veille et verrouillage désactivés.
   pendant leur tooltip ; pendant le survol du tooltip CPU, elle tourne au tick **Fast**.
 - **Les E/S par processus ne tournent que lorsque le tooltip DISK est
   ouvert** (données étendues) : 13 ms par échantillon pour ≈120 processus
-  lisibles, à chaque tick Slow, et rien une fois l'infobulle fermée.
+  lisibles, à chaque tick rapide, et rien une fois l'infobulle fermée. Les
+  tableaux de processus CPU et RAM suivent la même cadence tant que leur
+  infobulle est ouverte.
 - **Aucun polling batterie** : UPower et NetworkManager sont événementiels via
   D-Bus ; seul le nombre de cycles est relu une fois par heure.
 
@@ -176,9 +178,11 @@ la machine).
 - Le refresh à 1 Hz est le choix de conception : un moniteur système qui se
   met à jour chaque seconde. Le passer à 2 s ou plus dans Settings réduit le
   surcoût du shell à peu près proportionnellement.
-- Ouvrir le tooltip CPU coûte deux snapshots `/proc` espacés d'une seconde (le
-  premier ne sert que de référence, car un pourcentage CPU instantané exige un
-  delta), plus une lecture de fréquence de 5 ms.
+- Un tooltip ouvert n'est pas gratuit : les tableaux CPU, RAM et E/S disque
+  échantillonnent à la cadence de la barre tant qu'ils sont affichés. Mesuré
+  tooltip CPU ouvert à 1 s : 2,95 % d'un cœur contre 1,10 % fermé, soit ≈19 ms
+  par seconde pour le snapshot de processus et sa table de propriétaires.
+  Tout s'arrête quand le pointeur sort.
 - Le RSS n'est pas reporté ici : le processus du shell est partagé avec tous
   les autres plugins et sa taille résidente fluctue de plus que l'empreinte
   propre de YASSM (quelques Mo d'objets QML et un modèle de tooltip de 20

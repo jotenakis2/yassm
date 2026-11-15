@@ -871,10 +871,10 @@ BarWidget {
     // One dim line above a process table: the same totals split by owner.
     // Fixed widths keep the tooltip from resizing as the values change.
     function userSummaryLine(selfValue, rootValue, otherValue, memory) {
-        const valueWidth = memory ? 10 : 6;
+        const valueWidth = memory ? 8 : 6;
         const labelWidth = 7;
         const format = function (value) {
-            return memory ? Yassm.Format.formatKib(value) : value.toFixed(1) + "%";
+            return memory ? Yassm.Format.formatKibAsGib(value) : value.toFixed(1) + "%";
         };
         const column = function (label, value) {
             return Yassm.I18n.t(label).padEnd(labelWidth) + format(value).padStart(valueWidth);
@@ -1546,12 +1546,17 @@ BarWidget {
             const showKernel = root.showExtended && metrics.kernelTotalKb > 0;
             const table = processTable(root.processMemory, true);
             const kernelValue = showKernel ? Yassm.Format.formatKib(metrics.kernelTotalKb) : "";
-            // Fixed columns: the process list refreshes every 5 s and the
+            // Fixed columns: the process list follows the bar refresh and the
             // values must not shift when the longest name or value changes.
             const nameWidth = 15;
             const valueWidth = 10;
 
             const lines = [];
+
+            if (root.processMemory.length > 0) {
+                lines.push(root.sectionMark + root.userSummaryLine(root.processMemorySelfKb, root.processMemoryRootKb, root.processMemoryOtherKb, true));
+            }
+
             lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.data"));
 
             // htop does not use MemAvailable: it subtracts MemFree, Buffers,
@@ -1596,7 +1601,6 @@ BarWidget {
             if (showKernel || root.processMemory.length > 0) {
                 lines.push("");
                 lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
-                lines.push(root.dimMark + root.userSummaryLine(root.processMemorySelfKb, root.processMemoryRootKb, root.processMemoryOtherKb, true) + root.dimEndMark);
             }
 
             if (showKernel) {
@@ -1729,6 +1733,12 @@ BarWidget {
             const cores = metrics.corePercents || [];
             const lines = [];
 
+            // Hidden until the first pair of snapshots lands: before that the
+            // split is a meaningless row of zeros.
+            if (root.processCpu.length > 0) {
+                lines.push(root.sectionMark + root.userSummaryLine(root.processCpuSelf, root.processCpuRoot, root.processCpuOther, false));
+            }
+
             if (cores.length > 0) {
                 lines.push(root.centeredMark + root.iconCpu + " " + Yassm.I18n.t("head.cores"));
 
@@ -1787,7 +1797,6 @@ BarWidget {
                 }
 
                 lines.push(root.centeredMark + root.iconProc + " " + Yassm.I18n.t("head.proc"));
-                lines.push(root.dimMark + root.userSummaryLine(root.processCpuSelf, root.processCpuRoot, root.processCpuOther, false) + root.dimEndMark);
 
                 if (showKernel) {
                     lines.push(root.boldMark + root.dimMark + Yassm.I18n.t("row.kernel").padEnd(nameWidth) + "  " + kernelValue.padStart(valueWidth) + root.dimEndMark);
@@ -2972,9 +2981,9 @@ BarWidget {
     }
 
     // Keep the process list live while the CPU, RAM or DISK tooltip is open,
-    // at the slow background cadence.
+    // at the same cadence as the bar value.
     Timer {
-        interval: root.slowInterval * 1000
+        interval: root.refreshInterval * 1000
         repeat: true
         running: root.hoveredSegment === "cpu" || root.hoveredSegment === "memory" || (root.hoveredSegment === "disk" && root.showExtended)
 

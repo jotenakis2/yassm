@@ -29,7 +29,8 @@ tooltip open and the screensaver/locking disabled.
   while the CPU tooltip is open it runs on the **Fast** tick.
 - **Per-process disk I/O only runs while the DISK tooltip is open**
   (extended data): 13 ms per sample for ≈120 readable processes, at each
-  Slow tick, and nothing once the tooltip closes.
+  Fast tick, and nothing once the tooltip closes. The CPU and RAM process
+  tables follow the same cadence while their tooltip is open.
 - **No battery polling**: UPower and NetworkManager are event-driven over
   D-Bus; only the cycle count is re-read once an hour.
 
@@ -170,9 +171,11 @@ At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
 - The 1 Hz refresh is the design point: a system monitor that updates once a
   second. Lowering it to 2 s or more in Settings cuts the shell overhead
   roughly proportionally.
-- Opening the CPU tooltip costs two `/proc` snapshots 1 s apart (the first is
-  only a baseline, because instantaneous CPU% needs a delta), plus a 5 ms
-  frequency read.
+- A live tooltip is not free: the CPU and RAM tables (and the disk I/O one)
+  sample at the bar cadence while open. Measured with the CPU tooltip held
+  open at 1 s: 2.95 % of one core against 1.10 % closed, i.e. ≈19 ms per
+  second for the process snapshot and its owner table. Everything stops when
+  the pointer leaves.
 - RSS is not reported here: the shell process is shared with every other
   plugin and its resident size fluctuates by more than YASSM's own footprint
   (a few MB of QML objects and one 20-line tooltip model), so any isolated
