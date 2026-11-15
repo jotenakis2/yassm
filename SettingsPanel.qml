@@ -1732,9 +1732,12 @@ PanelWindow {
                                 Layout.fillWidth: true
                                 Layout.leftMargin: Math.max(0, clickRow.width - Style.space(260))
                                 visible: root.clickTarget(clickRow.modelData.key).startsWith("cmd:")
-                                verticalPadding: Style.space(3)
+                                verticalPadding: Style.space(1)
                                 opacity: activeFocus ? 1.0 : 0.45
                                 onActiveFocusChanged: root.commandEditing = activeFocus
+                                // Enter commits and hands the keyboard back: the
+                                // field loses the cursor and dims again.
+                                onAccepted: commandField.focus = false
                                 text: {
                                     const target = root.clickTarget(clickRow.modelData.key);
 
