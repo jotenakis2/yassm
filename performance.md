@@ -150,6 +150,10 @@ At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
   the background. Frequency sampling stops as soon as the tooltip closes.
 - **No polling where the system can push.** Battery state, health, SSID and
   link state come from UPower and NetworkManager over D-Bus.
+- **Routes re-read on change, not every second.** `/proc/net/route` and
+  `/proc/net/ipv6_route` are only read when NetworkManager reports a link
+  appearing, disappearing or changing state, when the NET tooltip opens, and
+  on the Slow tick as a safety net; the Fast tick reads `/proc/net/dev` alone.
 - **Cheap paths for `/proc`.** Anything that can be a plain file read
   (`/proc/stat`, `meminfo`, `loadavg`, `net/dev`, `pressure/*`, `diskstats`,
   `uptime`, zswap state) is read with a `FileView`, with no process spawn.

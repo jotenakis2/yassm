@@ -2271,6 +2271,9 @@ BarWidget {
         root.refreshProcesses();
 
         if (hit.key.indexOf("net") === 0) {
+            // The routes are no longer polled every second: take a fresh copy
+            // before showing the gateway and the WAN address.
+            Yassm.SystemMetrics.reloadNetworkRoute();
             Yassm.SystemMetrics.refreshNetworkDetails(root.showExtended);
         }
 

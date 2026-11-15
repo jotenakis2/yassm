@@ -154,6 +154,11 @@ la machine).
 - **Pas de polling quand le système peut pousser.** État et santé de la
   batterie, SSID et état du lien viennent d'UPower et de NetworkManager via
   D-Bus.
+- **Routes relues au changement, pas chaque seconde.** `/proc/net/route` et
+  `/proc/net/ipv6_route` ne sont relus que lorsque NetworkManager signale un
+  lien qui apparaît, disparaît ou change d'état, à l'ouverture du tooltip NET,
+  et au tick lent comme filet de sécurité ; le tick rapide ne relit que
+  `/proc/net/dev`.
 - **Chemins `/proc` sans processus.** Tout ce qui peut être une simple lecture
   de fichier (`/proc/stat`, `meminfo`, `loadavg`, `net/dev`, `pressure/*`,
   `diskstats`, `uptime`, état zswap) passe par un `FileView`, sans lancer de

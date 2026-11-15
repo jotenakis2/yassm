@@ -334,6 +334,40 @@ Singleton {
     readonly property bool hasNetwork: networkInterface !== ""
     property real wifiLevel: 0
 
+    // Which links are up decides where the default route points. The route
+    // files are therefore reloaded when NetworkManager reports a change (a
+    // link appearing, disappearing or changing state) instead of every fast
+    // tick; the Slow loop re-reads them as a safety net for a route that
+    // changed between two links that were already up.
+    readonly property string networkLinkKey: {
+        const devices = modelValues(Networking.devices);
+        const parts = [];
+
+        for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+
+            if (!device) {
+                continue;
+            }
+
+            parts.push(String(device.name) + ":" + String(device.state) + ":" + String(device.connected));
+        }
+
+        parts.sort();
+        return parts.join(",");
+    }
+
+    onNetworkLinkKeyChanged: metrics.reloadNetworkRoute()
+
+    function reloadNetworkRoute() {
+        if (!metrics.networkEnabled) {
+            return;
+        }
+
+        procNetRoute.reload();
+        procNetIpv6Route.reload();
+    }
+
     readonly property var wifiNetwork: {
         const devices = modelValues(Networking.devices);
 
@@ -1720,7 +1754,7 @@ Singleton {
     // cycles their hourly one.
     Timer {
         interval: metrics.slowIntervalMs
-        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled || metrics.pressureEnabled || metrics.swapDetailEnabled
+        running: metrics.diskEnabled || metrics.temperatureEnabled || metrics.uptimeEnabled || metrics.pressureEnabled || metrics.swapDetailEnabled || metrics.networkEnabled
         repeat: true
         triggeredOnStart: true
 
@@ -1742,6 +1776,11 @@ Singleton {
 
             if (metrics.temperatureEnabled) {
                 temperatureProcess.running = true;
+            }
+
+            if (metrics.networkEnabled) {
+                procNetRoute.reload();
+                procNetIpv6Route.reload();
             }
 
             if (metrics.uptimeEnabled) {
@@ -1811,8 +1850,6 @@ Singleton {
             }
 
             if (metrics.networkEnabled) {
-                procNetRoute.reload();
-                procNetIpv6Route.reload();
                 procNetDev.reload();
             }
         }
