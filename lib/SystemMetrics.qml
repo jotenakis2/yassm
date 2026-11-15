@@ -297,6 +297,39 @@ Singleton {
     property real networkTxKib: 0
     property real networkRxSessionKb: 0
     property real networkTxSessionKb: 0
+    // The session totals outlive a shell restart: net-session.sh stores them
+    // with the boot id, so a reboot starts the counters from zero again.
+    property real netSessionSavedRxKb: 0
+    property real netSessionSavedTxKb: 0
+    readonly property string netSessionScriptPath: decodeURIComponent(Qt.resolvedUrl("../net-session.sh").toString().replace("file://", ""))
+
+    function applyNetSession(content) {
+        const fields = String(content || "").trim().split(/\s+/);
+
+        if (fields.length < 2 || fields[0] === "") {
+            return;
+        }
+
+        const rx = Number(fields[0]);
+        const tx = Number(fields[1]);
+
+        if (Number.isFinite(rx) && Number.isFinite(tx) && rx >= 0 && tx >= 0) {
+            metrics.networkRxSessionKb = rx;
+            metrics.networkTxSessionKb = tx;
+            metrics.netSessionSavedRxKb = rx;
+            metrics.netSessionSavedTxKb = tx;
+        }
+    }
+
+    function saveNetSession() {
+        if (Math.abs(metrics.networkRxSessionKb - metrics.netSessionSavedRxKb) < 1 && Math.abs(metrics.networkTxSessionKb - metrics.netSessionSavedTxKb) < 1) {
+            return;
+        }
+
+        metrics.netSessionSavedRxKb = metrics.networkRxSessionKb;
+        metrics.netSessionSavedTxKb = metrics.networkTxSessionKb;
+        Quickshell.execDetached(["bash", metrics.netSessionScriptPath, "write", String(Math.round(metrics.networkRxSessionKb)), String(Math.round(metrics.networkTxSessionKb))]);
+    }
     property var networkPrevious: null
     readonly property bool hasNetwork: networkInterface !== ""
     property real wifiLevel: 0
@@ -1786,6 +1819,27 @@ Singleton {
     }
 
     Process {
+        id: netSessionProcess
+
+        command: ["timeout", "5", "bash", metrics.netSessionScriptPath, "read"]
+
+        stdout: StdioCollector {
+            id: netSessionOutput
+            waitForEnd: true
+            onStreamFinished: metrics.applyNetSession(netSessionOutput.text)
+        }
+    }
+
+    Timer {
+        // A minute of traffic at most is lost when the shell restarts; the
+        // write is skipped while the totals did not move.
+        interval: 60000
+        running: metrics.networkEnabled
+        repeat: true
+        onTriggered: metrics.saveNetSession()
+    }
+
+    Process {
         id: mountProcess
 
         command: ["timeout", "5", "findmnt", "-rn", "-b", "-o", "TARGET,SOURCE,FSTYPE,SIZE,USED,AVAIL", "-t", "ext2,ext3,ext4,btrfs,xfs,f2fs,vfat,exfat,ntfs,ntfs3,iso9660,udf,zfs,bcachefs,overlay,fuseblk,jfs,reiserfs,nilfs2,hfs,hfsplus,ufs"]
@@ -2021,5 +2075,6 @@ Singleton {
         installDateProcess.running = true;
         depsProcess.running = true;
         powerStateProcess.running = true;
+        netSessionProcess.running = true;
     }
 }

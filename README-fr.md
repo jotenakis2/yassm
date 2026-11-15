@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.2
+Version 1.3.3
 
 [English](README.md) | **Français**
 
@@ -93,7 +93,8 @@ marquées ci-dessous.
 - **Disque** : usage par système de fichiers local et montages NFS/CIFS
   (interrogés à l'ouverture de l'infobulle ; un montage qui ne répond pas en
   2 s est omis) ; débits d'E/S, PSI et E/S par processus (étendu) ;
-- **Réseau** : débits et totaux de session, IP LAN et SSID ; les données
+- **Réseau** : débits et totaux de session (conservés d'un redémarrage du
+  shell à l'autre, remis à zéro au reboot), IP LAN et SSID ; les données
   étendues ajoutent l'IP Gateway, l'IP WAN (avec le drapeau du pays), le nom de
   l'interface, la puissance et la fréquence Wi-Fi, ainsi qu'un ping de latence
   vers omarchy.org (à l'ouverture puis à chaque intervalle lent tant que

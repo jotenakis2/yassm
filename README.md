@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.2
+Version 1.3.3
 
 **English** | [Français](README-fr.md)
 
@@ -91,7 +91,8 @@ rows marked below.
 - **Disk**: usage per local filesystem and NFS/CIFS mounts (queried when the
   tooltip opens; a mount that does not answer within 2 s is omitted); I/O
   rates, PSI and per-process I/O (extended);
-- **Network**: rates and session totals, LAN IP and SSID; extended data adds
+- **Network**: rates and session totals (kept across shell restarts, reset on
+  reboot), LAN IP and SSID; extended data adds
   the gateway IP, WAN IP (with its country flag), the interface name, Wi-Fi
   power and frequency, and a latency ping to omarchy.org (at open then every
   Slow interval while the tooltip stays open);
