@@ -1554,7 +1554,8 @@ BarWidget {
             const lines = [];
 
             if (root.processMemory.length > 0) {
-                lines.push(root.sectionMark + root.userSummaryLine(root.processMemorySelfKb, root.processMemoryRootKb, root.processMemoryOtherKb, true));
+                lines.push(root.userSummaryLine(root.processMemorySelfKb, root.processMemoryRootKb, root.processMemoryOtherKb, true));
+                lines.push("");
             }
 
             lines.push(root.centeredMark + root.iconMemory + " " + Yassm.I18n.t("head.data"));
@@ -1736,7 +1737,8 @@ BarWidget {
             // Hidden until the first pair of snapshots lands: before that the
             // split is a meaningless row of zeros.
             if (root.processCpu.length > 0) {
-                lines.push(root.sectionMark + root.userSummaryLine(root.processCpuSelf, root.processCpuRoot, root.processCpuOther, false));
+                lines.push(root.userSummaryLine(root.processCpuSelf, root.processCpuRoot, root.processCpuOther, false));
+                lines.push("");
             }
 
             if (cores.length > 0) {
