@@ -216,10 +216,21 @@ BarWidget {
     // module action.
     readonly property string settingsButton: setting("settingsButton", "right") === "left" ? "left" : "right"
 
+    // NET is drawn as two segments (down and up) plus a third one when the
+    // link is down; all three share the single "net" row in CLICS.
+    function clickKey(key) {
+        if (key === "netDown" || key === "netUp" || key === "netOffline") {
+            return "net";
+        }
+
+        return key;
+    }
+
     function clickTarget(key) {
         const map = root.clickApps || {};
+        const id = root.clickKey(key);
 
-        return String(map[key] || root.clickDefaultTargets[key] || "preset:monitor");
+        return String(map[id] || root.clickDefaultTargets[id] || "preset:monitor");
     }
 
     // Fill of the module boxes, in percent of the bar foreground.
