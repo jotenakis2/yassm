@@ -1723,13 +1723,17 @@ PanelWindow {
                                 }
                             }
 
+                            // Indented to the dropdown's left edge and kept to
+                            // its width: the command refines the choice above.
+                            // Dimmed until it takes the keyboard.
                             TextField {
                                 id: commandField
 
                                 Layout.fillWidth: true
-                                Layout.leftMargin: Style.space(30)
-                                Layout.rightMargin: Style.space(8)
+                                Layout.leftMargin: Math.max(0, clickRow.width - Style.space(260))
                                 visible: root.clickTarget(clickRow.modelData.key).startsWith("cmd:")
+                                verticalPadding: Style.space(3)
+                                opacity: activeFocus ? 1.0 : 0.45
                                 onActiveFocusChanged: root.commandEditing = activeFocus
                                 text: {
                                     const target = root.clickTarget(clickRow.modelData.key);
