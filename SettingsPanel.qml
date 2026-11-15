@@ -65,7 +65,13 @@ PanelWindow {
         root.barPosition = bar && bar.position ? String(bar.position) : "top";
     }
 
-    onHostWidgetChanged: root.refreshHostBar()
+    onHostWidgetChanged: {
+        root.refreshHostBar();
+        // Application names are needed by the CLICS labels before that section
+        // is opened: a target set to an app would otherwise display its raw
+        // "app:<id>" value.
+        root.loadClickApps();
+    }
     Component.onCompleted: root.refreshHostBar()
     readonly property int maxPanelHeight: Math.max(Style.space(160), root.height - root.panelMargin * 2)
     readonly property int panelHeight: Math.min(settingsColumn.implicitHeight + root.panelPadding * 2, root.maxPanelHeight)
@@ -257,8 +263,13 @@ PanelWindow {
         }
     ]
 
-    // Presets, then the custom command, then the installed applications.
-    readonly property var clickOptions: root.clickPresets.concat([
+    // "Nothing" first, then the presets, the custom command and the apps.
+    readonly property var clickOptions: [
+        {
+            value: "none",
+            label: Yassm.I18n.t("click.none")
+        }
+    ].concat(root.clickPresets).concat([
         {
             value: "custom",
             label: Yassm.I18n.t("click.custom")

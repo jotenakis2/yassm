@@ -2595,6 +2595,11 @@ BarWidget {
     function activateSegment(key) {
         const target = root.clickTarget(key);
 
+        // "Nothing": the module keeps its tooltip but the click is inert.
+        if (target === "none") {
+            return;
+        }
+
         if (target.startsWith("app:")) {
             const appId = target.slice(4);
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.3.9
+Version 1.3.10
 
 [English](README.md) | **Français**
 
@@ -74,8 +74,9 @@ L'ordre et la visibilité de chaque module sont configurables.
 
 Le bouton qui ouvre les **Réglages** se choisit dans **Clics** (clic droit
 par défaut) ; l'autre déclenche l'action du module. Chaque cible se règle par
-module dans **Clics** (préréglage, application installée, ou commande
-personnalisée lancée dans un terminal flottant qui attend Entrée). Un clic
+module dans **Clics** (préréglage, application installée, commande
+personnalisée lancée dans un terminal flottant qui attend Entrée, ou *Rien*
+pour neutraliser le clic). Un clic
 hors des modules garde la cible générique : `btop`, puis `htop` ; les Réglages
 si aucun des deux n'est installé.
 
@@ -164,8 +165,8 @@ Clic droit sur le widget. Le panneau a cinq sections, ouvertes une à la fois
 - **Seuils** : utilisation, disque, charge, réseau, batterie, température.
   Masqués tant que **Couleurs** est désactivé ;
 - **Clics** : la cible de chaque module (un préréglage, une application
-  installée — les applications terminal s'ouvrent dans un terminal — ou une
-  commande personnalisée lancée dans un terminal flottant) ;
+  installée — les applications terminal s'ouvrent dans un terminal —, une
+  commande personnalisée lancée dans un terminal flottant, ou rien) ;
 - **Intervalles** : échantillonnage rapide (1–5 s) et lent (5–30 s).
 
 Les préférences sont stockées dans `~/.config/omarchy/shell.json`.
