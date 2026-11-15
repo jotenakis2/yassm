@@ -180,9 +180,13 @@ la machine).
   surcoût du shell à peu près proportionnellement.
 - Un tooltip ouvert n'est pas gratuit : les tableaux CPU, RAM et E/S disque
   échantillonnent à la cadence de la barre tant qu'ils sont affichés. Mesuré
-  tooltip CPU ouvert à 1 s : 2,95 % d'un cœur contre 1,10 % fermé, soit ≈19 ms
+  sur le processus du shell entier (barre, horloge et tous les plugins — pas
+  YASSM seul), tooltip CPU ouvert à 1 s : 2,95 % d'un cœur contre 1,10 % quand
+  le pointeur est ailleurs, soit ≈1,85 point de plus pour le tooltip, ≈19 ms
   par seconde pour le snapshot de processus et sa table de propriétaires.
-  Tout s'arrête quand le pointeur sort.
+  Tout s'arrête quand le pointeur sort. La part de YASSM dans ce socle de
+  1,10 % est de ≈0,6–0,9 point : retirer le widget de la barre ramène le shell
+  à 0,03–0,18 %.
 - Le RSS n'est pas reporté ici : le processus du shell est partagé avec tous
   les autres plugins et sa taille résidente fluctue de plus que l'empreinte
   propre de YASSM (quelques Mo d'objets QML et un modèle de tooltip de 20

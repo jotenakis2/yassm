@@ -172,10 +172,13 @@ At the 5 s refresh the total overhead falls to ≈ 0.4 points of one core
   second. Lowering it to 2 s or more in Settings cuts the shell overhead
   roughly proportionally.
 - A live tooltip is not free: the CPU and RAM tables (and the disk I/O one)
-  sample at the bar cadence while open. Measured with the CPU tooltip held
-  open at 1 s: 2.95 % of one core against 1.10 % closed, i.e. ≈19 ms per
-  second for the process snapshot and its owner table. Everything stops when
-  the pointer leaves.
+  sample at the bar cadence while open. Measured on the whole shell process
+  (bar, clock and every plugin — not YASSM alone) with the CPU tooltip held
+  open at 1 s: 2.95 % of one core against 1.10 % with the pointer away, so the
+  open tooltip adds ≈1.85 points, ≈19 ms per second for the process snapshot
+  and its owner table. Everything stops when the pointer leaves. YASSM's own
+  share of that 1.10 % baseline is ≈0.6–0.9 point: removing the widget from
+  the bar brings the shell back to 0.03–0.18 %.
 - RSS is not reported here: the shell process is shared with every other
   plugin and its resident size fluctuates by more than YASSM's own footprint
   (a few MB of QML objects and one 20-line tooltip model), so any isolated
