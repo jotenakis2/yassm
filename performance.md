@@ -125,7 +125,7 @@ On demand only:
 | `wifi-freq.sh` | 9 ms | NET tooltip open, Fast (wireless) |
 | `/proc/net/wireless` | < 1 ms | NET tooltip open, Fast (wireless) |
 | `curl https://ipinfo.io/json` | one HTTPS request | NET tooltip open, cache 5 min or uplink change |
-| `install-date.sh` | 12 ms | once at startup (Uptime tooltip, install and last-update dates) |
+| `system-age.sh` | 12 ms | once at startup (Uptime tooltip, install and last-update dates) |
 | `deps.sh` | 3 ms | once at startup (Settings warning) |
 | `getent passwd` | 1 ms | once at startup (process owners) |
 

@@ -464,7 +464,7 @@ Singleton {
     property var coreFreqMhz: []
     property real uptimeSeconds: 0
 
-    readonly property string installDateScriptPath: decodeURIComponent(Qt.resolvedUrl("../install-date.sh").toString().replace("file://", ""))
+    readonly property string installDateScriptPath: decodeURIComponent(Qt.resolvedUrl("../system-age.sh").toString().replace("file://", ""))
     property string installDate: ""
     property string updateDate: ""
     property real installEpoch: 0
@@ -1628,7 +1628,7 @@ Singleton {
     }
 
     function applyInstallDate(content) {
-        // install-date.sh prints four lines: installation date, its timestamp,
+        // system-age.sh prints four lines: installation date, its timestamp,
         // last upgrade date, its timestamp (e.g. "9 sept. 2026", 1788904800).
         const parts = String(content || "").split("\n");
         const value = (parts[0] || "").trim();

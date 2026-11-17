@@ -126,7 +126,7 @@ Aucun de ces processus ne survit entre deux exécutions.
 | `wifi-freq.sh` | 9 ms | tooltip NET ouvert, Fast (sans fil) |
 | `/proc/net/wireless` | < 1 ms | tooltip NET ouvert, Fast (sans fil) |
 | `curl https://ipinfo.io/json` | une requête HTTPS | tooltip NET ouvert, cache 5 min ou changement de lien |
-| `install-date.sh` | 12 ms | une fois au démarrage (tooltip Uptime, installation et dernière mise à jour) |
+| `system-age.sh` | 12 ms | une fois au démarrage (tooltip Uptime, installation et dernière mise à jour) |
 | `deps.sh` | 3 ms | une fois au démarrage (avertissement Settings) |
 | `getent passwd` | 1 ms | une fois au démarrage (propriétaires des processus) |
 
