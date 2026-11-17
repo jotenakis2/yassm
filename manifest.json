@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "io.github.jotenakis2.yassm",
   "name": "YASSM",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "author": "Jotenakis",
   "license": "MIT",
   "homepage": "https://github.com/jotenakis2/yassm",
-  "description": "YASSM — Yet Another Simple System Monitor: compact CPU, RAM, swap, GPU, temperature, battery, load, network, disk and alerts monitor.",
+  "description": "YASSM — Yet Another Simple System Monitor: an Omarchy bar widget for CPU, RAM, swap, GPU, network, disk, temperature, battery, uptime and alerts, each with a detailed tooltip.",
   "kinds": ["bar-widget"],
   "entryPoints": {
     "barWidget": "BarWidget.qml"

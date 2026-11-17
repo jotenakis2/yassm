@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.2
+Version 1.4.3
 
 **English** | [Français](README-fr.md)
 
@@ -10,8 +10,11 @@ temperature, battery, uptime and alerts, each with a detailed tooltip.
 **Feature complete.** The widget covers what it set out to do: new features
 are not planned, only bug fixes and Omarchy compatibility updates.
 
-
 Repository: <https://github.com/jotenakis2/yassm>
+
+On the Omarchy plugin marketplace:
+<https://plugins.omarchy.org/plugin.html?id=io.github.jotenakis2.yassm>.
+A star on GitHub and a heart there are what help other people find YASSM.
 
 ## Screenshots
 

@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.2
+Version 1.4.3
 
 [English](README.md) | **Français**
 
@@ -12,8 +12,12 @@ infobulle détaillée.
 nouvelle fonctionnalité n'est prévue, seulement des corrections de bugs et la
 compatibilité avec Omarchy.
 
-
 Dépôt : <https://github.com/jotenakis2/yassm>
+
+Sur la place de marché Omarchy :
+<https://plugins.omarchy.org/plugin.html?id=io.github.jotenakis2.yassm>.
+Une étoile sur GitHub et un cœur là-bas, c'est ce qui aide les autres à
+découvrir YASSM.
 
 ## Captures
 
