@@ -2166,20 +2166,34 @@ BarWidget {
 
                 // Aligned columns: pid, name, age, then the parent that is not
                 // reaping the child, which is the actionable bit.
+                //
+                // The list is capped: a leak can leave hundreds of zombies, and
+                // an unbounded table made the bubble taller than the screen
+                // (the popup does not scroll). The oldest come first, so the
+                // ones that need attention stay visible.
+                const zombieRows = 15;
+                const sorted = zombies.slice().sort(function (left, right) {
+                    return right.age - left.age;
+                });
+                const shown = sorted.slice(0, zombieRows);
                 let zombiePidWidth = 0;
                 let zombieNameWidth = 0;
                 let zombieAgeWidth = 0;
 
-                for (let i = 0; i < zombies.length; i++) {
-                    zombiePidWidth = Math.max(zombiePidWidth, String(zombies[i].pid).length);
-                    zombieNameWidth = Math.max(zombieNameWidth, String(zombies[i].name).length);
-                    zombieAgeWidth = Math.max(zombieAgeWidth, Yassm.Format.formatDuration(zombies[i].age).length);
+                for (let i = 0; i < shown.length; i++) {
+                    zombiePidWidth = Math.max(zombiePidWidth, String(shown[i].pid).length);
+                    zombieNameWidth = Math.max(zombieNameWidth, String(shown[i].name).length);
+                    zombieAgeWidth = Math.max(zombieAgeWidth, Yassm.Format.formatDuration(shown[i].age).length);
                 }
 
-                for (let i = 0; i < zombies.length; i++) {
-                    const zombie = zombies[i];
+                for (let i = 0; i < shown.length; i++) {
+                    const zombie = shown[i];
 
                     lines.push(String(zombie.pid).padStart(zombiePidWidth) + "  " + String(zombie.name).padEnd(zombieNameWidth) + "  " + Yassm.Format.formatDuration(zombie.age).padStart(zombieAgeWidth) + "  ← " + zombie.parentPid + " " + zombie.parentName);
+                }
+
+                if (sorted.length > shown.length) {
+                    lines.push(root.dimMark + "… " + String(sorted.length - shown.length) + " " + Yassm.I18n.t("alert.more_zombies") + root.dimEndMark);
                 }
             }
 
