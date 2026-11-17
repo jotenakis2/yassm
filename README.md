@@ -17,6 +17,10 @@ Repository: <https://github.com/jotenakis2/yassm>
 
 ![YASSM in the Omarchy bar](docs/screenshots/bar.png)
 
+![YASSM tooltips opening across the modules](docs/media/yassm-demo.gif)
+
+*Tooltips opening across the modules — [full tour, 88 s MP4](https://github.com/jotenakis2/yassm/releases/download/1.4.2/yassm-demo.mp4).*
+
 | Tooltips | |
 | --- | --- |
 | ![CPU](docs/screenshots/tooltip-cpu.png) | ![RAM](docs/screenshots/tooltip-memory.png) |

@@ -19,6 +19,10 @@ Dépôt : <https://github.com/jotenakis2/yassm>
 
 ![YASSM dans la barre Omarchy](docs/screenshots/bar.png)
 
+![Les infobulles de YASSM qui s'ouvrent module par module](docs/media/yassm-demo.gif)
+
+*Les infobulles s'ouvrant module par module — [démonstration complète, MP4 de 88 s](https://github.com/jotenakis2/yassm/releases/download/1.4.2/yassm-demo.mp4).*
+
 | Infobulles | |
 | --- | --- |
 | ![CPU](docs/screenshots/tooltip-cpu.png) | ![RAM](docs/screenshots/tooltip-memory.png) |
