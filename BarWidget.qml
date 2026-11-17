@@ -1391,7 +1391,10 @@ BarWidget {
         return lines;
     }
 
-    function tooltipBlock(title, body) {
+    // minWidth reserves room for a line that only shows up once its data
+    // arrives (the owner split needs two CPU samples), so the bubble opens at
+    // its final width instead of growing a second later.
+    function tooltipBlock(title, body, minWidth) {
         const lines = body.split("\n");
 
         // Control markers and surrogate pairs do not occupy cells: measuring the
@@ -1401,7 +1404,7 @@ BarWidget {
             return text.replace(/[\u0001-\u0007]/g, "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_").length;
         }
 
-        let width = visibleLength(title);
+        let width = Math.max(visibleLength(title), Number(minWidth) || 0);
 
         for (let i = 0; i < lines.length; i++) {
             width = Math.max(width, visibleLength(lines[i]));
@@ -1651,7 +1654,7 @@ BarWidget {
                 appendTableRows(lines, table, nameWidth, valueWidth);
             }
 
-            return tooltipBlock(Yassm.I18n.t("title.ram"), lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.ram"), lines.join("\n"), root.userSummaryLine(0, 0, 0, true).length);
         }
 
         if (key === "swap") {
@@ -1848,7 +1851,7 @@ BarWidget {
                 }
             }
 
-            return tooltipBlock(Yassm.I18n.t("title.cpu"), lines.join("\n"));
+            return tooltipBlock(Yassm.I18n.t("title.cpu"), lines.join("\n"), root.userSummaryLine(0, 0, 0, false).length);
         }
 
         if (key === "gpu") {
