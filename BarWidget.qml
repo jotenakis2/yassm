@@ -1434,6 +1434,11 @@ BarWidget {
         return padded.join("\n");
     }
 
+    // Width of the mounts block the last time it was built with the network
+    // rows: a fresh shell has no NAS rows yet, and the bubble should still
+    // open at the width it will have once they land.
+    property int mountsWidth: 0
+
     function mountsTooltip() {
         const local = Yassm.SystemMetrics.mounts || [];
         const network = Yassm.SystemMetrics.networkMounts || [];
@@ -1519,7 +1524,22 @@ BarWidget {
             }
         }
 
-        return tooltipBlock(Yassm.I18n.t("title.disk"), lines.join("\n"));
+        // Fixed width: reserved from the last full build, so the first frame
+        // of a fresh shell is already as wide as the rows that follow.
+        const visible = function (text) {
+            return text.replace(/[\u0001-\u0007]/g, "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "_").length;
+        };
+        let width = visible(Yassm.I18n.t("title.disk"));
+
+        for (let i = 0; i < lines.length; i++) {
+            width = Math.max(width, visible(lines[i]));
+        }
+
+        if (network.length > 0) {
+            root.mountsWidth = width;
+        }
+
+        return tooltipBlock(Yassm.I18n.t("title.disk"), lines.join("\n"), root.mountsWidth);
     }
 
     function syncTooltipModel() {

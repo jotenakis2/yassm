@@ -179,9 +179,9 @@ Singleton {
         metrics.networkMountUsers = withUser(metrics.networkMountUsers, widget, enabled);
 
         if (enabled && !wasEnabled) {
-            // Query only when the disk tooltip opens: clear the previous rows
-            // and fetch fresh ones, without a periodic network statfs.
-            metrics.networkMounts = [];
+            // Query only when the disk tooltip opens. The previous rows are
+            // kept until the scan answers: clearing them made the NAS lines
+            // appear a moment after opening, which widened the whole bubble.
             networkMountProcess.running = true;
         } else if (!enabled && !metrics.networkMountEnabled) {
             metrics.networkMounts = [];
@@ -2250,5 +2250,8 @@ Singleton {
         netSessionProcess.running = true;
         selfUidProcess.running = true;
         passwdProcess.running = true;
+        // Prime the network mounts so the first DISK tooltip already knows how
+        // wide its rows will be (and shows them without waiting).
+        networkMountProcess.running = true;
     }
 }
