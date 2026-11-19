@@ -14,9 +14,21 @@ omarchy plugin validate .
 
 bash -n check.sh alerts.sh alerts-view.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh system-age.sh command-open.sh command-view.sh launch-app.sh list-apps.sh net-session.sh power-state.sh proc-snapshot.sh sensors-open.sh sensors-view.sh temperature.sh wifi-freq.sh
 
-if command -v shellcheck >/dev/null 2>&1; then
+# The style rules (SC2248, SC2249, SC2250, SC2292, SC2312) only come from the
+# real ShellCheck binary (`shellcheck-real` here): the plain `shellcheck` on
+# this machine is shuck's compatibility engine, which omits them for now.
+if command -v shellcheck-real >/dev/null 2>&1; then
+	shellcheck_bin=shellcheck-real
+elif command -v shellcheck >/dev/null 2>&1; then
+	shellcheck_bin=shellcheck
+	printf 'check: shellcheck-real missing, optional style rules unchecked\n' >&2
+else
+	shellcheck_bin=
+fi
+
+if [[ -n ${shellcheck_bin} ]]; then
 	# Every script must pass all ShellCheck checks, including style ones.
-	shellcheck --enable=all check.sh alerts.sh alerts-view.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh system-age.sh command-open.sh command-view.sh launch-app.sh list-apps.sh net-session.sh power-state.sh proc-snapshot.sh sensors-open.sh sensors-view.sh temperature.sh wifi-freq.sh
+	"${shellcheck_bin}" --enable=all check.sh alerts.sh alerts-view.sh cpu-freq.sh deps.sh detect-gpu.sh disk-io.sh system-age.sh command-open.sh command-view.sh launch-app.sh list-apps.sh net-session.sh power-state.sh proc-snapshot.sh sensors-open.sh sensors-view.sh temperature.sh wifi-freq.sh
 fi
 
 # ---------------------------------------------------------------- metadata
