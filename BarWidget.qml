@@ -501,7 +501,7 @@ BarWidget {
         const saved = raw && typeof raw.length === "number" ? Array.prototype.slice.call(raw) : [];
         const defaults = root.defaultModuleOrder;
         const order = [];
-        const seen = {};
+        const seen = Object.create(null);
 
         for (let i = 0; i < saved.length; i++) {
             const key = saved[i];
@@ -541,7 +541,7 @@ BarWidget {
     }
 
     readonly property var segmentMap: {
-        const map = {};
+        const map = Object.create(null);
         const segments = segmentCache;
 
         for (let i = 0; i < segments.length; i++) {
@@ -790,8 +790,8 @@ BarWidget {
     // " 10M", "1.0G". Keeping the value field at 3 characters makes a network
     // half as wide as a percentage module.
     function aggregateProcesses(content, limit) {
-        const byName = {};
-        const byUid = {};
+        const byName = Object.create(null);
+        const byUid = Object.create(null);
         const lines = content.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
@@ -917,8 +917,8 @@ BarWidget {
     function applyDiskIo(content) {
         const now = Date.now();
         const previous = root.diskIoSnapshot;
-        const current = {};
-        const byName = {};
+        const current = Object.create(null);
+        const byName = Object.create(null);
         const lines = String(content || "").split("\n");
 
         for (let i = 0; i < lines.length; i++) {
@@ -1010,7 +1010,7 @@ BarWidget {
         const separator = content.indexOf(marker);
         const statText = separator < 0 ? content : content.slice(0, separator);
         const ownerText = separator < 0 ? "" : content.slice(separator + marker.length);
-        const owners = {};
+        const owners = Object.create(null);
         const ownerLines = ownerText.split("\n");
 
         for (let i = 0; i < ownerLines.length; i++) {
@@ -1024,7 +1024,7 @@ BarWidget {
         }
 
         const now = Date.now();
-        const current = {};
+        const current = Object.create(null);
         const lines = statText.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
@@ -1089,8 +1089,8 @@ BarWidget {
             return;
         }
 
-        const byName = {};
-        const byUid = {};
+        const byName = Object.create(null);
+        const byUid = Object.create(null);
         const cores = Math.max(1, Number(Yassm.SystemMetrics.nproc) || 1);
 
         for (const key in current) {
