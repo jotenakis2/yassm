@@ -1997,8 +1997,14 @@ BarWidget {
                 ifaceLabelWidth = Math.max(ifaceLabelWidth, ifaceLabels[i].length);
             }
 
+            // Fixed value column: the addresses and the radio details land a
+            // moment after the tooltip opens (ip, route files, WAN lookup,
+            // `iw`), and a 15-character IPv4 replacing a two-character "--"
+            // used to widen the whole bubble a second later.
+            const ifaceValueWidth = 18;
+
             for (let i = 0; i < ifaceRows.length; i++) {
-                const text = ifaceRows[i].label.padEnd(ifaceLabelWidth) + " : " + ifaceRows[i].value;
+                const text = ifaceRows[i].label.padEnd(ifaceLabelWidth) + " : " + String(ifaceRows[i].value).padEnd(ifaceValueWidth);
 
                 // "--" means the value is not available on this link (no
                 // gateway, WAN lookup pending, radio details off): dim the row

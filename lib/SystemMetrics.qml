@@ -429,19 +429,46 @@ Singleton {
 
         return null;
     }
-    readonly property string wifiSsid: wifiNetwork && wifiNetwork.name ? String(wifiNetwork.name) : ""
+    // The link is authoritative while it is up; NetworkManager's network
+    // object is only a fallback for the first frame after opening.
+    readonly property string wifiSsid: {
+        if (metrics.wifiLinkSsid !== "") {
+            return metrics.wifiLinkSsid;
+        }
+
+        return wifiNetwork && wifiNetwork.name ? String(wifiNetwork.name) : "";
+    }
 
     // The Wi-Fi helpers must follow the interface actually carrying the
     // default route: a laptop can keep a Wi-Fi association while Ethernet is
     // the active link, and then no Wi-Fi value should be read or shown.
+    //
+    // Only the device list is consulted, not the connected network object:
+    // NetworkManager empties and rebuilds that object while roaming, and
+    // hanging the whole radio section on it made the SSID and the frequency
+    // disappear until the next reload.
     readonly property bool activeWifi: {
-        const wifi = wifiNetwork;
+        const devices = modelValues(Networking.devices);
 
-        return wifi !== null && wifi.device !== null && wifi.device !== undefined && wifi.device.name === networkInterface && networkInterface !== "";
+        if (metrics.networkInterface === "") {
+            return false;
+        }
+
+        for (let i = 0; i < devices.length; i++) {
+            const device = devices[i];
+
+            if (device && device.type === DeviceType.Wifi && String(device.name) === metrics.networkInterface) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     readonly property string wifiFreqScriptPath: decodeURIComponent(Qt.resolvedUrl("../wifi-freq.sh").toString().replace("file://", ""))
     property real wifiFreqMhz: 0
+    property string wifiLinkSsid: ""
+    property real wifiLinkSignal: 0
 
     // Interface addresses are only fetched while the NET tooltip is open:
     // the LAN address from iproute2, the public address and country from
@@ -1045,6 +1072,9 @@ Singleton {
         metrics.wanCountry = "";
         metrics.wanIpUpdatedAt = 0;
         metrics.wifiLevel = 0;
+        metrics.wifiLinkSsid = "";
+        metrics.wifiLinkSignal = 0;
+        metrics.wifiFreqMhz = 0;
         // Session totals span the whole shell session: keep them across
         // interface changes, as documented.
     }
@@ -1558,8 +1588,40 @@ Singleton {
     }
 
     function applyWifiFreq(content) {
-        const value = Number(String(content).trim());
-        metrics.wifiFreqMhz = Number.isFinite(value) && value > 0 ? value : 0;
+        const lines = String(content || "").split("\n");
+        let freq = 0;
+        let ssid = "";
+        let signal = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            if (line.startsWith("freq ")) {
+                const value = Number(line.slice(5).trim());
+
+                if (Number.isFinite(value)) {
+                    freq = value;
+                }
+            } else if (line.startsWith("ssid ")) {
+                ssid = line.slice(5).trim();
+            } else if (line.startsWith("signal ")) {
+                const value = Number(line.slice(7).trim());
+
+                if (Number.isFinite(value)) {
+                    signal = value;
+                }
+            }
+        }
+
+        metrics.wifiFreqMhz = freq > 0 ? freq : 0;
+        metrics.wifiLinkSsid = ssid;
+        metrics.wifiLinkSignal = signal;
+
+        // /proc/net/wireless is read by the same tick and carries the level
+        // too; keep it, and fall back to the link when it has nothing.
+        if (metrics.wifiLevel === 0 && signal !== 0) {
+            metrics.wifiLevel = signal;
+        }
     }
 
     function applyCpuFreq(content) {
