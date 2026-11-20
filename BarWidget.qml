@@ -20,6 +20,7 @@ BarWidget {
     readonly property string commandOpenScriptPath: decodeURIComponent(Qt.resolvedUrl("command-open.sh").toString().replace("file://", ""))
     readonly property string appLauncherScriptPath: decodeURIComponent(Qt.resolvedUrl("launch-app.sh").toString().replace("file://", ""))
     readonly property string appListScriptPath: decodeURIComponent(Qt.resolvedUrl("list-apps.sh").toString().replace("file://", ""))
+    readonly property string settingsSnapshotPath: decodeURIComponent(Qt.resolvedUrl("save-settings.sh").toString().replace("file://", ""))
     // Filled on demand for the click picker in Settings.
     property var clickAppChoices: []
 
@@ -103,6 +104,20 @@ BarWidget {
     }
 
     onTooltipContentChanged: root.syncTooltipModel()
+
+    // The shell injects `settings` after this component is created, so the
+    // snapshot waits for the first real value and for the derived properties
+    // (slowInterval and friends) to catch up with it.
+    onSettingsChanged: settingsSnapshotTimer.restart()
+
+    Timer {
+        id: settingsSnapshotTimer
+
+        interval: 300
+        repeat: false
+
+        onTriggered: root.saveSettingsSnapshot(root.settingsEntry())
+    }
 
     ListModel {
         id: tooltipLineModel
@@ -2494,21 +2509,22 @@ BarWidget {
         }
     }
 
-    function updateSetting(name, value) {
+    // The complete module state as shell.json stores it: the current settings
+    // object plus the values this widget computes (thresholds are clamped, for
+    // instance). `root.settings` alone can lag behind while the shell writes
+    // shell.json, so it would drop keys that were just changed.
+    function settingsEntry() {
         const current = root.settings || {};
         const entry = {
             id: root.moduleName
         };
 
         for (const key in current) {
-            if (key !== "id") {
+            if (key !== "id" && key !== "settingsEntry") {
                 entry[key] = current[key];
             }
         }
 
-        // Always persist the complete module state. `root.settings` can still
-        // hold the pre-injection value while the shell writes shell.json, so
-        // relying on it alone would drop keys that were just changed.
         entry.showCpu = root.showCpu;
         entry.showMemory = root.showMemory;
         entry.showSwap = root.showSwap;
@@ -2549,6 +2565,13 @@ BarWidget {
         entry.batteryGreen = root.batteryGreen;
         entry.batteryOrange = root.batteryOrange;
         entry.batteryRed = root.batteryRed;
+
+        return entry;
+    }
+
+    function updateSetting(name, value) {
+        const entry = root.settingsEntry();
+
         entry[name] = value;
 
         root.settings = entry;
@@ -2556,6 +2579,15 @@ BarWidget {
         if (root.bar && root.bar.shell && typeof root.bar.shell.updateEntryInline === "function") {
             root.bar.shell.updateEntryInline(root.moduleName, entry);
         }
+
+        root.saveSettingsSnapshot(entry);
+    }
+
+    // Keep a copy of the widget entry outside shell.json: removing the widget
+    // from the bar takes its 40-odd settings with it, and nothing in the shell
+    // remembers them. restore-settings.sh replays this file.
+    function saveSettingsSnapshot(entry) {
+        Quickshell.execDetached(["bash", root.settingsSnapshotPath, JSON.stringify(entry)]);
     }
 
     // gpu_memory is "key value" lines in bytes:

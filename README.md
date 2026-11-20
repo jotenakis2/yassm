@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.6
+Version 1.4.7
 
 **English** | [Français](README-fr.md)
 
@@ -153,6 +153,20 @@ zombie older than 60 s, the root filesystem or RAM at 95 % or more, or a
 battery health at 20 % or less. Its icon shows the severity; the tooltip lists
 the cause. It also appears when a **required tool** is missing, even if Alerts
 is disabled.
+
+## Settings backup
+
+The widget keeps a copy of its own entry — the options stored inside
+`~/.config/omarchy/shell.json`, one per module and threshold — in
+`~/.local/state/yassm/settings.json`, refreshed whenever a setting changes.
+If the widget ever disappears from the bar, put it back with its settings:
+
+```bash
+bash ~/.config/omarchy/plugins/io.github.jotenakis2.yassm/restore-settings.sh
+```
+
+It re-adds the widget after `omarchy.menu` and replays every saved option
+through `omarchy bar set`; `--dry-run` prints the commands instead.
 
 ## Settings
 

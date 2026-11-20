@@ -1,6 +1,6 @@
 # YASSM — Yet Another Simple System Monitor
 
-Version 1.4.6
+Version 1.4.7
 
 [English](README.md) | **Français**
 
@@ -162,6 +162,20 @@ Le module reste masqué tant que tout va bien : unité systemd en échec, zombie
 de plus de 60 s, racine ou RAM à 95 % ou plus, ou santé de la batterie à 20 %
 ou moins. Son icône donne la gravité, l'infobulle en liste la cause. Il
 apparaît aussi lorsqu'un **outil requis** manque, même si Alertes est désactivé.
+
+## Sauvegarde des réglages
+
+Le widget conserve une copie de sa propre entrée — les options stockées dans
+`~/.config/omarchy/shell.json`, module par module et seuil par seuil — dans
+`~/.local/state/yassm/settings.json`, mise à jour à chaque changement. Si le
+widget disparaît de la barre, une commande le remet en place avec ses réglages :
+
+```bash
+bash ~/.config/omarchy/plugins/io.github.jotenakis2.yassm/restore-settings.sh
+```
+
+Il le réinsère après `omarchy.menu` et rejoue chaque option via
+`omarchy bar set` ; `--dry-run` affiche les commandes à la place.
 
 ## Réglages
 
